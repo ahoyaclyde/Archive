@@ -1,0 +1,39 @@
+2026-03-02 10:21:54: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-02 10:21:56: 📂 Loading models from: ./models
+2026-03-02 10:21:56: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-02 10:21:56:    Models path : ./models
+2026-03-02 10:21:56:    Threshold   : 0.55
+2026-03-02 10:21:56:    Max image dim: 640px
+2026-03-02 10:26:47: 🛑 SIGINT received — shutting down
+2026-03-02 10:26:48: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-02 10:26:50: 📂 Loading models from: ./models
+2026-03-02 10:26:50: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-02 10:26:50:    Models path : ./models
+2026-03-02 10:26:50:    Threshold   : 0.55
+2026-03-02 10:26:50:    Max image dim: 640px
+2026-03-02 10:31:27: 🛑 SIGINT received — shutting down
+2026-03-02 10:31:28: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-02 10:31:30: 📂 Loading models from: ./models
+2026-03-02 10:31:30: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-02 10:31:30:    Models path : ./models
+2026-03-02 10:31:30:    Threshold   : 0.55
+2026-03-02 10:31:30:    Max image dim: 640px
+2026-03-02 10:35:55: 🛑 SIGINT received — shutting down
+2026-03-02 10:35:56: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-02 10:35:58: 📂 Loading models from: ./models
+2026-03-02 10:35:58: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-02 10:35:58:    Models path : ./models
+2026-03-02 10:35:58:    Threshold   : 0.55
+2026-03-02 10:35:58:    Max image dim: 640px
+2026-03-02 10:44:24: 🛑 SIGINT received — shutting down
+2026-03-02 10:44:25: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-02 10:44:27: 📂 Loading models from: ./models
+2026-03-02 10:44:27: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-02 10:44:27:    Models path : ./models
+2026-03-02 10:44:27:    Threshold   : 0.55
+2026-03-02 10:44:27:    Max image dim: 640px
+2026-03-02 10:44:28: ✅ Face-api.js models loaded and ready
+2026-03-02 11:43:53: 📸 Analyzed image: 1 face(s) found | pHash: 37b0d8cfc6484d2c | 1855ms
+2026-03-02 11:43:54: 📸 Analyzed image: 1 face(s) found | pHash: 37b258cb26c8cd2c | 851ms
+2026-03-02 14:03:35: 📸 Analyzed image: 1 face(s) found | pHash: 83c27d3f86f1810e | 1991ms
+2026-03-02 14:03:37: 📸 Analyzed image: 0 face(s) found | pHash: cbca34355dc98386 | 836ms

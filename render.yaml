@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: flug-evidence-archive
+    runtime: docker
+    repo: https://github.com/ahoyaclyde/Archive.git
+    branch: CrimeBank
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: RUST_LOG
+        value: info
+      - key: DATABASE_PATH
+        value: /app/data/flug_evidence.db
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: STORJ_ACCESS_KEY
+        sync: false
+      - key: STORJ_SECRET_KEY
+        sync: false
+      - key: STORJ_ENDPOINT
+        value: https://gateway.storjshare.io
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev
+      - key: RESEND_FROM_NAME
+        value: FLUG Evidence
+    disk:
+      name: evidence-data
+      mountPath: /app/data
+      sizeGB: 1

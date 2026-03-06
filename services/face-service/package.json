@@ -1,0 +1,26 @@
+{
+  "name": "face-service",
+  "version": "1.0.0",
+  "description": "Face detection sidecar for evidence matching",
+  "main": "face_service.js",
+  "scripts": {
+    "start": "node face_service.js",
+    "dev": "node --watch face_service.js",
+    "download-models": "node download_models.js",
+    "pm2-start": "pm2 start face_service.js --name face-service --restart-delay 3000",
+    "pm2-stop": "pm2 stop face-service",
+    "pm2-logs": "pm2 logs face-service"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.17.0",
+    "@vladmandic/face-api": "^1.7.15",
+    "canvas": "^3.0.0",
+    "sharp": "^0.33.3"
+  },
+  "devDependencies": {
+    "pm2": "^5.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

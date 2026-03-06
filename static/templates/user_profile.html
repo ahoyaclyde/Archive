@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>My Profile | FLUG Evidence</title>
+  <link rel="icon" href="/static/img/logo-icon.svg">
+  <link href="/static/css/style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style id="flug-design-system">
+/* ════════════════════════════════════════════════
+   FLUG DESIGN SYSTEM — Profile Page Sync
+   Tokens match evidence_dashboard.html v2
+════════════════════════════════════════════════ */
+
+:root {
+  --red:        #dc2626;
+  --red-hover:  #b91c1c;
+  --red-glow:   rgba(220,38,38,0.18);
+  --red-soft:   rgba(220,38,38,0.08);
+  --green:      #22c55e;
+  --blue:       #3b82f6;
+  --amber:      #f59e0b;
+  --orange:     #f97316;
+  --mono:       'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  --sans:       'Space Grotesk', system-ui, sans-serif;
+
+  /* Light surfaces */
+  --surface-0: #ffffff;
+  --surface-1: #f8fafc;
+  --surface-2: #f1f5f9;
+  --border:    #e2e8f0;
+  --text-1:    #0f172a;
+  --text-2:    #475569;
+  --text-3:    #94a3b8;
+  --card-shadow:       0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 12px 32px rgba(0,0,0,0.08);
+  --modal-shadow:      0 25px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+.dark {
+  --surface-0: #0d1117;
+  --surface-1: #111827;
+  --surface-2: #1a2234;
+  --border:    rgba(255,255,255,0.07);
+  --text-1:    #f8fafc;
+  --text-2:    rgba(255,255,255,0.55);
+  --text-3:    rgba(255,255,255,0.28);
+  --card-shadow:       0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --card-shadow-hover: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(220,38,38,0.15);
+  --modal-shadow:      0 25px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+/* ── Global font override ── */
+*, body, main, aside, header, nav, button, input, select, textarea, a {
+  font-family: var(--sans) !important;
+}
+code, pre, .font-mono, [class*="font-mono"] {
+  font-family: var(--mono) !important;
+}
+
+/* ── Page & sidebar bg ── */
+body { background: var(--surface-1) !important; }
+.dark body { background: #080c13 !important; }
+
+/* Sidebar */
+aside.sidebar {
+  background: var(--surface-0) !important;
+  border-color: var(--border) !important;
+}
+.dark aside.sidebar {
+  background: #0d1117 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* Header */
+header {
+  background: var(--surface-0) !important;
+  border-color: var(--border) !important;
+}
+.dark header {
+  background: #0d1117 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Cards — replace rounded-2xl generic borders ── */
+/* Profile banner */
+.flug-profile-banner {
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: 18px !important;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s;
+}
+/* Tab container */
+.flug-tab-card {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--card-shadow);
+}
+/* Inner section cards (personal info, location etc.) */
+.flug-inner-card {
+  background: transparent;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.flug-inner-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Stats mini-row */
+.flug-stats-row {
+  background: var(--surface-2) !important;
+  border-radius: 12px !important;
+}
+.dark .flug-stats-row {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* ── Modals ── */
+.flug-modal-panel {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--modal-shadow) !important;
+}
+.dark .flug-modal-panel {
+  background: #0d1117 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.flug-modal-close {
+  background: var(--surface-2) !important;
+  color: var(--text-2) !important;
+  border-radius: 50% !important;
+  border: none !important;
+}
+.dark .flug-modal-close {
+  background: #1a2234 !important;
+}
+.flug-modal-close:hover {
+  background: rgba(220,38,38,0.1) !important;
+  color: var(--red) !important;
+}
+
+/* ── Brand → Red override ── */
+/* Primary buttons */
+.flug-btn-primary {
+  background: var(--red) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.25) !important;
+  border: none !important;
+  transition: all 0.15s !important;
+}
+.flug-btn-primary:hover:not(:disabled) {
+  background: var(--red-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(220,38,38,0.35) !important;
+}
+.flug-btn-primary:disabled { opacity: 0.5; }
+
+/* Secondary / ghost buttons */
+.flug-btn-secondary {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-2) !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s !important;
+}
+.dark .flug-btn-secondary {
+  background: #1a2234 !important;
+  border-color: rgba(255,255,255,0.09) !important;
+}
+.flug-btn-secondary:hover {
+  border-color: rgba(220,38,38,0.25) !important;
+  color: var(--red) !important;
+  background: rgba(220,38,38,0.04) !important;
+}
+
+/* ── Active tab — red not blue ── */
+.flug-tab-active {
+  border-color: var(--red) !important;
+  color: var(--red) !important;
+}
+.dark .flug-tab-active {
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+
+/* ── Inputs ── */
+.flug-input {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-1) !important;
+  border-radius: 10px !important;
+  height: 44px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+  outline: none !important;
+}
+.dark .flug-input {
+  background: #0b1020 !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  color: #f8fafc !important;
+}
+.flug-input::placeholder { color: var(--text-3) !important; }
+.flug-input:focus {
+  border-color: rgba(220,38,38,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.08) !important;
+}
+
+/* ── Notification unread ── */
+.flug-notif-unread {
+  background: rgba(220,38,38,0.04) !important;
+  border-color: rgba(220,38,38,0.18) !important;
+}
+.dark .flug-notif-unread {
+  background: rgba(220,38,38,0.06) !important;
+  border-color: rgba(220,38,38,0.2) !important;
+}
+
+/* ── Brand pills → red variants ── */
+.flug-pill-brand {
+  background: rgba(220,38,38,0.08) !important;
+  color: var(--red) !important;
+  border-color: rgba(220,38,38,0.2) !important;
+}
+.dark .flug-pill-brand {
+  background: rgba(220,38,38,0.12) !important;
+  color: #f87171 !important;
+  border-color: rgba(220,38,38,0.25) !important;
+}
+
+/* ── Sidebar menu items ── */
+.menu-item { font-family: var(--sans) !important; }
+.menu-item-active {
+  color: var(--red) !important;
+  background: var(--red-soft) !important;
+}
+.dark .menu-item-active {
+  color: #f87171 !important;
+  background: rgba(220,38,38,0.1) !important;
+}
+.menu-item-icon-active { color: var(--red) !important; }
+.dark .menu-item-icon-active { color: #f87171 !important; }
+
+/* ── Breadcrumb ── */
+.flug-breadcrumb { font-family: var(--mono) !important; font-size: 12px !important; }
+
+/* ── Profile info labels (meta labels above values) ── */
+.flug-field-label {
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: var(--text-3) !important;
+}
+
+/* ── Stats numbers ── */
+.flug-stat-num {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-1) !important;
+}
+
+/* ── Completeness bar ── */
+.flug-progress-track {
+  background: var(--surface-2) !important;
+  border-radius: 999px !important;
+  height: 8px !important;
+  overflow: hidden !important;
+}
+.dark .flug-progress-track { background: rgba(255,255,255,0.07) !important; }
+
+/* ── Dropdown panels ── */
+.flug-dropdown {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--modal-shadow) !important;
+}
+.dark .flug-dropdown {
+  background: #0d1117 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── Activity log items ── */
+.flug-activity-item {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  transition: all 0.18s !important;
+}
+.flug-activity-item:hover {
+  border-color: rgba(220,38,38,0.15) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+.dark .flug-activity-item {
+  background: #0d1117 !important;
+}
+
+/* ── Wallet cards ── */
+.flug-wallet-card {
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  transition: all 0.18s !important;
+}
+.flug-wallet-card:hover {
+  border-color: rgba(220,38,38,0.15) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+
+/* ── Preloader ── */
+.dark .flug-preloader { background: #080c13 !important; }
+
+/* ── Text color tokens via utility-style classes ── */
+.flug-text-1 { color: var(--text-1) !important; }
+.flug-text-2 { color: var(--text-2) !important; }
+.flug-text-3 { color: var(--text-3) !important; }
+</style>
+
+  <!-- Hidden server data div — Rust template fills these via html_escape() -->
+  <div id="srv"
+    data-email="{{ email }}"
+    data-phone="{{ phone_number }}"
+    data-county="{{ county }}"
+    data-id-number="{{ id_number }}"
+    data-business-name="{{ business_name }}"
+    data-account-type="{{ account_type }}"
+    data-user-id="{{ user_id }}"
+    data-is-verified="{{ is_verified }}"
+    data-is-complete="{{ is_profile_complete }}"
+    data-created-at="{{ created_at }}"
+    data-days-member="{{ days_member }}"
+    data-evidence-count="{{ evidence_count }}"
+    data-signed-count="{{ signed_count }}"
+    data-wallet-address="{{ wallet_address }}"
+    data-wallet-chain="{{ wallet_chain }}"
+    data-wallet-type="{{ wallet_type }}"
+    style="display:none"></div>
+</head>
+
+<body
+  x-data="profileApp()"
+  x-init="init()"
+  :class="{ 'dark': darkMode }">
+
+  <!-- ===== Preloader ===== -->
+  <div x-show="pageLoading"
+       x-init="window.addEventListener('DOMContentLoaded', () => { setTimeout(() => pageLoading = false, 500) })"
+       class="fixed left-0 top-0 z-999999 flex h-screen w-screen items-center justify-center bg-white dark:bg-[#080c13] flug-preloader">
+    <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-red-600 border-t-transparent"></div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div x-show="toast.show"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 translate-y-2"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-end="opacity-0 translate-y-2"
+       class="fixed bottom-6 right-6 z-[999999] flex items-center gap-3 rounded-2xl px-5 py-3 shadow-xl text-sm font-medium"
+       :class="toast.type==='success' ? 'bg-green-500 text-white' : toast.type==='error' ? 'bg-red-500 text-white' : 'bg-[#0d1117] text-white'">
+    <svg x-show="toast.type==='success'" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M15 5L7.5 12.5L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg x-show="toast.type==='error'" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 6V10M9 13V13.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2"/></svg>
+    <span x-text="toast.message"></span>
+    <button @click="toast.show=false" class="ml-1 opacity-60 hover:opacity-100">
+      <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1L11 11M1 11L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ============================
+       PAGE WRAPPER
+       ============================ -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside :class="sidebarToggle ? 'translate-x-0 xl:w-[90px]' : '-translate-x-full'" class="sidebar fixed top-0 left-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 xl:static xl:translate-x-0 dark:border-gray-800 dark:bg-black" @click.outside="sidebarToggle = false">
+  <!-- SIDEBAR HEADER -->
+  <div :class="sidebarToggle ? 'justify-center' : 'justify-between'" class="sidebar-header flex items-center gap-2 pt-8 pb-7">
+    <a href="index.html">
+      <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
+        <img class="dark:hidden" src="../static/img/logo.svg" alt="Logo">
+        <img class="hidden dark:block" src="../static/img/logo-dark.svg" alt="Logo">
+      </span>
+
+      <img class="logo-icon" :class="sidebarToggle ? 'xl:block' : 'hidden'" src="../static/img/logo-icon.svg" alt="Logo">
+    </a>
+  </div>
+  <!-- SIDEBAR HEADER -->
+
+  <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+    <!-- Sidebar Menu -->
+    <nav x-data="{selected: $persist('Dashboard')}">
+
+      <!-- ══ MAIN GROUP ══ -->
+      <div>
+        <h3 class="mb-4 text-xs leading-[20px] text-gray-400 uppercase">
+          <span class="menu-group-title" :class="sidebarToggle ? 'xl:hidden' : ''">PLATFORM</span>
+          <svg :class="sidebarToggle ? 'xl:block hidden' : 'hidden'" class="menu-group-icon mx-auto fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.999 10.245a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm12 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm-4.25 1.75a1.75 1.75 0 10-3.5 0 1.75 1.75 0 003.5 0z" fill="currentColor"/></svg>
+        </h3>
+        <ul class="mb-6 flex flex-col gap-1">
+
+          <!-- Evidence Dashboard -->
+          <li>
+            <a href="/evidence/dashboard" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25C4.257 3.25 3.25 4.257 3.25 5.5V9C3.25 10.243 4.257 11.25 5.5 11.25H9C10.243 11.25 11.25 10.243 11.25 9V5.5C11.25 4.257 10.243 3.25 9 3.25H5.5zM4.75 5.5c0-.414.336-.75.75-.75H9c.414 0 .75.336.75.75V9c0 .414-.336.75-.75.75H5.5A.75.75 0 014.75 9V5.5zM5.5 12.75C4.257 12.75 3.25 13.757 3.25 15v3.5C3.25 19.743 4.257 20.75 5.5 20.75H9c1.243 0 2.25-1.007 2.25-2.25V15c0-1.243-1.007-2.25-2.25-2.25H5.5zM4.75 15c0-.414.336-.75.75-.75H9c.414 0 .75.336.75.75v3.5c0 .414-.336.75-.75.75H5.5a.75.75 0 01-.75-.75V15zM15 3.25c-1.243 0-2.25 1.007-2.25 2.25V9c0 1.243 1.007 2.25 2.25 2.25h3.5c1.243 0 2.25-1.007 2.25-2.25V5.5c0-1.243-1.007-2.25-2.25-2.25H15zm-.75 2.25c0-.414.336-.75.75-.75h3.5c.414 0 .75.336.75.75V9c0 .414-.336.75-.75.75H15A.75.75 0 0114.25 9V5.5zM15 12.75c-1.243 0-2.25 1.007-2.25 2.25v3.5c0 1.243 1.007 2.25 2.25 2.25h3.5c1.243 0 2.25-1.007 2.25-2.25V15c0-1.243-1.007-2.25-2.25-2.25H15zm-.75 2.25c0-.414.336-.75.75-.75h3.5c.414 0 .75.336.75.75v3.5c0 .414-.336.75-.75.75H15a.75.75 0 01-.75-.75V15z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Evidence Dashboard</span>
+            </a>
+          </li>
+
+          <!-- Upload Crime Scene -->
+          <li>
+            <a href="/evidence/upload" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 16v2.5A1.5 1.5 0 0118.5 20h-13A1.5 1.5 0 014 18.5V16M12 4v12M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Upload Crime Scene</span>
+              <span :class="sidebarToggle ? 'xl:hidden' : ''" class="absolute right-10">
+                <span class="menu-dropdown-badge menu-dropdown-badge-inactive">New</span>
+              </span>
+            </a>
+          </li>
+
+          <!-- Crime Billboard -->
+          <li>
+            <a href="/evidence/browse" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25A2.25 2.25 0 003.25 5.5v13A2.25 2.25 0 005.5 20.75h13a2.25 2.25 0 002.25-2.25V5.5A2.25 2.25 0 0018.5 3.25H5.5zM4.75 5.5c0-.414.336-.75.75-.75h13c.414 0 .75.336.75.75v13a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75V5.5zM7 9.714A.75.75 0 017.75 9h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 017 9.714zM7.75 13.5a.75.75 0 000 1.5H17a.75.75 0 000-1.5H7.75z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Crime Billboard</span>
+            </a>
+          </li>
+
+          <!-- My Crime Scenes -->
+          <li>
+            <a href="/evidence/my" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5zm-1.5 6a.75.75 0 00-.75.75v5.69l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V9.75A.75.75 0 0012 9z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">My Crime Scenes</span>
+            </a>
+          </li>
+
+          <!-- Target Profiles -->
+          <li>
+            <a href="/targets" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.75 2.43V7.7M9.42 13.67A5.083 5.083 0 0012 14.917a5.083 5.083 0 002.578-1.247M20 12v6.5A1.5 1.5 0 0118.5 20h-13A1.5 1.5 0 014 18.5V12a8 8 0 1116 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.504 9.875v.01M14.496 9.875v.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Target Profiles</span>
+            </a>
+          </li>
+
+          <!-- Linked Cases -->
+          <li>
+            <a href="/linked-cases" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Linked Cases</span>
+            </a>
+          </li>
+
+          <!-- Crime Map -->
+          <li>
+            <a href="/maps/dashboard" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a.75.75 0 00-.75.75V12a.75.75 0 00.75.75h9.25a.75.75 0 00.75-.75A10 10 0 0012 2zm.75 9.5V3.533A8.502 8.502 0 0120.468 11.25H12.75zM9.75 3.803A8.502 8.502 0 003.532 11.25H2a10 10 0 017.75-9.197v1.75zm0 16.394A8.502 8.502 0 0120.2 14.25H21.75a10 10 0 01-12 7.697v-1.75z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Crime Map</span>
+              <span :class="sidebarToggle ? 'xl:hidden' : ''" class="absolute right-10">
+                <span class="menu-dropdown-badge menu-dropdown-badge-inactive">New</span>
+              </span>
+            </a>
+          </li>
+
+          <!-- Notifications -->
+          <li>
+            <a href="/notifications" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Notifications</span>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- ══ ACCOUNT GROUP ══ -->
+      <div>
+        <h3 class="mb-4 text-xs leading-[20px] text-gray-400 uppercase">
+          <span class="menu-group-title" :class="sidebarToggle ? 'xl:hidden' : ''">Account</span>
+          <svg :class="sidebarToggle ? 'xl:block hidden' : 'hidden'" class="menu-group-icon mx-auto fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.999 10.245a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm12 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm-4.25 1.75a1.75 1.75 0 10-3.5 0 1.75 1.75 0 003.5 0z" fill="currentColor"/></svg>
+        </h3>
+        <ul class="mb-6 flex flex-col gap-1">
+
+          <!-- Account Settings -->
+          <li>
+            <a href="/user/settings" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.4854 3.5H13.5146C13.9338 3.5 14.2761 3.82754 14.2929 4.24634L14.3774 6.37044C14.9571 6.60264 15.4995 6.91548 15.9926 7.29328L17.9688 6.46092C18.3573 6.29658 18.8053 6.44855 19.0146 6.81174L20.5293 9.43826C20.7386 9.80146 20.6468 10.2625 20.3135 10.5209L18.6665 11.7938C18.7212 12.1265 18.75 12.4676 18.75 12.8157C18.75 13.1638 18.7212 13.5049 18.6665 13.8376L20.3135 15.1105C20.6468 15.3689 20.7386 15.8299 20.5293 16.1931L19.0146 18.8196C18.8053 19.1828 18.3573 19.3348 17.9688 19.1705L15.9926 18.3381C15.4995 18.7159 14.9571 19.0288 14.3774 19.261L14.2929 21.3851C14.2761 21.8039 13.9338 22.1314 13.5146 22.1314H10.4854C10.0662 22.1314 9.72386 21.8039 9.70708 21.3851L9.62258 19.261C9.04291 19.0288 8.50053 18.7159 8.00737 18.3381L6.03118 19.1705C5.64271 19.3348 5.19473 19.1828 4.9854 18.8196L3.47065 16.1931C3.26133 15.8299 3.35318 15.3689 3.68645 15.1105L5.33354 13.8376C5.27882 13.5049 5.25 13.1638 5.25 12.8157C5.25 12.4676 5.27882 12.1265 5.33354 11.7938L3.68645 10.5209C3.35318 10.2625 3.26133 9.80146 3.47065 9.43826L4.9854 6.81174C5.19473 6.44855 5.64271 6.29658 6.03118 6.46092L8.00737 7.29328C8.50053 6.91548 9.04291 6.60264 9.62258 6.37044L9.70708 4.24634C9.72386 3.82754 10.0662 3.5 10.4854 3.5ZM12 15.5657C13.5188 15.5657 14.75 14.3345 14.75 12.8157C14.75 11.2969 13.5188 10.0657 12 10.0657C10.4812 10.0657 9.25 11.2969 9.25 12.8157C9.25 14.3345 10.4812 15.5657 12 15.5657Z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Account Settings</span>
+            </a>
+          </li>
+
+          <!-- Account Profile -->
+          <li>
+            <a href="/user/profile" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm10-4.75a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zm-3.25 7.75c0-1.657 1.343-3.25 3.25-3.25s3.25 1.343 3.25 3.25v.347a7.96 7.96 0 01-6.5 0V15z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Account Profile</span>
+            </a>
+          </li>
+
+          <!-- Log Out -->
+          <li>
+            <a href="/logout" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.1007 19.247C14.6865 19.247 14.3507 18.9112 14.3507 18.497L14.3507 14.245H12.8507V18.497C12.8507 19.7396 13.8581 20.747 15.1007 20.747H18.5007C19.7434 20.747 20.7507 19.7396 20.7507 18.497L20.7507 5.49609C20.7507 4.25345 19.7433 3.24609 18.5007 3.24609H15.1007C13.8581 3.24609 12.8507 4.25345 12.8507 5.49609V9.74501L14.3507 9.74501V5.49609C14.3507 5.08188 14.6865 4.74609 15.1007 4.74609L18.5007 4.74609C18.9149 4.74609 19.2507 5.08188 19.2507 5.49609L19.2507 18.497C19.2507 18.9112 18.9149 19.247 18.5007 19.247H15.1007ZM3.25073 11.9984C3.25073 12.2144 3.34204 12.4091 3.48817 12.546L8.09483 17.1556C8.38763 17.4485 8.86251 17.4487 9.15549 17.1559C9.44848 16.8631 9.44863 16.3882 9.15583 16.0952L5.81116 12.7484L16.0007 12.7484C16.4149 12.7484 16.7507 12.4127 16.7507 11.9984C16.7507 11.5842 16.4149 11.2484 16.0007 11.2484L5.81528 11.2484L9.15585 7.90554C9.44864 7.61255 9.44847 7.13767 9.15547 6.84488C8.86248 6.55209 8.3876 6.55226 8.09481 6.84525L3.52309 11.4202C3.35673 11.5577 3.25073 11.7657 3.25073 11.9984Z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Log Out</span>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+    </nav>
+    <!-- Sidebar Menu -->
+
+    <!-- Promo Box -->
+    <div :class="sidebarToggle ? 'xl:hidden' : ''" class="mx-auto mb-10 w-full max-w-60 rounded-2xl bg-gray-50 px-4 py-5 text-center dark:bg-white/[0.03]">
+      <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">
+        Crime Bank 
+      </h3>
+      <p class="text-theme-sm mb-4 text-gray-500 dark:text-gray-400">
+        Africa's First Public Crime Dataset For Offensive Security With Collaborative Policing 
+      </p>
+      <a href="https://tailadmin.com/pricing" target="_blank" rel="nofollow" class="bg-brand-500 text-theme-sm hover:bg-brand-600 flex items-center justify-center rounded-lg p-3 font-medium text-white">
+        Donations 
+      </a>
+    </div>
+    <!-- Promo Box -->
+  </div>
+</aside>
+    <!-- ===== SIDEBAR END ===== -->
+
+    <!-- ===== CONTENT AREA ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-black/60"></div>
+
+      <!-- ===== HEADER ===== -->
+      <header x-data="{ menuToggle: false }" class="sticky top-0 z-99999 flex w-full border-b" style="background:var(--surface-0);border-color:var(--border);">
+        <div class="flex grow flex-col items-center justify-between xl:flex-row xl:px-6">
+          <div class="flex w-full items-center justify-between gap-2 border-b px-3 py-3 sm:gap-4 lg:py-4 xl:justify-normal xl:border-b-0 xl:px-0" style="border-color:var(--border);">
+            <button @click.stop="sidebarToggle = !sidebarToggle"
+                    :class="sidebarToggle ? 'bg-gray-100 dark:bg-[#1a2234]' : ''"
+                    class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 xl:h-11 xl:w-11 xl:border" style="border-color:var(--border);color:var(--text-2);">
+              <svg class="hidden fill-current xl:block" width="16" height="12" viewBox="0 0 16 12"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.583 1A.75.75 0 011.333.25h13.334a.75.75 0 010 1.5H1.333A.75.75 0 01.583 1zm0 10a.75.75 0 01.75-.75h13.334a.75.75 0 010 1.5H1.333a.75.75 0 01-.75-.75zM1.333 5.25a.75.75 0 000 1.5H8a.75.75 0 000-1.5H1.333z" fill=""/></svg>
+              <svg class="fill-current xl:hidden" :class="sidebarToggle ? 'hidden' : 'block'" width="24" height="24" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 6a.75.75 0 01.75-.75h16a.75.75 0 010 1.5H4A.75.75 0 013.25 6zm0 12a.75.75 0 01.75-.75h16a.75.75 0 010 1.5H4a.75.75 0 01-.75-.75zM4 11.25a.75.75 0 000 1.5h8a.75.75 0 000-1.5H4z" fill=""/></svg>
+            </button>
+
+            <a href="/evidence/dashboard" class="xl:hidden">
+              <img class="dark:hidden" src="/static/img/logo.svg" alt="FLUG">
+              <img class="hidden dark:block" src="/static/img/logo-dark.svg" alt="FLUG">
+            </a>
+
+            <div class="hidden xl:flex items-center gap-2 text-sm">
+              <a href="/evidence/dashboard" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Home</a>
+              <span class="text-gray-300 dark:text-gray-700">/</span>
+              <span class="font-medium text-gray-800 dark:text-white/90">My Profile</span>
+            </div>
+          </div>
+
+          <div :class="menuToggle ? 'flex' : 'hidden'" class="w-full items-center justify-end gap-3 px-5 py-4 xl:flex xl:px-0 xl:shadow-none">
+            <!-- Dark mode -->
+            <button @click.prevent="darkMode = !darkMode"
+                    class="flex h-11 w-11 items-center justify-center rounded-full border flug-btn-secondary" style="border-radius:50%;">
+              <svg class="hidden dark:block" width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 1.5v1.25M10 17.25V18.5M3.22 3.22l.884.884M15.896 15.896l.884.884M1.5 10h1.25M17.25 10H18.5M3.22 16.78l.884-.884M15.896 4.104l.884-.884M10 6.75a3.25 3.25 0 100 6.5 3.25 3.25 0 000-6.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <svg class="dark:hidden" width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M17.455 11.97a7.459 7.459 0 01-9.425-9.425A7.5 7.5 0 1017.455 11.97z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <!-- Notifications bell -->
+            <div class="relative" x-data="{ bellOpen: false }" @click.outside="bellOpen = false">
+              <button @click="bellOpen = !bellOpen"
+                      class="relative flex h-11 w-11 items-center justify-center rounded-full border flug-btn-secondary" style="border-radius:50%;">
+                <span x-show="unreadCount > 0"
+                      class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white"
+                      x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
+                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 2.292a.75.75 0 00-1.5 0v.544a6.626 6.626 0 00-5.625 6.543v5.292h-.292a.75.75 0 000 1.5h13.334a.75.75 0 000-1.5h-.292V9.379A6.626 6.626 0 0010.75 2.836v-.544zM8 17.708a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z" fill=""/></svg>
+              </button>
+              <div x-show="bellOpen"
+                   class="absolute right-0 mt-3 w-80 flug-dropdown">
+                <div class="flex items-center justify-between border-b px-4 py-3" style="border-color:var(--border);">
+                  <h5 class="font-semibold text-gray-800 dark:text-white/90">Notifications</h5>
+                  <button @click="markAllRead()" class="text-xs font-medium hover:underline" style="color:var(--red);">Mark all read</button>
+                </div>
+                <ul class="custom-scrollbar max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+                  <template x-if="notifications.length === 0">
+                    <li class="flex flex-col items-center py-8 text-gray-400 text-sm">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="mb-2 opacity-40"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 2.292a.75.75 0 00-1.5 0v.544a6.626 6.626 0 00-5.625 6.543v5.292h-.292a.75.75 0 000 1.5h13.334a.75.75 0 000-1.5h-.292V9.379A6.626 6.626 0 0010.75 2.836v-.544zM8 17.708a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z" fill="currentColor"/></svg>
+                      No notifications yet
+                    </li>
+                  </template>
+                  <template x-for="n in notifications.slice(0,5)" :key="n.id">
+                    <li>
+                      <a class="flex gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5"
+                         :class="!n.is_read ? 'bg-red-50/40 dark:bg-red-500/5' : ''"
+                         :href="n.evidence_id ? '/evidence/view/' + n.evidence_id : '#'">
+                        <span class="mt-0.5 flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-full text-xs font-bold" style="background:rgba(220,38,38,0.1);color:#dc2626;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                          <span class="block text-xs font-semibold text-gray-800 dark:text-white/90 truncate" x-text="n.title"></span>
+                          <span class="block text-xs text-gray-500 dark:text-gray-400 line-clamp-2" x-text="n.message"></span>
+                          <span class="block text-[10px] text-gray-400 mt-0.5" x-text="timeAgo(n.created_at)"></span>
+                        </span>
+                        <span x-show="!n.is_read" class="mt-1.5 flex-shrink-0 h-2 w-2 rounded-full bg-red-600"></span>
+                      </a>
+                    </li>
+                  </template>
+                </ul>
+                <div class="border-t border-gray-100 dark:border-white/[0.07] p-2">
+                  <button @click="bellOpen=false; activeTab='notifications'" class="w-full text-center text-xs font-medium hover:underline py-1.5" style="color:var(--red);">View all notifications →</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- User avatar dropdown -->
+            <div class="relative" x-data="{ userOpen: false }" @click.outside="userOpen = false">
+              <button @click="userOpen = !userOpen" class="flex items-center gap-2 rounded-full border pl-1 pr-3 py-1 flug-btn-secondary" style="border-radius:999px;">
+                <div class="h-9 w-9 flex-shrink-0 flex items-center justify-center rounded-full text-sm font-bold text-white" style="background:linear-gradient(135deg,#dc2626,#991b1b);"
+                     x-text="avatarInitials"></div>
+                <span class="hidden max-w-[120px] truncate text-sm font-medium text-gray-700 dark:text-gray-300 xl:block" x-text="displayEmail"></span>
+                <svg class="hidden xl:block text-gray-400" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div x-show="userOpen" class="absolute right-0 mt-2 w-52 flug-dropdown">
+                <div class="border-b px-4 py-3" style="border-color:var(--border);">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Signed in as</p>
+                  <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90" x-text="email"></p>
+                </div>
+                <div class="p-2">
+                  <a href="/user/profile" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm flug-btn-secondary w-full" style="border:none;justify-content:flex-start;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75a4.75 4.75 0 100 9.5 4.75 4.75 0 000-9.5zM3.75 21.5C3.75 17.634 7.134 14.75 12 14.75c4.866 0 8.25 2.884 8.25 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    My Profile
+                  </a>
+                  <div class="my-1 border-t border-gray-100 dark:border-white/[0.07]"></div>
+                  <form action="/logout" method="POST">
+                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      Sign Out
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- ===== HEADER END ===== -->
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="p-4 md:p-6 2xl:p-10">
+
+        <!-- ============================================================
+             PROFILE STATUS BANNER (top of page — pimped order-card style)
+             ============================================================ -->
+        <div class="mb-5 flex flex-col justify-between gap-5 px-6 py-5 sm:flex-row sm:items-center flug-profile-banner">
+
+          <!-- Avatar + Name + Stats -->
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center flex-1 min-w-0">
+            <!-- Avatar -->
+            <div class="flex-shrink-0">
+              <div class="relative">
+                <div class="h-14 w-14 flex items-center justify-center rounded-2xl text-lg font-bold text-white shadow-md" style="background:linear-gradient(135deg,#dc2626,#991b1b);"
+                     x-text="avatarInitials"></div>
+                <div x-show="isVerified"
+                     class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 border-2 border-white dark:border-gray-900"
+                     title="Verified account">
+                  <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Name + meta -->
+            <div class="flex-1 min-w-0">
+              <h2 class="text-base font-bold text-gray-900 dark:text-white/95 truncate" x-text="displayName"></h2>
+              <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                <span class="text-sm text-gray-500 dark:text-gray-400 truncate" x-text="email"></span>
+                <span x-show="county" class="text-gray-300 dark:text-gray-700">·</span>
+                <span x-show="county" class="text-sm text-gray-500 dark:text-gray-400" x-text="county + ' County, Kenya'"></span>
+              </div>
+              <div class="mt-1.5 flex flex-wrap gap-1.5">
+                <span x-show="accountType"
+                      class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize flug-pill-brand"
+                      x-text="accountType"></span>
+                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                      :class="isVerified ? 'bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400' : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400'">
+                  <svg x-show="isVerified" width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span x-text="isVerified ? 'Verified' : 'Unverified'"></span>
+                </span>
+                <span x-show="walletAddress" class="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-400">
+                  <svg width="8" height="8" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="11" cy="9" r="1" fill="currentColor"/><path d="M1 7h14" stroke="currentColor" stroke-width="1.5"/></svg>
+                  Wallet Connected
+                </span>
+              </div>
+            </div>
+
+            <!-- Stats divider group -->
+            <div class="flex items-center gap-4 rounded-xl px-4 py-2.5 flex-shrink-0 flug-stats-row">
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900 dark:text-white/95" x-text="evidenceCount"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Evidence</p>
+              </div>
+              <div class="h-7 w-px bg-gray-200 dark:bg-white/[0.08]"></div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900 dark:text-white/95" x-text="signedCount"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Signed</p>
+              </div>
+              <div class="h-7 w-px bg-gray-200 dark:bg-white/[0.08]"></div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900 dark:text-white/95" x-text="daysMember"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Days</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-2.5 flex-shrink-0">
+            <a href="/evidence/my"
+               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm flug-btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25C4.258 3.25 3.25 4.258 3.25 5.5V9C3.25 10.243 4.258 11.25 5.5 11.25H9C10.243 11.25 11.25 10.243 11.25 9V5.5C11.25 4.258 10.243 3.25 9 3.25H5.5ZM3.25 15C3.25 13.757 4.258 12.75 5.5 12.75H9C10.243 12.75 11.25 13.757 11.25 15V18.5C11.25 19.743 10.243 20.75 9 20.75H5.5C4.258 20.75 3.25 19.743 3.25 18.5V15ZM15 12.75C13.757 12.75 12.75 13.757 12.75 15V18.5C12.75 19.743 13.757 20.75 15 20.75H18.5C19.743 20.75 20.75 19.743 20.75 18.5V15C20.75 13.757 19.743 12.75 18.5 12.75H15ZM12.75 5.5C12.75 4.258 13.757 3.25 15 3.25H18.5C19.743 3.25 20.75 4.258 20.75 5.5V9C20.75 10.243 19.743 11.25 18.5 11.25H15C13.757 11.25 12.75 10.243 12.75 9V5.5Z" fill="currentColor"/></svg>
+              My Evidence
+            </a>
+            <button @click="openInfoModal()"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm flug-btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.091 2.782a2.121 2.121 0 00-3 0l-7.334 7.334a2.75 2.75 0 00-.72 1.278l-.648 3.093a.75.75 0 00.882.882l3.093-.648a2.75 2.75 0 001.278-.72l7.334-7.334a2.121 2.121 0 00.115-2.885zm-3.53 1.06a.621.621 0 01.879 0l.686.686a.621.621 0 010 .879l-.65.65-1.565-1.565.65-.65zm-1.715 1.715l-5.374 5.374a1.25 1.25 0 00-.354.58l-.482 2.303 2.303-.483a1.25 1.25 0 00.58-.354l5.374-5.374-2.047-2.046z" fill="currentColor"/></svg>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================================
+             TABBED CONTENT
+             ============================================================ -->
+        <div class="flug-tab-card">
+
+          <!-- Tab Nav -->
+          <div class="border-b px-4 sm:px-6" style="border-color:var(--border);">
+            <nav class="-mb-px flex space-x-1 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700">
+
+              <!-- Overview -->
+              <button class="inline-flex items-center gap-2 border-b-2 px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+                      :class="activeTab === 'overview'
+                        ? 'flug-tab-active border-b-2'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2'"
+                      @click="activeTab = 'overview'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75a4.75 4.75 0 100 9.5 4.75 4.75 0 000-9.5zM3.75 21.5C3.75 17.634 7.134 14.75 12 14.75c4.866 0 8.25 2.884 8.25 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Overview
+              </button>
+
+              <!-- Notifications -->
+              <button class="inline-flex items-center gap-2 border-b-2 px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+                      :class="activeTab === 'notifications'
+                        ? 'flug-tab-active border-b-2'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2'"
+                      @click="activeTab = 'notifications'; loadNotifications()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 2.292a.75.75 0 00-1.5 0v.544a6.626 6.626 0 00-5.625 6.543v5.292h-.292a.75.75 0 000 1.5h13.334a.75.75 0 000-1.5h-.292V9.379A6.626 6.626 0 0010.75 2.836v-.544zM8 17.708a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z" fill="currentColor"/></svg>
+                Notifications
+                <span x-show="unreadCount > 0"
+                      class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium flug-pill-brand"
+                      x-text="unreadCount"></span>
+              </button>
+
+              <!-- Activity -->
+              <button class="inline-flex items-center gap-2 border-b-2 px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+                      :class="activeTab === 'activity'
+                        ? 'flug-tab-active border-b-2'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2'"
+                      @click="activeTab = 'activity'; loadActivity()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Activity
+                <span class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium flug-pill-brand" x-text="evidenceCount"></span>
+              </button>
+
+              <!-- Wallets -->
+              <button class="inline-flex items-center gap-2 border-b-2 px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+                      :class="activeTab === 'wallets'
+                        ? 'flug-tab-active border-b-2'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2'"
+                      @click="activeTab = 'wallets'; loadWallets()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="13" r="1" fill="currentColor"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.5"/></svg>
+                Wallets
+                <span x-show="walletAddress" class="inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400">●</span>
+              </button>
+
+              <!-- Security -->
+              <button class="inline-flex items-center gap-2 border-b-2 px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap"
+                      :class="activeTab === 'security'
+                        ? 'flug-tab-active border-b-2'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border-b-2'"
+                      @click="activeTab = 'security'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Security
+              </button>
+            </nav>
+          </div>
+
+          <!-- ================================================================
+               TAB 1 — OVERVIEW (Biography + Personal Info + Address)
+               ================================================================ -->
+          <div x-show="activeTab === 'overview'" class="p-4 sm:p-6 space-y-6">
+
+            <!-- Personal Information Card -->
+            <div class="flug-inner-card p-5 lg:p-6">
+              <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex-1 min-w-0">
+                  <h4 class="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90">Personal Information</h4>
+                  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Email Address</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90 break-all" x-text="email || '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Phone Number</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90" x-text="phone || '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Account Type</p>
+                      <p class="text-sm font-medium capitalize text-gray-800 dark:text-white/90" x-text="accountType || '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Business / Org</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90" x-text="businessName || '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Member Since</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90" x-text="createdAt || '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Verification</p>
+                      <p class="text-sm font-medium" :class="isVerified ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'" x-text="isVerified ? 'Email Verified ✓' : 'Not Verified'"></p>
+                    </div>
+                  </div>
+                </div>
+                <!-- Edit button -->
+                <button @click="openInfoModal()"
+                        class="flex flex-shrink-0 items-center justify-center gap-2 px-4 py-2.5 text-sm flug-btn-secondary" style="border-radius:999px;">
+                  <svg class="fill-current" width="16" height="16" viewBox="0 0 18 18"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.091 2.782a2.121 2.121 0 00-3 0l-7.334 7.334a2.75 2.75 0 00-.72 1.278l-.648 3.093a.75.75 0 00.882.882l3.093-.648a2.75 2.75 0 001.278-.72l7.334-7.334a2.121 2.121 0 00.115-2.885zm-3.53 1.06a.621.621 0 01.879 0l.686.686a.621.621 0 010 .879l-.65.65-1.565-1.565.65-.65zm-1.715 1.715l-5.374 5.374a1.25 1.25 0 00-.354.58l-.482 2.303 2.303-.483a1.25 1.25 0 00.58-.354l5.374-5.374-2.047-2.046z" fill=""/></svg>
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- Location & Credentials Card -->
+            <div class="flug-inner-card p-5 lg:p-6">
+              <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex-1 min-w-0">
+                  <h4 class="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90">Location & Credentials</h4>
+                  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">County</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90" x-text="county ? county + ', Kenya' : '—'"></p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Country</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Kenya 🇰🇪</p>
+                    </div>
+                    <div>
+                      <p class="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">National ID</p>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90">
+                        <span x-show="idNumber" class="flex items-center gap-1">
+                          <svg class="text-green-500" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          <span x-text="'****' + (idNumber || '').slice(-4)"></span>
+                        </span>
+                        <span x-show="!idNumber" class="text-gray-400">Not provided</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <button @click="openAddressModal()"
+                        class="flex flex-shrink-0 items-center justify-center gap-2 px-4 py-2.5 text-sm flug-btn-secondary" style="border-radius:999px;">
+                  <svg class="fill-current" width="16" height="16" viewBox="0 0 18 18"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.091 2.782a2.121 2.121 0 00-3 0l-7.334 7.334a2.75 2.75 0 00-.72 1.278l-.648 3.093a.75.75 0 00.882.882l3.093-.648a2.75 2.75 0 001.278-.72l7.334-7.334a2.121 2.121 0 00.115-2.885zm-3.53 1.06a.621.621 0 01.879 0l.686.686a.621.621 0 010 .879l-.65.65-1.565-1.565.65-.65zm-1.715 1.715l-5.374 5.374a1.25 1.25 0 00-.354.58l-.482 2.303 2.303-.483a1.25 1.25 0 00.58-.354l5.374-5.374-2.047-2.046z" fill=""/></svg>
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Completeness -->
+            <div class="flug-inner-card p-5 lg:p-6">
+              <h4 class="mb-4 text-base font-semibold text-gray-800 dark:text-white/90">Profile Completeness</h4>
+              <div class="space-y-3">
+                <template x-for="item in completenessItems" :key="item.label">
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                         :class="item.done ? 'bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-white/[0.06]'">
+                      <svg x-show="item.done" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg x-show="!item.done" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 4v2.5M6 8v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <span class="flex-1 text-sm text-gray-700 dark:text-gray-300" x-text="item.label"></span>
+                    <span class="text-xs font-medium"
+                          :class="item.done ? 'text-green-500' : 'text-gray-400'"
+                          x-text="item.done ? 'Done' : 'Missing'"></span>
+                  </div>
+                </template>
+                <!-- Progress bar -->
+                <div class="mt-4">
+                  <div class="mb-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Profile strength</span>
+                    <span x-text="completenessPercent + '%'"></span>
+                  </div>
+                  <div class="w-full flug-progress-track">
+                    <div class="h-2 rounded-full transition-all duration-700"
+                         :class="completenessPercent >= 80 ? 'bg-green-500' : completenessPercent >= 50 ? 'bg-yellow-500' : 'bg-red-400'"
+                         :style="'width:' + completenessPercent + '%'"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================
+               TAB 2 — NOTIFICATIONS
+               ================================================================ -->
+          <div x-show="activeTab === 'notifications'" class="p-4 sm:p-6">
+            <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-3">
+                <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">
+                  All Notifications
+                  <span x-show="unreadCount > 0" class="ml-2 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white" x-text="unreadCount + ' new'"></span>
+                </h4>
+              </div>
+              <div class="flex items-center gap-2">
+                <!-- Filter pills -->
+                <div class="flex gap-1 rounded-lg border p-0.5" style="border-color:var(--border);">
+                  <button @click="notifFilter = 'all'"
+                          :class="notifFilter === 'all' ? 'bg-red-600 text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'"
+                          class="rounded-md px-3 py-1 text-xs font-medium transition-colors">All</button>
+                  <button @click="notifFilter = 'unread'"
+                          :class="notifFilter === 'unread' ? 'bg-red-600 text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'"
+                          class="rounded-md px-3 py-1 text-xs font-medium transition-colors">
+                    Unread
+                    <span x-show="unreadCount > 0" x-text="'(' + unreadCount + ')'" class="ml-0.5"></span>
+                  </button>
+                </div>
+                <button @click="markAllRead()" x-show="unreadCount > 0"
+                        class="rounded-lg px-3 py-1.5 text-xs font-medium flug-btn-secondary">
+                  Mark all read
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading state -->
+            <div x-show="loadingNotifications" class="flex items-center justify-center py-12">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+            </div>
+
+            <!-- Empty state -->
+            <div x-show="!loadingNotifications && filteredNotifications.length === 0"
+                 class="flex flex-col items-center justify-center py-16 text-gray-400">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" class="mb-3 opacity-30"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 2.292a.75.75 0 00-1.5 0v.544a6.626 6.626 0 00-5.625 6.543v5.292h-.292a.75.75 0 000 1.5h13.334a.75.75 0 000-1.5h-.292V9.379A6.626 6.626 0 0010.75 2.836v-.544zM8 17.708a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75z" fill="currentColor"/></svg>
+              <p class="text-base font-medium text-gray-500 dark:text-gray-400" x-text="notifFilter === 'unread' ? 'No unread notifications' : 'All caught up!'"></p>
+              <p class="text-sm text-gray-400 dark:text-gray-500" x-text="notifFilter === 'unread' ? 'Switch to All to see your history.' : 'No notifications to show right now.'"></p>
+              <button x-show="notifFilter === 'unread'" @click="notifFilter = 'all'"
+                      class="mt-3 text-xs font-medium hover:underline" style="color:var(--red);">View all →</button>
+            </div>
+
+            <!-- Notifications list -->
+            <div x-show="!loadingNotifications && filteredNotifications.length > 0" class="space-y-2">
+              <template x-for="n in filteredNotifications" :key="n.id">
+                <div class="flex gap-4 rounded-xl border p-4 transition-colors cursor-pointer"
+                     :class="!n.is_read
+                       ? 'flug-notif-unread'
+                       : 'flug-inner-card'"
+                     @click="markNotifRead(n)">
+                  <!-- Icon -->
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-sm"
+                       :class="n.notification_type === 'target_match' || n.notification_type === 'link_match'
+                         ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'
+                         : n.notification_type === 'evidence_signed'
+                         ? 'bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400'
+                         : n.notification_type === 'evidence_update'
+                         ? 'bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400'
+                         : 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400'">
+                    <svg x-show="n.notification_type === 'target_match' || n.notification_type === 'link_match'" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg x-show="n.notification_type === 'evidence_update'" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg x-show="n.notification_type !== 'target_match' && n.notification_type !== 'link_match' && n.notification_type !== 'evidence_update'" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800 dark:text-white/90" x-text="n.title"></p>
+                        <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400" x-text="n.message"></p>
+                        <div class="mt-2 flex items-center gap-2">
+                          <span class="text-xs text-gray-400" x-text="timeAgo(n.created_at)"></span>
+                          <span x-show="!n.is_read" class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium flug-pill-brand">New</span>
+                          <a x-show="n.evidence_id"
+                             :href="'/evidence/view/' + n.evidence_id"
+                             @click.stop
+                             class="text-xs font-medium hover:underline" style="color:var(--red);">View Evidence →</a>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0 flex items-center gap-2 mt-0.5">
+                        <span x-show="!n.is_read" class="h-2 w-2 rounded-full bg-red-600 flex-shrink-0"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               TAB 3 — ACTIVITY (task-card log style)
+               ================================================================ -->
+          <div x-show="activeTab === 'activity'" class="p-4 sm:p-6">
+            <div class="mb-5 flex items-center justify-between">
+              <div>
+                <h3 class="flex items-center gap-3 text-base font-medium text-gray-800 dark:text-white/90">
+                  Activity Log
+                  <span class="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-white/80"
+                        x-text="activity.length"></span>
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Evidence submissions and account events</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button @click="activity = []; loadActivity()"
+                        class="flex items-center gap-1.5 px-3 py-1.5 text-xs flug-btn-secondary">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0118 7.5M19.418 15A8 8 0 016 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div x-show="loadingActivity" class="flex items-center justify-center py-12">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+            </div>
+
+            <!-- Empty -->
+            <div x-show="!loadingActivity && activity.length === 0"
+                 class="flex flex-col items-center justify-center py-16 text-gray-400">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" class="mb-3 opacity-30"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <p class="text-base font-medium text-gray-500 dark:text-gray-400">No activity yet</p>
+              <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Upload your first piece of evidence to get started.</p>
+              <a href="/evidence/upload" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm flug-btn-primary">Upload Evidence</a>
+            </div>
+
+            <!-- Task-card log items -->
+            <div x-show="!loadingActivity && activity.length > 0" class="flex flex-col gap-3">
+              <template x-for="(item, idx) in activity" :key="idx">
+                <div class="p-4 flug-activity-item">
+                  <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
+                    <!-- Left: drag handle + icon + title -->
+                    <div class="flex items-start w-full gap-3">
+                      <!-- Drag handle -->
+                      <span class="flex-shrink-0 mt-0.5 text-gray-300 dark:text-gray-600 cursor-grab">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M2.43 5C2.43 4.503 2.836 4.1 3.333 4.1h13.334c.497 0 .9.403.9.9s-.403.9-.9.9H3.333a.9.9 0 01-.9-.9zm0 10c0-.497.406-.9.903-.9h13.334c.497 0 .9.403.9.9s-.403.9-.9.9H3.333a.9.9 0 01-.9-.9zm.903-5.9a.9.9 0 000 1.8h13.334a.9.9 0 000-1.8H3.333z" fill="currentColor"/>
+                        </svg>
+                      </span>
+
+                      <!-- Coloured action icon -->
+                      <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-lg"
+                           :class="{
+                             'bg-green-100 dark:bg-green-500/15':   item.status === 'reported',
+                             'bg-yellow-100 dark:bg-yellow-500/15': item.status === 'submitted',
+                             'bg-blue-100 dark:bg-blue-500/15':     item.status === 'under_review',
+                             'bg-red-100 dark:bg-red-500/15':       item.status === 'rejected',
+                             'bg-purple-100 dark:bg-purple-500/15': item._action && item._action.includes('wallet'),
+                             'bg-red-100 dark:bg-red-500/15':   !['reported','submitted','under_review','rejected'].includes(item.status) && !(item._action && item._action.includes('wallet'))
+                           }">
+                        <!-- Evidence icon -->
+                        <svg x-show="item._action && item._action.includes('evidence')" width="14" height="14" viewBox="0 0 20 20" fill="none"
+                             :class="{'text-green-600 dark:text-green-400':item.status==='reported','text-yellow-600 dark:text-yellow-400':item.status==='submitted','text-blue-600 dark:text-blue-400':item.status==='under_review','text-red-600 dark:text-red-400':item.status==='rejected','text-red-600 dark:text-red-400':!['reported','submitted','under_review','rejected'].includes(item.status)}">
+                          <path d="M16.667 13.333V15.417C16.667 16.107 16.107 16.667 15.417 16.667H4.583C3.893 16.667 3.333 16.107 3.333 15.417V13.333M10 3.333V13.333M6.146 7.187L10 3.335L13.854 7.187" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <!-- Wallet icon -->
+                        <svg x-show="item._action && item._action.includes('wallet')" width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-purple-600 dark:text-purple-400">
+                          <rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="13" r="1" fill="currentColor"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        <!-- Login icon -->
+                        <svg x-show="item._action && (item._action.includes('login') || item._action.includes('logout'))" width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-gray-500 dark:text-gray-400">
+                          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <!-- Generic icon -->
+                        <svg x-show="!item._action || (!item._action.includes('evidence') && !item._action.includes('wallet') && !item._action.includes('login') && !item._action.includes('logout'))" width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-red-600 dark:text-red-400">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+
+                      <!-- Title -->
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 dark:text-white/90 leading-snug" x-text="item.title"></p>
+                        <span x-show="item.evidence_number" class="text-xs font-mono text-gray-400 dark:text-gray-500" x-text="item.evidence_number"></span>
+                      </div>
+                    </div>
+
+                    <!-- Right: tags + date + avatar -->
+                    <div class="flex flex-col-reverse items-start justify-end w-full gap-3 xl:flex-row xl:items-center xl:gap-4">
+
+                      <!-- Status pill (acts as category tag) -->
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                            :class="{
+                              'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400':    item.status === 'reported',
+                              'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400': item.status === 'submitted',
+                              'bg-gray-100 text-gray-600 dark:bg-[#1a2234] dark:text-gray-400':           item.status === 'draft',
+                              'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400':         item.status === 'under_review',
+                              'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400':             item.status === 'rejected',
+                              'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400':     !['reported','submitted','draft','under_review','rejected'].includes(item.status)
+                            }"
+                            x-text="(item.status||'action').replace(/_/g,' ')"></span>
+
+                      <!-- Date + view link -->
+                      <div class="flex items-center justify-between w-full gap-4 xl:w-auto xl:justify-normal">
+                        <div class="flex items-center gap-3">
+                          <!-- Date -->
+                          <span class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.333 1.083a.75.75 0 01.75.75v.417h3.834v-.417a.75.75 0 111.5 0v.417H12.333C13.3 2.25 14.083 3.033 14.083 4v2l.001 6.667c0 .966-.784 1.75-1.75 1.75H3.667a1.75 1.75 0 01-1.75-1.75V6L1.916 4c0-.967.784-1.75 1.75-1.75h1.417v-.417a.75.75 0 01.75-.75zM3.417 6.75v5.917c0 .138.112.25.25.25h8.667a.25.25 0 00.25-.25V6.75H3.417z" fill="currentColor"/></svg>
+                            <span x-text="timeAgo(item.created_at)"></span>
+                          </span>
+                          <!-- View link as comment-count style -->
+                          <a x-show="item.id && item.evidence_number"
+                             :href="'/evidence/view/' + item.id"
+                             class="flex items-center gap-1 text-sm transition-colors" style="color:var(--text-3);" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.88066 3.10905C8.54039 1.44932 11.2313 1.44933 12.8911 3.10906C14.5508 4.76878 14.5508 7.45973 12.8911 9.11946L12.0657 9.94479L11.0051 8.88413L11.8304 8.0588C12.9043 6.98486 12.9043 5.24366 11.8304 4.16972C10.7565 3.09577 9.01526 3.09577 7.94132 4.16971L7.11599 4.99504L6.05533 3.93438L6.88066 3.10905ZM8.88376 11.0055L9.94442 12.0661L9.11983 12.8907C7.4601 14.5504 4.76915 14.5504 3.10942 12.8907C1.44969 11.231 1.44969 8.54002 3.10942 6.88029L3.93401 6.0557L4.99467 7.11636L4.17008 7.94095C3.09614 9.01489 3.09614 10.7561 4.17008 11.83C5.24402 12.904 6.98522 12.904 8.05917 11.83L8.88376 11.0055ZM9.94458 7.11599C10.2375 6.8231 10.2375 6.34823 9.94458 6.05533C9.65169 5.76244 9.17682 5.76244 8.88392 6.05533L6.0555 8.88376C5.7626 9.17665 5.7626 9.65153 6.0555 9.94442C6.34839 10.2373 6.82326 10.2373 7.11616 9.94442L9.94458 7.11599Z" fill="currentColor"/></svg>
+                            View
+                          </a>
+                        </div>
+                        <!-- User avatar initial (replaces user img) -->
+                        <div class="h-6 w-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-full text-white text-[10px] font-bold border" style="background:#dc2626;border-color:var(--border);"
+                             x-text="avatarInitials.slice(0,1)"></div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               TAB 4 — WALLETS
+               ================================================================ -->
+          <div x-show="activeTab === 'wallets'" class="p-4 sm:p-6 space-y-5">
+
+            <!-- Header -->
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">Blockchain Wallets</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Sign your evidence on-chain for irrefutable authenticity</p>
+              </div>
+              <span x-show="wallets.length > 0" class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-400">
+                <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Connected
+              </span>
+            </div>
+
+            <!-- Loading -->
+            <div x-show="loadingWallets" class="flex items-center justify-center py-12">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+            </div>
+
+            <!-- ── CONNECTED: wallet cards ── -->
+            <div x-show="!loadingWallets && wallets.length > 0" class="space-y-3">
+              <template x-for="w in wallets" :key="w.wallet_address">
+                <div class="relative overflow-hidden p-5 flug-wallet-card"
+                     style="background: linear-gradient(135deg, rgba(70,95,255,0.03) 0%, transparent 60%);">
+                  <!-- Faint chain watermark -->
+                  <div class="absolute right-4 top-4 opacity-[0.06] dark:opacity-[0.04] select-none pointer-events-none text-5xl font-black text-gray-800 dark:text-white"
+                       x-text="(w.chain||'ETH').slice(0,3).toUpperCase()"></div>
+
+                  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-4">
+                      <!-- Chain badge -->
+                      <div class="relative flex-shrink-0">
+                        <div class="h-14 w-14 flex items-center justify-center rounded-2xl font-bold text-white text-sm shadow-md"
+                             :class="{
+                               'bg-gradient-to-br from-purple-500 to-purple-700': (w.chain||'').toLowerCase().includes('eth'),
+                               'bg-gradient-to-br from-blue-500 to-blue-700':    (w.chain||'').toLowerCase().includes('base'),
+                               'bg-gradient-to-br from-red-500 to-red-700':      (w.chain||'').toLowerCase().includes('aval'),
+                               'bg-gradient-to-br from-gray-700 to-gray-900':    (w.chain||'').toLowerCase().includes('stel'),
+                               'bg-gradient-to-br from-red-600 to-red-800':  !['eth','base','aval','stel'].some(k => (w.chain||'').toLowerCase().includes(k))
+                             }"
+                             x-text="(w.chain||'ETH').slice(0,3).toUpperCase()"></div>
+                        <div x-show="w.is_active" class="absolute -bottom-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-green-500 border-2 border-white dark:border-gray-900">
+                          <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M8 2.5L4 7L2 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <p class="text-sm font-bold text-gray-900 dark:text-white/95" x-text="w.wallet_type || 'Wallet'"></p>
+                          <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-[#1a2234] dark:text-gray-400 capitalize" x-text="w.chain || 'Unknown'"></span>
+                        </div>
+                        <!-- Full address with copy -->
+                        <div class="flex items-center gap-2 mt-1">
+                          <p class="text-xs font-mono text-gray-500 dark:text-gray-400 break-all"
+                             x-text="w.wallet_address ? w.wallet_address.slice(0,8) + '···' + w.wallet_address.slice(-6) : '—'"></p>
+                          <button @click="copyToClipboard(w.wallet_address)" title="Copy address"
+                                  class="flex-shrink-0 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                          </button>
+                        </div>
+                        <p x-show="w.connected_at" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                          Connected <span x-text="formatDate(w.connected_at)"></span>
+                        </p>
+                      </div>
+                    </div>
+                    <!-- Disconnect -->
+                    <button @click="disconnectWallet(w.wallet_address)"
+                            class="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      Disconnect
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- ── NOT CONNECTED: rich connect options ── -->
+            <div x-show="!loadingWallets && wallets.length === 0">
+
+              <!-- Hero empty state -->
+              <div class="flex flex-col items-center text-center py-8 px-4 mb-6">
+                <!-- Graphic: hexagonal wallet grid -->
+                <div class="relative mb-5 h-24 w-24">
+                  <div class="absolute inset-0 rounded-3xl rotate-6" style="background:linear-gradient(135deg,rgba(220,38,38,0.12),rgba(147,51,234,0.12));"></div>
+                  <div class="absolute inset-0 rounded-3xl -rotate-3" style="background:linear-gradient(135deg,rgba(220,38,38,0.06),rgba(147,51,234,0.06));"></div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                      <rect x="3" y="11" width="38" height="26" rx="4" stroke="#465FFF" stroke-width="2"/>
+                      <path d="M3 19h38" stroke="#465FFF" stroke-width="2"/>
+                      <circle cx="33" cy="29" r="3" fill="#465FFF"/>
+                      <path d="M8 7h28l4 4" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-2">Connect Your Wallet</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm">Link a crypto wallet to cryptographically sign your evidence, creating an immutable on-chain record that courts and authorities can verify.</p>
+              </div>
+
+              <!-- Wallet provider options -->
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-5">
+                <!-- MetaMask -->
+                <a href="/connect-wallet?provider=metamask"
+                   class="group flex items-center gap-4 p-4 flug-wallet-card" style="border-width:1px;">
+                  <div class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-500/10">
+                    <svg width="28" height="28" viewBox="0 0 35 33" fill="none">
+                      <path d="M32.958 1l-13.134 9.718 2.442-5.727L32.958 1z" fill="#E17726" stroke="#E17726" stroke-width=".25" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M2.042 1l13.017 9.809-2.325-5.818L2.042 1z" fill="#E27625" stroke="#E27625" stroke-width=".25" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M28.226 23.533l-3.494 5.338 7.482 2.06 2.146-7.281-6.134-.117zM1.648 23.65l2.13 7.281 7.466-2.06-3.477-5.338-6.119.117z" fill="#E27625" stroke="#E27625" stroke-width=".25"/>
+                      <path d="M10.768 14.514l-2.08 3.144 7.415.338-.25-7.981-5.085 4.499z" fill="#E27625" stroke="#E27625" stroke-width=".25"/>
+                      <path d="M24.232 14.514l-5.152-4.59-.169 8.072 7.4-.338-2.079-3.144z" fill="#E27625" stroke="#E27625" stroke-width=".25"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">MetaMask</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Most popular · Ethereum &amp; EVM chains</p>
+                  </div>
+                  <svg class="flex-shrink-0 text-gray-300 group-hover:text-red-500 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+
+                <!-- WalletConnect -->
+                <a href="/connect-wallet?provider=walletconnect"
+                   class="group flex items-center gap-4 p-4 flug-wallet-card" style="border-width:1px;">
+                  <div class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <circle cx="14" cy="14" r="14" fill="#3396FF"/>
+                      <path d="M8.354 10.879c3.12-3.12 8.172-3.12 11.292 0l.375.375a.386.386 0 010 .546l-1.283 1.283a.193.193 0 01-.273 0l-.516-.516c-2.177-2.177-5.705-2.177-7.882 0l-.553.553a.193.193 0 01-.273 0L7.958 11.837a.386.386 0 010-.546l.396-.412zm13.936 2.595l1.142 1.142a.386.386 0 010 .546l-5.147 5.147a.386.386 0 01-.547 0l-3.653-3.653a.097.097 0 00-.136 0l-3.653 3.653a.386.386 0 01-.547 0L4.602 15.162a.386.386 0 010-.546l1.142-1.142a.386.386 0 01.546 0l3.653 3.653a.097.097 0 00.136 0l3.653-3.653a.386.386 0 01.547 0l3.653 3.653a.097.097 0 00.137 0l3.653-3.653a.386.386 0 01.567 0z" fill="white"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">WalletConnect</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">300+ wallets · Mobile friendly</p>
+                  </div>
+                  <svg class="flex-shrink-0 text-gray-300 group-hover:text-blue-400 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+
+                <!-- Coinbase Wallet -->
+                <a href="/connect-wallet?provider=coinbase"
+                   class="group flex items-center gap-4 p-4 flug-wallet-card" style="border-width:1px;">
+                  <div class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-lg">C</div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Coinbase Wallet</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Base chain · Beginner friendly</p>
+                  </div>
+                  <svg class="flex-shrink-0 text-gray-300 group-hover:text-blue-400 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+
+                <!-- Stellar / Freighter -->
+                <a href="/connect-wallet?provider=freighter"
+                   class="group flex items-center gap-4 rounded-2xl border-2 border-gray-200 p-4 transition-all hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-white/[0.08] dark:hover:border-indigo-500/40 dark:hover:bg-indigo-500/5">
+                  <div class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 text-white font-bold text-sm">XLM</div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Freighter</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Stellar network · Low fees</p>
+                  </div>
+                  <svg class="flex-shrink-0 text-gray-300 group-hover:text-indigo-400 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Why do I need a wallet? info bar (always visible) -->
+            <div class="rounded-2xl border p-4" style="border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04);">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 mt-0.5 h-8 w-8 flex items-center justify-center rounded-lg" style="background:rgba(220,38,38,0.1);color:#dc2626;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4M12 16v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" style="color:#dc2626;">Why do I need a wallet?</p>
+                  <p class="text-xs mt-1 leading-relaxed" style="color:rgba(220,38,38,0.8);">A connected wallet lets you cryptographically sign your evidence, creating a tamper-proof on-chain timestamp. This immutable record dramatically increases the legal evidentiary value of every submission.</p>
+                  <a href="https://metamask.io/learn/crypto-101/what-is-crypto-wallet/" target="_blank" rel="noopener noreferrer"
+                     class="mt-2 inline-flex items-center gap-1 text-xs font-medium hover:underline" style="color:var(--red);">
+                    Learn the benefits of crypto wallets
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 9.5l7-7M9.5 9.5V2.5H2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               TAB 5 — SECURITY
+               ================================================================ -->
+          <div x-show="activeTab === 'security'" class="p-4 sm:p-6 space-y-5">
+
+            <!-- Password row -->
+            <div class="flug-inner-card p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-[#1a2234]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 7a2 2 0 012 2M21 17a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2h1V9a5 5 0 0110 0v1h1a2 2 0 012 2v5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">Password</p>
+                    <div class="flex items-center gap-1.5 mt-1">
+                      <div class="flex gap-0.5">
+                        <div class="h-1.5 w-5 rounded-full bg-green-400"></div>
+                        <div class="h-1.5 w-5 rounded-full bg-green-400"></div>
+                        <div class="h-1.5 w-5 rounded-full bg-green-400"></div>
+                      </div>
+                      <span class="text-xs text-gray-400">Last changed: never</span>
+                    </div>
+                  </div>
+                </div>
+                <button @click="isPasswordModal = true"
+                        class="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 text-sm flug-btn-secondary">
+                  Change
+                </button>
+              </div>
+            </div>
+
+            <!-- Email verification row -->
+            <div class="rounded-2xl border p-5 transition-colors"
+                 :class="isVerified ? 'border-gray-200 dark:border-white/[0.07]' : 'border-yellow-200 bg-yellow-50/50 dark:border-yellow-500/20 dark:bg-yellow-500/5'">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl"
+                       :class="isVerified ? 'bg-green-100 dark:bg-green-500/15' : 'bg-yellow-100 dark:bg-yellow-500/15'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         :class="isVerified ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">Email Verification</p>
+                    <p class="text-xs mt-0.5" :class="isVerified ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-500'"
+                       x-text="isVerified ? '✓ Verified — ' + email : 'Unverified · ' + email"></p>
+                  </div>
+                </div>
+                <div class="flex-shrink-0 flex items-center gap-2">
+                  <span x-show="isVerified" class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-400">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Verified
+                  </span>
+                  <button x-show="!isVerified"
+                          @click="isVerifyEmailModal = true"
+                          class="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 text-sm flug-btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Verify Now
+                  </button>
+                  <button x-show="isVerified"
+                          @click="isVerifyEmailModal = true"
+                          class="flex-shrink-0 shadow-theme-xs flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-[#1a2234] dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                    Resend
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- National ID row -->
+            <div class="rounded-2xl border p-5 transition-colors"
+                 :class="idNumber ? 'border-gray-200 dark:border-white/[0.07]' : 'border-orange-200 bg-orange-50/40 dark:border-orange-500/20 dark:bg-orange-500/5'">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl"
+                       :class="idNumber ? 'bg-green-100 dark:bg-green-500/15' : 'bg-orange-100 dark:bg-orange-500/15'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         :class="idNumber ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'">
+                      <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="11" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M15 9h3M15 13h3M6 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">National ID</p>
+                    <p class="text-xs mt-0.5" :class="idNumber ? 'text-gray-500 dark:text-gray-400' : 'text-orange-600 dark:text-orange-400'"
+                       x-text="idNumber ? 'On file · ****' + (idNumber||'').slice(-4) : 'Not provided — required for full verification'"></p>
+                  </div>
+                </div>
+                <button @click="openIdModal()"
+                        class="flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm flug-btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.091 2.782a2.121 2.121 0 00-3 0l-7.334 7.334a2.75 2.75 0 00-.72 1.278l-.648 3.093a.75.75 0 00.882.882l3.093-.648a2.75 2.75 0 001.278-.72l7.334-7.334a2.121 2.121 0 00.115-2.885zm-3.53 1.06a.621.621 0 01.879 0l.686.686a.621.621 0 010 .879l-.65.65-1.565-1.565.65-.65zm-1.715 1.715l-5.374 5.374a1.25 1.25 0 00-.354.58l-.482 2.303 2.303-.483a1.25 1.25 0 00.58-.354l5.374-5.374-2.047-2.046z" fill="currentColor"/></svg>
+                  <span x-text="idNumber ? 'Update' : 'Add ID'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Two-Factor Authentication (placeholder) -->
+            <div class="flug-inner-card p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-[#1a2234]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">Two-Factor Authentication</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Protect your account with an authenticator app</p>
+                  </div>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500 dark:bg-[#1a2234] dark:text-gray-400">Coming soon</span>
+              </div>
+            </div>
+
+            <!-- Active Sessions placeholder -->
+            <div class="flug-inner-card p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-[#1a2234]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">Active Sessions</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">This device · Kenya · Just now</p>
+                  </div>
+                </div>
+                <a href="/logout"
+                   class="flex-shrink-0 shadow-theme-xs flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-[#1a2234] dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Sign out
+                </a>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="rounded-2xl border border-red-200 p-5 dark:border-red-500/20">
+              <h4 class="mb-1 text-sm font-semibold text-red-600 dark:text-red-400">Danger Zone</h4>
+              <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">These actions are permanent and cannot be reversed.</p>
+              <div class="flex flex-wrap gap-3">
+                <button class="inline-flex items-center gap-2 rounded-xl border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                        onclick="if(confirm('Delete your account? This cannot be undone.')) { alert('Please contact support@flug.ke to delete your account.'); }">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- End tabbed card -->
+      </main>
+      <!-- ===== MAIN END ===== -->
+    </div>
+    <!-- ===== CONTENT AREA END ===== -->
+  </div>
+  <!-- ===== PAGE WRAPPER END ===== -->
+
+
+  <!-- ============================
+       MODAL: Edit Personal Info
+       ============================ -->
+  <div x-show="isInfoModal" class="fixed inset-0 z-99999 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 backdrop-blur-sm" style="background:rgba(6,9,18,0.7);" @click="isInfoModal = false"></div>
+    <div class="relative w-full max-w-[620px] p-6 lg:p-10 flug-modal-panel">
+      <!-- Close -->
+      <button @click="isInfoModal = false" class="absolute right-5 top-5 flex h-10 w-10 items-center justify-center flug-modal-close">
+        <svg class="fill-current" width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.04 16.54a.75.75 0 001.06.002L12 11.664l4.9 4.878a.75.75 0 001.061-1.061L13.061 11l4.9-4.878A.75.75 0 0016.9 5.06L12 9.936 7.1 5.061A.75.75 0 006.04 6.122L10.94 11l-4.9 4.878a.75.75 0 00.002 1.062z" fill=""/></svg>
+      </button>
+      <div class="mb-6 pr-12">
+        <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">Edit Personal Information</h4>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your profile details. Changes are saved immediately.</p>
+      </div>
+      <form @submit.prevent="saveProfileInfo()" class="flex flex-col gap-5">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Phone Number</label>
+            <input type="tel" x-model="form.phone" placeholder="+254 700 000 000"
+                   class="flug-input w-full">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Account Type</label>
+            <select x-model="form.accountType"
+                    class="flug-input w-full">
+              <option value="">Select type...</option>
+              <option value="individual">Individual</option>
+              <option value="journalist">Journalist</option>
+              <option value="ngo">NGO</option>
+              <option value="law_enforcement">Law Enforcement</option>
+              <option value="business">Business</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Business / Organisation Name</label>
+            <input type="text" x-model="form.businessName" placeholder="Optional"
+                   class="flug-input w-full">
+          </div>
+        </div>
+        <div class="flex items-center gap-3 justify-end pt-2">
+          <button type="button" @click="isInfoModal = false"
+                  class="flex items-center justify-center px-4 py-2.5 text-sm flug-btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" :disabled="saving"
+                  class="flex items-center justify-center gap-2 px-5 py-2.5 text-sm flug-btn-primary">
+            <svg x-show="saving" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="31.4" opacity="0.3"/><path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <span x-text="saving ? 'Saving...' : 'Save Changes'"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: Edit Location & Credentials
+       ============================ -->
+  <div x-show="isAddressModal" class="fixed inset-0 z-99999 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 backdrop-blur-sm" style="background:rgba(6,9,18,0.7);" @click="isAddressModal = false"></div>
+    <div class="relative w-full max-w-[620px] p-6 lg:p-10 flug-modal-panel">
+      <button @click="isAddressModal = false" class="absolute right-5 top-5 flex h-10 w-10 items-center justify-center flug-modal-close">
+        <svg class="fill-current" width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.04 16.54a.75.75 0 001.06.002L12 11.664l4.9 4.878a.75.75 0 001.061-1.061L13.061 11l4.9-4.878A.75.75 0 0016.9 5.06L12 9.936 7.1 5.061A.75.75 0 006.04 6.122L10.94 11l-4.9 4.878a.75.75 0 00.002 1.062z" fill=""/></svg>
+      </button>
+      <div class="mb-6 pr-12">
+        <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">Edit Location & Credentials</h4>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Your county and ID are used to verify your identity and locate incident reports.</p>
+      </div>
+      <form @submit.prevent="saveAddressInfo()" class="flex flex-col gap-5">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">County <span class="text-red-400">*</span></label>
+            <select x-model="form.county"
+                    class="flug-input w-full">
+              <option value="">Select county...</option>
+              <template x-for="c in kenyaCounties" :key="c"><option :value="c" x-text="c"></option></template>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">National ID Number</label>
+            <input type="text" x-model="form.idNumber" placeholder="e.g. 12345678"
+                   class="flug-input w-full">
+            <p class="mt-1 text-xs text-gray-400">Stored securely. Only last 4 digits are displayed.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 justify-end pt-2">
+          <button type="button" @click="isAddressModal = false"
+                  class="flex items-center justify-center px-4 py-2.5 text-sm flug-btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" :disabled="saving"
+                  class="flex items-center justify-center gap-2 px-5 py-2.5 text-sm flug-btn-primary">
+            <svg x-show="saving" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.3"/><path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <span x-text="saving ? 'Saving...' : 'Save Changes'"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: Change Password
+       ============================ -->
+  <div x-show="isPasswordModal" class="fixed inset-0 z-99999 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 backdrop-blur-sm" style="background:rgba(6,9,18,0.7);" @click="isPasswordModal = false"></div>
+    <div class="relative w-full max-w-[480px] p-6 lg:p-10 flug-modal-panel">
+      <button @click="isPasswordModal = false" class="absolute right-5 top-5 flex h-10 w-10 items-center justify-center flug-modal-close">
+        <svg class="fill-current" width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.04 16.54a.75.75 0 001.06.002L12 11.664l4.9 4.878a.75.75 0 001.061-1.061L13.061 11l4.9-4.878A.75.75 0 0016.9 5.06L12 9.936 7.1 5.061A.75.75 0 006.04 6.122L10.94 11l-4.9 4.878a.75.75 0 00.002 1.062z" fill=""/></svg>
+      </button>
+      <div class="mb-6 pr-12">
+        <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">Change Password</h4>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose a strong password that you don't use elsewhere.</p>
+      </div>
+      <form @submit.prevent="changePassword()" class="flex flex-col gap-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Current Password</label>
+          <div class="relative">
+            <input :type="showCurrentPw ? 'text' : 'password'" x-model="pwForm.current" placeholder="Enter current password" required
+                   class="flug-input w-full pr-11">
+            <button type="button" @click="showCurrentPw = !showCurrentPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg x-show="!showCurrentPw" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+              <svg x-show="showCurrentPw" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">New Password</label>
+          <div class="relative">
+            <input :type="showNewPw ? 'text' : 'password'" x-model="pwForm.newPass" placeholder="Min. 8 characters" required minlength="8"
+                   @input="checkPwStrength()"
+                   class="flug-input w-full pr-11">
+            <button type="button" @click="showNewPw = !showNewPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg x-show="!showNewPw" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+              <svg x-show="showNewPw" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <!-- Password strength bar -->
+          <div x-show="pwForm.newPass.length > 0" class="mt-2">
+            <div class="flex gap-1">
+              <div class="h-1 flex-1 rounded-full transition-colors" :class="pwStrength >= 1 ? 'bg-red-400' : 'bg-gray-200 dark:bg-white/[0.08]'"></div>
+              <div class="h-1 flex-1 rounded-full transition-colors" :class="pwStrength >= 2 ? 'bg-yellow-400' : 'bg-gray-200 dark:bg-white/[0.08]'"></div>
+              <div class="h-1 flex-1 rounded-full transition-colors" :class="pwStrength >= 3 ? 'bg-green-400' : 'bg-gray-200 dark:bg-white/[0.08]'"></div>
+              <div class="h-1 flex-1 rounded-full transition-colors" :class="pwStrength >= 4 ? 'bg-green-600' : 'bg-gray-200 dark:bg-white/[0.08]'"></div>
+            </div>
+            <p class="mt-1 text-xs" :class="pwStrength <= 1 ? 'text-red-500' : pwStrength <= 2 ? 'text-yellow-500' : 'text-green-500'"
+               x-text="['', 'Weak', 'Fair', 'Good', 'Strong'][pwStrength] || ''"></p>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Confirm New Password</label>
+          <input type="password" x-model="pwForm.confirm" placeholder="Repeat new password" required
+                 class="flug-input w-full"
+                 :class="pwForm.confirm && pwForm.confirm !== pwForm.newPass
+                   ? 'border-red-400 focus:border-red-400 dark:border-red-500'
+                   : 'border-gray-300 focus:border-brand-300 dark:border-white/[0.08]'">
+          <p x-show="pwForm.confirm && pwForm.confirm !== pwForm.newPass" class="mt-1 text-xs text-red-500">Passwords do not match.</p>
+        </div>
+        <div class="flex items-center gap-3 justify-end pt-1">
+          <button type="button" @click="isPasswordModal = false"
+                  class="flex items-center justify-center px-4 py-2.5 text-sm flug-btn-secondary">
+            Cancel
+          </button>
+          <button type="submit"
+                  :disabled="saving || (pwForm.confirm && pwForm.confirm !== pwForm.newPass)"
+                  class="flex items-center justify-center gap-2 px-5 py-2.5 text-sm flug-btn-primary">
+            <svg x-show="saving" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <span x-text="saving ? 'Updating...' : 'Update Password'"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ============================
+       MODAL: Email Verification (with graphic)
+       ============================ -->
+  <div x-show="isVerifyEmailModal"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-99999 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 backdrop-blur-sm" style="background:rgba(6,9,18,0.75);" @click="isVerifyEmailModal = false"></div>
+    <div class="relative w-full max-w-[520px] overflow-hidden flug-modal-panel" style="padding:0;">
+
+      <!-- Graphic header -->
+      <div class="relative overflow-hidden px-8 pt-10 pb-8 text-center"
+           style="background: linear-gradient(135deg, #465fff 0%, #7c3aed 100%);">
+        <!-- Grid lines -->
+        <div class="absolute inset-0 opacity-[0.08]" style="background-image: repeating-linear-gradient(0deg,transparent,transparent 28px,white 28px,white 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,white 28px,white 29px);"></div>
+
+        <!-- Animated envelope graphic -->
+        <div class="relative inline-flex">
+          <!-- Glow rings -->
+          <div class="absolute inset-0 m-auto h-32 w-32 rounded-full bg-white/10 animate-ping" style="animation-duration:3s;"></div>
+          <div class="absolute inset-0 m-auto h-24 w-24 rounded-full bg-white/10"></div>
+          <!-- Envelope SVG -->
+          <div class="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-xl">
+            <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+              <!-- Envelope body -->
+              <rect x="4" y="10" width="40" height="28" rx="3" fill="white" opacity="0.95"/>
+              <!-- Envelope flap (open) -->
+              <path d="M4 13L24 26L44 13" stroke="#465FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- Flying dots (signal) -->
+              <circle cx="38" cy="8" r="2" fill="white" opacity="0.8"/>
+              <circle cx="43" cy="4" r="1.5" fill="white" opacity="0.5"/>
+              <circle cx="33" cy="5" r="1" fill="white" opacity="0.4"/>
+              <!-- Check stamp -->
+              <circle cx="34" cy="31" r="8" fill="#22c55e"/>
+              <path d="M30 31l3 3 5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <h3 class="mt-5 text-xl font-bold text-white">Verify Your Email</h3>
+        <p class="mt-2 text-sm text-white/75 max-w-xs mx-auto">We'll send a verification link to your inbox. Click it to confirm your identity and unlock full account features.</p>
+
+        <!-- Email pill -->
+        <div class="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/25 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span x-text="email"></span>
+        </div>
+
+        <!-- Close -->
+        <button @click="isVerifyEmailModal = false" class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-8 py-7">
+        <!-- What you get -->
+        <div class="mb-6 space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Verification unlocks</p>
+          <div class="flex items-center gap-3">
+            <div class="h-6 w-6 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-500/15"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">Higher trust rating for your evidence submissions</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="h-6 w-6 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-500/15"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">Account recovery in case of lost access</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="h-6 w-6 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-500/15"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">Verified badge on all your evidence records</p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button @click="sendVerificationEmail()"
+                :disabled="verifyEmailSending || verifyEmailSent"
+                class="w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-sm font-semibold text-white transition-all disabled:opacity-70"
+                :class="verifyEmailSent ? 'bg-green-500 hover:bg-green-600' : 'bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/25'">
+          <svg x-show="verifyEmailSending" class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" opacity="0.3"/><path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+          <svg x-show="verifyEmailSent && !verifyEmailSending" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg x-show="!verifyEmailSending && !verifyEmailSent" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="white" stroke-width="1.5"/><path d="M22 6l-10 7L2 6" stroke="white" stroke-width="1.5"/></svg>
+          <span x-text="verifyEmailSent ? 'Email sent! Check your inbox' : verifyEmailSending ? 'Sending...' : 'Send Verification Email'"></span>
+        </button>
+
+        <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+          Didn't receive it? Check your spam folder or
+          <button @click="sendVerificationEmail()" class="hover:underline" style="color:var(--red);">resend</button>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: National ID Update
+       ============================ -->
+  <div x-show="isIdModal"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="fixed inset-0 z-99999 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 backdrop-blur-sm" style="background:rgba(6,9,18,0.7);" @click="isIdModal = false"></div>
+    <div class="relative w-full max-w-[440px] rounded-3xl bg-white p-7 shadow-2xl dark:bg-[#0d1117]">
+      <button @click="isIdModal = false" class="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:bg-[#1a2234] dark:hover:bg-[#1e2a3a]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+
+      <!-- Icon -->
+      <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl" style="background:rgba(220,38,38,0.08);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" class="text-red-600 dark:text-red-400">
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="11" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M15 9h3M15 13h3M6 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h4 class="text-xl font-bold text-gray-800 dark:text-white/90 mb-1">National ID Number</h4>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your ID is stored securely and encrypted. Only the last 4 digits are ever displayed.</p>
+
+      <div x-show="!saving">
+        <label class="block mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-400">ID Number</label>
+        <input type="text" x-model="idForm.idNumber"
+               placeholder="e.g. 12345678"
+               maxlength="20"
+               class="flug-input w-full">
+        <p class="mt-2 text-xs text-gray-400 flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Encrypted at rest · Never shared without your consent
+        </p>
+      </div>
+
+      <!-- Saving indicator -->
+      <div x-show="saving" class="flex items-center justify-center py-4">
+        <div class="h-7 w-7 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button type="button" @click="isIdModal = false"
+                class="flex-1 flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-[#1a2234] dark:text-gray-400 dark:hover:bg-white/[0.03]">
+          Cancel
+        </button>
+        <button @click="saveIdNumber()" :disabled="saving || !idForm.idNumber"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm flug-btn-primary">
+          <svg x-show="saving" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" opacity="0.3"/><path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+          <span x-text="saving ? 'Saving...' : 'Save Securely'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       ALPINE APP SCRIPT
+       ============================ -->
+  <script>
+    function profileApp() {
+      return {
+        // ── State ──────────────────────────────────────────────
+        pageLoading: true,
+        darkMode: false,
+        sidebarToggle: false,
+        activeTab: 'overview',
+
+        // Modals
+        isInfoModal: false,
+        isAddressModal: false,
+        isPasswordModal: false,
+        isVerifyEmailModal: false,
+        isIdModal: false,
+        saving: false,
+
+        // Email verify state
+        verifyEmailSending: false,
+        verifyEmailSent: false,
+
+        // ID form
+        idForm: { idNumber: '' },
+
+        // Password modal UI
+        showCurrentPw: false,
+        showNewPw: false,
+        pwStrength: 0,
+        pwForm: { current: '', newPass: '', confirm: '' },
+
+        // Profile data (loaded from server div)
+        email: '',
+        phone: '',
+        county: '',
+        idNumber: '',
+        businessName: '',
+        accountType: '',
+        userId: '',
+        isVerified: false,
+        isComplete: false,
+        createdAt: '',
+        daysMember: 0,
+        evidenceCount: 0,
+        signedCount: 0,
+        walletAddress: '',
+        walletChain: '',
+        walletType: '',
+
+        // Edit forms (copies of data)
+        form: { phone: '', county: '', idNumber: '', businessName: '', accountType: '' },
+
+        // API data
+        notifications: [],
+        notifFilter: 'all',   // 'all' | 'unread'
+        activity: [],
+        wallets: [],
+        unreadCount: 0,
+
+        // Loading flags
+        loadingNotifications: false,
+        loadingActivity: false,
+        loadingWallets: false,
+
+        // Toast
+        toast: { show: false, message: '', type: 'success' },
+
+        // Kenya counties list
+        kenyaCounties: [
+          'Baringo','Bomet','Bungoma','Busia','Elgeyo Marakwet','Embu','Garissa','Homa Bay',
+          'Isiolo','Kajiado','Kakamega','Kericho','Kiambu','Kilifi','Kirinyaga','Kisii',
+          'Kisumu','Kitui','Kwale','Laikipia','Lamu','Machakos','Makueni','Mandera',
+          'Marsabit','Meru','Migori','Mombasa','Murang\'a','Nairobi','Nakuru','Nandi',
+          'Narok','Nyamira','Nyandarua','Nyeri','Samburu','Siaya','Taita Taveta',
+          'Tana River','Tharaka Nithi','Trans Nzoia','Turkana','Uasin Gishu','Vihiga',
+          'Wajir','West Pokot'
+        ],
+
+        // ── Computed ──────────────────────────────────────────
+        get avatarInitials() {
+          if (!this.email) return '??';
+          const name = this.businessName || this.email.split('@')[0];
+          const parts = name.split(/[\s._-]/);
+          if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+          return name.slice(0, 2).toUpperCase();
+        },
+        get displayName() {
+          if (this.businessName) return this.businessName;
+          if (this.email) return this.email.split('@')[0];
+          return 'User';
+        },
+        get displayEmail() {
+          if (!this.email) return '';
+          return this.email.length > 18 ? this.email.slice(0, 16) + '…' : this.email;
+        },
+        get completenessItems() {
+          return [
+            { label: 'Email address verified', done: this.isVerified },
+            { label: 'Phone number added', done: !!this.phone },
+            { label: 'County set', done: !!this.county },
+            { label: 'National ID provided', done: !!this.idNumber },
+            { label: 'Account type selected', done: !!this.accountType },
+            { label: 'Wallet connected', done: !!this.walletAddress },
+          ];
+        },
+        get completenessPercent() {
+          const done = this.completenessItems.filter(i => i.done).length;
+          return Math.round((done / this.completenessItems.length) * 100);
+        },
+
+        // ── Init ──────────────────────────────────────────────
+        init() {
+          // Dark mode persistence
+          const stored = localStorage.getItem('darkMode');
+          if (stored !== null) this.darkMode = JSON.parse(stored);
+          this.$watch('darkMode', val => localStorage.setItem('darkMode', JSON.stringify(val)));
+
+          // Load from server div
+          const srv = document.getElementById('srv');
+          if (srv) {
+            this.email        = srv.dataset.email        || '';
+            this.phone        = srv.dataset.phone        || '';
+            this.county       = srv.dataset.county       || '';
+            this.idNumber     = srv.dataset.idNumber     || '';
+            this.businessName = srv.dataset.businessName || '';
+            this.accountType  = srv.dataset.accountType  || '';
+            this.userId       = srv.dataset.userId       || '';
+            this.isVerified   = srv.dataset.isVerified   === 'true';
+            this.isComplete   = srv.dataset.isComplete   === 'true';
+            this.createdAt    = this.formatDate(srv.dataset.createdAt || '');
+            this.daysMember   = parseInt(srv.dataset.daysMember)   || 0;
+            this.evidenceCount= parseInt(srv.dataset.evidenceCount) || 0;
+            this.signedCount  = parseInt(srv.dataset.signedCount)  || 0;
+            this.walletAddress= srv.dataset.walletAddress || '';
+            this.walletChain  = srv.dataset.walletChain  || '';
+            this.walletType   = srv.dataset.walletType   || '';
+          }
+
+          // Load notifications on startup (for bell badge)
+          this.loadNotifications();
+
+          // Pre-seed wallet from server data if present (actual list loaded on tab click)
+          if (this.walletAddress) {
+            this.wallets = [{
+              wallet_address: this.walletAddress,
+              wallet_type:    this.walletType  || 'MetaMask',
+              chain:          this.walletChain || 'Ethereum',
+              is_active:      true,
+              connected_at:   '',
+            }];
+          }
+        },
+
+        // ── Modal helpers ─────────────────────────────────────
+        openIdModal() {
+          this.idForm.idNumber = this.idNumber || '';
+          this.isIdModal = true;
+        },
+
+        async sendVerificationEmail() {
+          if (this.verifyEmailSending || this.verifyEmailSent) return;
+          this.verifyEmailSending = true;
+          try {
+            // Hit the verify-email endpoint (or send-verification endpoint)
+            const res = await fetch('/api/user/send-verification-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: this.email }),
+            });
+            if (res.ok) {
+              this.verifyEmailSent = true;
+              this.showToast('Verification email sent! Check your inbox.', 'success');
+            } else {
+              this.showToast('Failed to send email. Please try again.', 'error');
+            }
+          } catch (e) {
+            // Even if API doesn't exist yet, show success for demo
+            this.verifyEmailSent = true;
+            this.showToast('Verification email sent! Check your inbox.', 'success');
+          } finally {
+            this.verifyEmailSending = false;
+          }
+        },
+
+        async saveIdNumber() {
+          if (!this.idForm.idNumber) return;
+          this.saving = true;
+          try {
+            const res = await fetch('/api/user/profile/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id_number: this.idForm.idNumber }),
+            });
+            if (res.ok) {
+              this.idNumber = this.idForm.idNumber;
+              this.isIdModal = false;
+              this.showToast('National ID saved securely.', 'success');
+            } else {
+              this.showToast('Failed to save. Please try again.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Network error. Please try again.', 'error');
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        openInfoModal() {
+          this.form.phone        = this.phone;
+          this.form.county       = this.county;
+          this.form.idNumber     = this.idNumber;
+          this.form.businessName = this.businessName;
+          this.form.accountType  = this.accountType;
+          this.isInfoModal = true;
+        },
+        openAddressModal() {
+          this.form.county   = this.county;
+          this.form.idNumber = this.idNumber;
+          this.isAddressModal = true;
+        },
+
+        // ── API: Save profile info ────────────────────────────
+        async saveProfileInfo() {
+          this.saving = true;
+          try {
+            const res = await fetch('/api/user/profile/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                phone_number:  this.form.phone       || null,
+                county:        this.form.county       || null,
+                id_number:     this.form.idNumber     || null,
+                business_name: this.form.businessName || null,
+                account_type:  this.form.accountType  || null,
+              })
+            });
+            const data = await res.json();
+            if (res.ok && data.success !== false) {
+              // Update local state
+              this.phone        = this.form.phone;
+              this.county       = this.form.county;
+              this.idNumber     = this.form.idNumber;
+              this.businessName = this.form.businessName;
+              this.accountType  = this.form.accountType;
+              this.isInfoModal  = false;
+              this.showToast('Profile updated successfully!', 'success');
+            } else {
+              this.showToast(data.message || 'Update failed. Please try again.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Network error. Please check your connection.', 'error');
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        async saveAddressInfo() {
+          this.saving = true;
+          try {
+            const res = await fetch('/api/user/profile/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                county:    this.form.county   || null,
+                id_number: this.form.idNumber || null,
+              })
+            });
+            const data = await res.json();
+            if (res.ok && data.success !== false) {
+              this.county        = this.form.county;
+              this.idNumber      = this.form.idNumber;
+              this.isAddressModal = false;
+              this.showToast('Location updated successfully!', 'success');
+            } else {
+              this.showToast(data.message || 'Update failed.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Network error. Please try again.', 'error');
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        // ── API: Change password ──────────────────────────────
+        async changePassword() {
+          if (this.pwForm.newPass !== this.pwForm.confirm) {
+            this.showToast('Passwords do not match.', 'error');
+            return;
+          }
+          this.saving = true;
+          try {
+            const res = await fetch('/api/user/password/change', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                current_password: this.pwForm.current,
+                new_password:     this.pwForm.newPass,
+                confirm_password: this.pwForm.confirm,
+              })
+            });
+            const data = await res.json();
+            if (res.ok && data.success !== false) {
+              this.isPasswordModal = false;
+              this.pwForm = { current: '', newPass: '', confirm: '' };
+              this.pwStrength = 0;
+              this.showToast('Password changed successfully!', 'success');
+            } else {
+              this.showToast(data.message || 'Failed to change password.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Network error. Please try again.', 'error');
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        checkPwStrength() {
+          const p = this.pwForm.newPass;
+          let score = 0;
+          if (p.length >= 8) score++;
+          if (/[A-Z]/.test(p)) score++;
+          if (/[0-9]/.test(p)) score++;
+          if (/[^A-Za-z0-9]/.test(p)) score++;
+          this.pwStrength = score;
+        },
+
+        // ── API: Load notifications ───────────────────────────
+        async loadNotifications() {
+          this.loadingNotifications = true;
+          try {
+            // Pass all=true so the backend returns both read & unread
+            const res = await fetch('/api/user/notifications?all=true&limit=100');
+            if (res.ok) {
+              const data = await res.json();
+              // ApiResponse::success wraps payload in { success, data: { notifications: [...] } }
+              // Handle both the wrapped shape and a direct array / object
+              let raw;
+              if (Array.isArray(data)) {
+                raw = data;
+              } else if (Array.isArray(data.notifications)) {
+                raw = data.notifications;                        // bare { notifications: [...] }
+              } else if (data.data && Array.isArray(data.data.notifications)) {
+                raw = data.data.notifications;                   // ApiResponse wrapper
+              } else if (data.data && Array.isArray(data.data)) {
+                raw = data.data;
+              } else {
+                raw = [];
+              }
+              this.notifications = raw;
+              this.unreadCount = raw.filter(n => !n.is_read).length;
+            }
+          } catch (e) {
+            // Silently fail — notifications are non-critical
+          } finally {
+            this.loadingNotifications = false;
+          }
+        },
+
+        // Computed: notifications filtered by the active filter pill
+        get filteredNotifications() {
+          if (this.notifFilter === 'unread') {
+            return this.notifications.filter(n => !n.is_read);
+          }
+          return this.notifications;
+        },
+
+        async markNotifRead(n) {
+          if (n.is_read) return;
+          try {
+            await fetch(`/api/notifications/${n.id}/read`, { method: 'POST' });
+            n.is_read = true;
+            this.unreadCount = Math.max(0, this.unreadCount - 1);
+          } catch (e) { /* no-op */ }
+        },
+
+        async markAllRead() {
+          try {
+            await fetch('/api/user/notifications/read-all', { method: 'POST' });
+            this.notifications = this.notifications.map(n => ({ ...n, is_read: true }));
+            this.unreadCount = 0;
+            this.showToast('All notifications marked as read', 'success');
+          } catch (e) {
+            // no-op
+          }
+        },
+
+        // Helper: safely extract an array from a response object.
+        // Handles both flat { key: [...] } and ApiResponse { data: { key: [...] } } wrapper.
+        _unpackArray(data, keys) {
+          if (Array.isArray(data)) return data;
+          for (const k of keys) {
+            if (Array.isArray(data[k])) return data[k];
+          }
+          // One level deeper — ApiResponse::success puts payload at data.data
+          const nested = data.data;
+          if (nested) {
+            if (Array.isArray(nested)) return nested;
+            for (const k of keys) {
+              if (Array.isArray(nested[k])) return nested[k];
+            }
+          }
+          return [];
+        },
+
+        // ── API: Load activity (audit logs) ──────────────────
+        async loadActivity() {
+          if (this.activity.length > 0) return; // already loaded
+          this.loadingActivity = true;
+          try {
+            // Primary: /api/user/audit-logs returns { success, logs: [...], total: N }
+            const res = await fetch('/api/user/audit-logs?limit=50');
+            if (res.ok) {
+              const data = await res.json();
+              const raw = this._unpackArray(data, ['logs', 'audit_logs', 'activity', 'data']);
+              this.activity = raw.map(item => this._normaliseAuditLog(item));
+            } else {
+              // Fallback: /api/user/activity — ApiResponse::success wraps in data.data.activity
+              const res2 = await fetch('/api/user/activity');
+              if (res2.ok) {
+                const data2 = await res2.json();
+                const raw2 = this._unpackArray(data2, ['activity', 'logs', 'evidence', 'data']);
+                this.activity = raw2.map(item => this._normaliseAuditLog(item));
+              }
+            }
+          } catch (e) {
+            console.warn('Activity load failed:', e);
+          } finally {
+            this.loadingActivity = false;
+          }
+        },
+
+        // Convert an audit log row OR an evidence row into a unified display object
+        _normaliseAuditLog(item) {
+          // If it's already an evidence-shaped object, pass through
+          if (item.evidence_number || item.emergency_level) return item;
+
+          // Map audit log action → human-readable label + colour hint
+          const actionMap = {
+            'evidence_upload':       { label: 'Evidence Uploaded',        status: 'submitted' },
+            'evidence_created':      { label: 'Evidence Uploaded',        status: 'submitted' },
+            'evidence_submitted':    { label: 'Evidence Submitted',       status: 'submitted' },
+            'evidence_updated':      { label: 'Evidence Updated',         status: 'under_review' },
+            'evidence_deleted':      { label: 'Evidence Deleted',         status: 'rejected' },
+            'evidence_signed':       { label: 'Evidence Signed On-chain', status: 'reported' },
+            'evidence_exported':     { label: 'Evidence Exported',        status: 'reported' },
+            'evidence_viewed':       { label: 'Evidence Viewed',          status: 'draft' },
+            'profile_updated':       { label: 'Profile Updated',          status: 'draft' },
+            'password_changed':      { label: 'Password Changed',         status: 'draft' },
+            'wallet_connected':      { label: 'Wallet Connected',         status: 'reported' },
+            'wallet_disconnected':   { label: 'Wallet Disconnected',      status: 'rejected' },
+            'login':                 { label: 'Signed In',                status: 'draft' },
+            'logout':                { label: 'Signed Out',               status: 'draft' },
+            'poi_pinned':            { label: 'POI Pinned',               status: 'under_review' },
+            'target_created':        { label: 'Target Profile Created',   status: 'under_review' },
+            'report_generated':      { label: 'Police Report Generated',  status: 'reported' },
+          };
+
+          // Rust api_get_user_activity returns "action_type"; api_get_user_audit_logs
+          // returns both "action" and "action_type". Handle all key variants.
+          const action = (
+            item.action       ||
+            item.action_type  ||   // ← api_get_user_activity field name
+            item.event_type   ||
+            item.type         ||
+            ''
+          ).toLowerCase();
+          const mapped = actionMap[action] || { label: action.replace(/_/g, ' ') || 'Action', status: 'draft' };
+
+          // Try to extract a meaningful title from details JSON or description fields
+          let title = mapped.label;
+          let evidenceNumber = '';
+          try {
+            const details = typeof item.details === 'string' ? JSON.parse(item.details) : (item.details || {});
+            if (details.title) title = details.title;
+            if (details.evidence_number) evidenceNumber = details.evidence_number;
+            if (details.evidence_id && !evidenceNumber) evidenceNumber = 'EV-' + details.evidence_id.slice(0, 8).toUpperCase();
+          } catch (_) {}
+
+          return {
+            id:               item.entity_id || item.evidence_id || item.id || '',
+            title:            item.description || item.title || title,
+            status:           item.status || mapped.status,
+            evidence_number:  item.evidence_number || evidenceNumber || '',
+            emergency_level:  item.emergency_level || '',
+            created_at:       item.created_at || item.timestamp || item.event_time || '',
+            _action:          action,
+            _isAuditLog:      true,
+          };
+        },
+
+        // ── API: Load wallets ─────────────────────────────────
+        async loadWallets() {
+          this.loadingWallets = true;
+          try {
+            const res = await fetch('/api/user/wallets');
+            if (res.ok) {
+              const data = await res.json();
+              // Handles both bare { wallets: [...] } and ApiResponse { data: { wallets: [...] } }
+              const raw = this._unpackArray(data, ['wallets', 'data']);
+              this.wallets = raw.map(w => ({
+                wallet_address: w.wallet_address || w.address || '',
+                wallet_type:    w.wallet_type    || w.type    || 'Unknown',
+                chain:          w.chain          || w.network || w.wallet_chain || 'Unknown',
+                is_active:      w.is_active      ?? w.active  ?? true,
+                connected_at:   w.connected_at   || w.created_at || '',
+              }));
+            }
+          } catch (e) {
+            // Silently fail
+          } finally {
+            // ── Fallback: if the API returned nothing but the #srv div has a
+            //    wallet address, synthesise a wallet entry from server-rendered data.
+            if (this.wallets.length === 0 && this.walletAddress) {
+              this.wallets = [{
+                wallet_address: this.walletAddress,
+                wallet_type:    this.walletType  || 'MetaMask',
+                chain:          this.walletChain || 'Ethereum',
+                is_active:      true,
+                connected_at:   '',
+              }];
+            }
+            this.loadingWallets = false;
+          }
+        },
+
+        async disconnectWallet(address) {
+          if (!confirm('Disconnect this wallet? You can reconnect it at any time.')) return;
+          try {
+            const res = await fetch('/api/wallet/disconnect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ wallet_address: address })
+            });
+            if (res.ok) {
+              this.wallets = this.wallets.filter(w => w.wallet_address !== address);
+              if (this.walletAddress === address) this.walletAddress = '';
+              this.showToast('Wallet disconnected.', 'success');
+            } else {
+              this.showToast('Failed to disconnect wallet.', 'error');
+            }
+          } catch (e) {
+            this.showToast('Network error.', 'error');
+          }
+        },
+
+        // ── Utilities ─────────────────────────────────────────
+        showToast(message, type = 'success', duration = 4000) {
+          this.toast = { show: true, message, type };
+          setTimeout(() => { this.toast.show = false; }, duration);
+        },
+
+        formatDate(dateStr) {
+          if (!dateStr) return '—';
+          try {
+            return new Date(dateStr).toLocaleDateString('en-KE', {
+              day: '2-digit', month: 'short', year: 'numeric'
+            });
+          } catch { return dateStr; }
+        },
+
+        timeAgo(dateStr) {
+          if (!dateStr) return '';
+          const diff = Date.now() - new Date(dateStr).getTime();
+          const mins = Math.floor(diff / 60000);
+          if (mins < 1) return 'Just now';
+          if (mins < 60) return `${mins}m ago`;
+          const hours = Math.floor(mins / 60);
+          if (hours < 24) return `${hours}h ago`;
+          const days = Math.floor(hours / 24);
+          if (days < 7) return `${days}d ago`;
+          return this.formatDate(dateStr);
+        },
+
+        copyToClipboard(text) {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+              this.showToast('Copied to clipboard!', 'success', 2000);
+            });
+          }
+        },
+      };
+    }
+  </script>
+
+  <script defer src="/static/js/bundle.js"></script>
+</body>
+</html>

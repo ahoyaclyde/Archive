@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Archive - Set Up Account Password </title>
+    <script src="../static/css/tailwind.css"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<form action="/verify-email" method="post">
+    <input type="hidden" name="token" value="{{token}}">
+<div class="bg-gray-900/20 flex h-screen items-center justify-center">
+  <div class="m-2 inline-flex rounded-xl bg-gray-100 sm:p-2">
+    <div class="flex flex-col rounded-lg bg-white sm:w-96">
+      <div class="flex w-full justify-between self-start px-8 py-4">
+        <h2 class="text-lg font-medium text-gray-700"> Verify Email Address </h2>
+        <a onclick="window.history.back()"> 
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 cursor-pointer text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        </a>
+      </div>
+      <hr>
+      <div class="flex w-full flex-col px-8">
+        <p class="mt-4 mb-2 text-sm font-medium"> Manual Email Verification Context  </p>
+        <p class="mb-2 text-gray-400"> Activate your account using direct links  </p>
+        <div class="mb-4 flex justify-between">
+          <input type="text" class="mr-2 w-full rounded-md bg-blue-100 px-2 py-2 text-gray-700 outline-none" value="https://google.com/link-it">
+          <button class="active:border-transparent active:bg-blue-50 rounded-md border bg-white px-2 py-1 font-medium text-blue-500 shadow"> Verify </button>
+        </div>
+      </div>
+      <hr>
+      <div class="flex w-full flex-col px-8 pt-4 pb-8">
+        <p class="mb-3 font-medium"> Click Verify To Use Manual Verification In Your Activation </p>
+        <p class="mb-2 text-sm font-medium"> Account Holder </p>
+        <div class="focus-within:border-blue-300 mb-2 flex rounded-lg border-2">
+          <div class="flex h-12 space-x-1 px-2 py-2">
+            <span class="flex items-center rounded-md bg-blue-100 px-2 py-1.5 text-sm text-gray-700">user@gmail.com
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </span>
+            </span>
+          </div>
+          <input type="text" class="mx-2 w-full outline-none">
+        </div>
+        <p class="mb-2 text-sm font-medium"> Verification Token </p>
+        <input class="focus-within:border-blue-300 mb-2 h-12 rounded-md border-2 px-2 py-1 outline-none" type="text" value="{{token}}">
+        <p class="mb-2 text-sm font-medium"> Info </p>
+        <div class="flex items-center space-x-3 border px-2 py-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <div class="">
+            <p class="text-blue-600/90 cursor-pointer text-sm font-medium"> This link self destructs in </p>
+            <p class="text-xs text-gray-600"> 24 Hrs </p>
+          </div>
+        </div>
+        <button class="my-2 rounded-md bg-blue-600 py-2 font-medium text-white" type="submit"> Verify Account </button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+</body>
+</html>

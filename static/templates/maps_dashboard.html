@@ -1,0 +1,3045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLUG INTEL — Crime Operations Map</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+
+<style>
+:root {
+  --bg:       #05080f;
+  --bg-p:     #0b1220;
+  --bg-c:     #0f1a2a;
+  --bg-ch:    #131f30;
+  --bdr:      #182333;
+  --bdr-l:    #1f3047;
+  --txt:      #dde6f0;
+  --txt-s:    #7a96b0;
+  --txt-d:    #2e4258;
+  --red:      #e63946;
+  --red-g:    rgba(230,57,70,.35);
+  --orange:   #f97316;
+  --amber:    #f59e0b;
+  --cyan:     #0ea5e9;
+  --cyan-g:   rgba(14,165,233,.18);
+  --green:    #10b981;
+  --purple:   #8b5cf6;
+  --neon-red: #ff2d3b;
+  --neon-cyn: #00d4ff;
+}
+/* ── LIGHT MODE VARIABLES ──────────────────────────────────── */
+body.light {
+  --bg:    #eef2f7;
+  --bg-p:  #ffffff;
+  --bg-c:  #f6f9fc;
+  --bg-ch: #edf1f7;
+  --bdr:   #d4dce8;
+  --bdr-l: #b8c6d8;
+  --txt:   #111c2d;
+  --txt-s: #4a6180;
+  --txt-d: #8fa4be;
+  --cyan-g: rgba(14,165,233,.12);
+}
+
+/* Structural elements with hardcoded rgba backgrounds */
+body.light #topbar          { background: rgba(240,245,252,.96); }
+body.light #sidepanel       { background: rgba(255,255,255,.98); }
+body.light #timelinePanel   { background: rgba(246,249,252,.97); }
+body.light #annotBar        { background: rgba(255,255,255,.97); }
+body.light #miniMapWrap     { border-color: var(--bdr-l); }
+body.light .modal-box       { background: #ffffff; }
+body.light #cmdPalette      { background: rgba(0,0,0,.45); }
+body.light .cmd-box         { background: #ffffff; }
+body.light #radarIntro      { background: #05080f; } /* keep dark always */
+
+/* Scanlines are invisible on light */
+body.light #scanlines { opacity: 0; }
+
+/* Leaflet popups */
+body.light .leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  border-color: var(--bdr-l) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12) !important;
+  color: var(--txt) !important;
+}
+body.light .leaflet-popup-tip { background: #ffffff !important; }
+
+/* Cluster bubbles in light */
+body.light .marker-cluster-small  { background-color: rgba(14,165,233,.14); }
+body.light .marker-cluster-small div  { background-color: rgba(14,165,233,.55); }
+body.light .marker-cluster-medium { background-color: rgba(245,158,11,.14); }
+body.light .marker-cluster-medium div { background-color: rgba(245,158,11,.55); }
+body.light .marker-cluster-large  { background-color: rgba(230,57,70,.14); }
+body.light .marker-cluster-large div  { background-color: rgba(230,57,70,.55); }
+
+/* ── THEME TOGGLE BUTTON ───────────────────────────────────── */
+#themeToggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--bdr);
+  cursor: pointer; transition: all .2s ease;
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+#themeToggle:hover { background: rgba(255,255,255,.12); border-color: var(--bdr-l); }
+#themeToggle .icon-dark,
+#themeToggle .icon-light {
+  position: absolute; font-size: 15px;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+}
+#themeToggle .icon-dark  { color: #f59e0b; transform: translateY(0);   opacity: 1; }
+#themeToggle .icon-light { color: #0ea5e9; transform: translateY(24px); opacity: 0; }
+body.light #themeToggle .icon-dark  { transform: translateY(-24px); opacity: 0; }
+body.light #themeToggle .icon-light { transform: translateY(0);     opacity: 1; }
+body.light #themeToggle { background: rgba(0,0,0,.05); }
+body.light #themeToggle:hover { background: rgba(0,0,0,.09); }
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Noto Sans',sans-serif;transition:background .3s ease,color .25s ease}
+
+/* ── RADAR SWEEP INTRO ─────────────────────────────────────── */
+#radarIntro{
+  position:fixed;inset:0;z-index:9999;
+  background:#05080f;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;
+  animation:introFade 0.4s ease 2.8s forwards;
+  pointer-events:none;
+}
+@keyframes introFade{to{opacity:0;visibility:hidden}}
+#radarCanvas{opacity:.9}
+.intro-brand{
+  font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;
+  letter-spacing:.18em;color:var(--neon-cyn);
+  text-shadow:0 0 20px var(--neon-cyn),0 0 60px rgba(0,212,255,.3);
+  animation:brandPulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes brandPulse{from{opacity:.7}to{opacity:1}}
+.intro-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-d);letter-spacing:.2em;text-transform:uppercase}
+
+/* ── SCANLINES OVERLAY ─────────────────────────────────────── */
+#scanlines{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+  animation:scanMove 8s linear infinite;
+}
+@keyframes scanMove{from{background-position:0 0}to{background-position:0 100px}}
+
+/* ── MAP ───────────────────────────────────────────────────── */
+#crimeMap{position:fixed;inset:0;z-index:0}
+
+/* ── TOPBAR ────────────────────────────────────────────────── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:50px;
+  background:rgba(5,8,15,.92);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;gap:8px;padding:0 12px;z-index:700;
+}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;letter-spacing:.08em;flex-shrink:0}
+.brand-shield{width:28px;height:28px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 12px var(--red-g)}
+.brand-accent{color:var(--red)}
+.brand-ver{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d);margin-left:2px;align-self:flex-end;margin-bottom:2px}
+.live-pill{display:flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--green);flex-shrink:0;letter-spacing:.08em}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:livePulse 2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}50%{box-shadow:0 0 0 5px rgba(16,185,129,0)}}
+.tb-sp{flex:1}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:7px;color:var(--txt-s);font-size:11px;cursor:pointer;transition:all .15s;font-family:'Noto Sans',sans-serif;white-space:nowrap;flex-shrink:0}
+.tb-btn:hover{background:rgba(255,255,255,.08);color:var(--txt);border-color:var(--bdr-l)}
+.tb-btn.active{background:var(--cyan-g);border-color:var(--cyan);color:var(--cyan)}
+.tb-btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.tb-btn.danger:hover{background:#c9313e;box-shadow:0 0 14px var(--red-g)}
+.tb-sep{width:1px;height:22px;background:var(--bdr);flex-shrink:0}
+.tb-lbl{display:none}
+@media(min-width:900px){.tb-lbl{display:inline}}
+@media(min-width:1024px){.panel-mob{display:none!important}}
+.kbd{display:inline-flex;align-items:center;justify-content:center;padding:1px 5px;background:rgba(255,255,255,.06);border:1px solid var(--bdr-l);border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)}
+
+/* ── DROP ──────────────────────────────────────────────────── */
+.drop-wrap{position:relative}
+.drop-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-p);border:1px solid var(--bdr-l);border-radius:10px;min-width:160px;overflow:hidden;display:none;z-index:2000;box-shadow:0 16px 48px rgba(0,0,0,.7)}
+.drop-menu.open{display:block}
+.drop-item{padding:9px 13px;font-size:11px;color:var(--txt-s);cursor:pointer;transition:all .1s;display:flex;align-items:center;gap:8px;font-family:'Noto Sans',sans-serif}
+.drop-item:hover{background:var(--bg-ch);color:var(--txt)}
+.drop-item.active{color:var(--cyan)}
+
+/* ── SIDEPANEL ─────────────────────────────────────────────── */
+#sidepanel{
+  position:fixed;top:50px;right:0;bottom:0;
+  width:380px;background:rgba(11,18,32,.97);backdrop-filter:blur(16px);
+  border-left:1px solid var(--bdr);
+  display:flex;flex-direction:column;z-index:500;overflow:hidden;
+}
+@media(max-width:1023px){
+  #sidepanel{top:auto;bottom:0;left:0;right:0;width:100%;height:65vh;border-left:none;border-top:1px solid var(--bdr);border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  #sidepanel.open{transform:translateY(0)}
+}
+.tab-nav{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:fit-content;padding:14px 10px;background:transparent;border:none;color:var(--txt-d);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;position:relative;top:1px}
+.tab-btn:hover{color:var(--txt-s)}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab-panel{display:none;flex:1;overflow-y:auto;flex-direction:column}
+.tab-panel.active{display:flex;flex-direction:column;padding:18px 16px;gap:20px}
+.tab-panel::-webkit-scrollbar{width:3px}
+.tab-panel::-webkit-scrollbar-thumb{background:var(--bdr-l);border-radius:2px}
+
+/* ── STATS ─────────────────────────────────────────────────── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.stat-card{background:var(--bg-c);border:1px solid var(--bdr);border-radius:11px;padding:16px 14px 14px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:0}
+.c-cyan::before{background:var(--cyan)}.c-red::before{background:var(--red)}.c-grn::before{background:var(--green)}.c-amb::before{background:var(--amber)}
+.stat-num{font-family:'Rajdhani',sans-serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:9px;color:var(--txt-d);text-transform:uppercase;letter-spacing:.07em}
+.stat-ico{position:absolute;top:12px;right:12px;font-size:20px;opacity:.13}
+
+/* ── SECTION HEADER ────────────────────────────────────────── */
+.sec{display:flex;align-items:center;gap:9px;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-d);margin-bottom:2px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* ── LAYERS ────────────────────────────────────────────────── */
+.layer-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.layer-btn{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:9px;color:var(--txt-s);font-size:12px;cursor:pointer;transition:all .15s;font-family:'Noto Sans',sans-serif;line-height:1}
+.layer-btn:hover{background:var(--bg-ch);color:var(--txt)}
+.layer-btn.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-g)}
+
+/* ── COUNTY ────────────────────────────────────────────────── */
+.county-row{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
+.county-row:hover{background:var(--bg-ch)}
+.county-wrap{flex:1;min-width:0}
+.county-name{font-size:12px;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.county-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:5px;overflow:hidden}
+.county-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width .7s ease}
+.county-n{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);flex-shrink:0}
+
+/* ── FEED ──────────────────────────────────────────────────── */
+.feed-item{display:flex;align-items:flex-start;gap:11px;padding:11px 8px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:all .12s;border-radius:7px}
+.feed-item:last-child{border-bottom:none}
+.feed-item:hover{background:var(--bg-ch);padding-left:13px}
+.feed-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.feed-title{font-size:12px;color:var(--txt);line-height:1.45;margin-bottom:3px}
+.feed-meta{font-size:10px;color:var(--txt-d);font-family:'IBM Plex Mono',monospace}
+
+/* ── CHART CARDS ───────────────────────────────────────────── */
+.chart-card{background:var(--bg-c);border:1px solid var(--bdr);border-radius:11px;padding:16px}
+.chart-ttl{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt-d);margin-bottom:14px}
+
+/* ── ACTION BTNS ───────────────────────────────────────────── */
+.act-btn{display:flex;align-items:center;gap:9px;padding:12px 15px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid transparent;text-decoration:none;color:inherit;font-family:'Noto Sans',sans-serif}
+.act-prim{background:var(--red);color:#fff;border-color:var(--red)}
+.act-prim:hover{background:#c9313e;box-shadow:0 4px 20px var(--red-g);transform:translateY(-1px)}
+.act-sec{background:var(--bg-c);border-color:var(--bdr);color:var(--txt-s)}
+.act-sec:hover{background:var(--bg-ch);color:var(--txt)}
+
+/* ── TIMELINE SCRUBBER ─────────────────────────────────────── */
+#timelinePanel{
+  position:fixed;bottom:0;left:0;right:380px;
+  background:rgba(11,18,32,.95);backdrop-filter:blur(16px);
+  border-top:1px solid var(--bdr);padding:14px 22px;
+  z-index:600;display:none;
+}
+@media(max-width:1023px){#timelinePanel{right:0}}
+#timelinePanel.open{display:block}
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tl-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
+.tl-controls{display:flex;align-items:center;gap:8px}
+.tl-btn{width:28px;height:28px;border-radius:6px;background:var(--bg-c);border:1px solid var(--bdr);color:var(--txt-s);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s}
+.tl-btn:hover{background:var(--bg-ch);color:var(--txt)}
+.tl-btn.playing{background:var(--cyan-g);border-color:var(--cyan);color:var(--cyan)}
+.tl-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txt-s);min-width:100px;text-align:center}
+.tl-slider-wrap{position:relative;padding:0 4px}
+input[type=range].tl-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--bdr);outline:none;cursor:pointer}
+input[type=range].tl-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--cyan);border:2px solid var(--bg-p);box-shadow:0 0 8px var(--cyan-g);cursor:pointer;transition:transform .1s}
+input[type=range].tl-slider::-webkit-slider-thumb:active{transform:scale(1.3)}
+.tl-speed{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d);background:var(--bg-c);border:1px solid var(--bdr);border-radius:4px;padding:2px 6px;cursor:pointer}
+.tl-progress{height:3px;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:2px;margin-top:6px;transition:width .4s linear}
+
+/* ── COMMAND PALETTE ───────────────────────────────────────── */
+#cmdPalette{position:fixed;inset:0;z-index:8000;display:none;align-items:flex-start;justify-content:center;padding-top:80px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px)}
+#cmdPalette.open{display:flex}
+.cmd-box{width:100%;max-width:580px;background:var(--bg-p);border:1px solid var(--bdr-l);border-radius:14px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.8)}
+.cmd-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bdr)}
+.cmd-input-wrap i{color:var(--txt-d);font-size:14px;flex-shrink:0}
+#cmdInput{flex:1;background:transparent;border:none;outline:none;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--txt);caret-color:var(--cyan)}
+#cmdInput::placeholder{color:var(--txt-d)}
+.cmd-shortcut{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d);padding:2px 6px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:4px;flex-shrink:0}
+#cmdResults{max-height:380px;overflow-y:auto}
+#cmdResults::-webkit-scrollbar{width:3px}
+#cmdResults::-webkit-scrollbar-thumb{background:var(--bdr-l)}
+.cmd-section{padding:8px 16px 4px;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-d)}
+.cmd-result{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .1s}
+.cmd-result:hover,.cmd-result.selected{background:var(--bg-ch)}
+.cmd-result-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.cmd-result-main{flex:1;min-width:0}
+.cmd-result-title{font-size:12px;color:var(--txt);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd-result-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)}
+.cmd-result-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.cmd-empty{padding:36px 16px;text-align:center;color:var(--txt-d);font-size:12px}
+.cmd-footer{padding:8px 16px;border-top:1px solid var(--bdr);display:flex;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)}
+.cmd-hint{display:flex;align-items:center;gap:5px}
+
+/* ── ANNOTATION TOOLBAR ────────────────────────────────────── */
+#annotBar{
+  position:fixed;left:14px;top:50%;transform:translateY(-50%);
+  background:rgba(11,18,32,.95);backdrop-filter:blur(16px);
+  border:1px solid var(--bdr);border-radius:12px;
+  padding:8px 6px;display:none;flex-direction:column;gap:6px;
+  z-index:600;
+}
+#annotBar.open{display:flex}
+.ann-btn{width:36px;height:36px;border-radius:8px;background:transparent;border:1px solid transparent;color:var(--txt-s);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;position:relative}
+.ann-btn:hover{background:var(--bg-ch);color:var(--txt);border-color:var(--bdr)}
+.ann-btn.active{background:var(--cyan-g);border-color:var(--cyan);color:var(--cyan)}
+.ann-sep{height:1px;background:var(--bdr);margin:2px 0}
+.ann-tooltip{position:absolute;left:calc(100% + 9px);top:50%;transform:translateY(-50%);background:var(--bg-p);border:1px solid var(--bdr-l);border-radius:6px;padding:4px 9px;font-size:10px;color:var(--txt);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;font-family:'Noto Sans',sans-serif}
+.ann-btn:hover .ann-tooltip{opacity:1}
+
+/* ── MINI MAP ──────────────────────────────────────────────── */
+#miniMapWrap{
+  position:fixed;bottom:18px;left:14px;
+  width:180px;height:130px;
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--bdr-l);
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  z-index:600;display:none;
+  cursor:move;
+}
+#miniMapWrap.open{display:block}
+#miniMap{width:100%;height:100%}
+.mini-overlay{
+  position:absolute;inset:0;
+  border:2px solid rgba(14,165,233,.4);
+  border-radius:9px;pointer-events:none;
+  box-shadow:inset 0 0 20px rgba(14,165,233,.06);
+}
+.mini-label{
+  position:absolute;top:5px;left:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  color:var(--neon-cyn);text-transform:uppercase;letter-spacing:.1em;
+  text-shadow:0 0 6px var(--neon-cyn);
+}
+
+/* ── MODALS ────────────────────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:3000;padding:16px}
+.modal-bg.active{display:flex}
+.modal-box{background:var(--bg-p);border:1px solid var(--bdr-l);border-radius:16px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.8)}
+.modal-box::-webkit-scrollbar{width:3px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--bdr-l)}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 0;margin-bottom:16px}
+.modal-ttl{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em}
+.modal-body{padding:0 20px 20px}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--bg-c);border:1px solid var(--bdr);color:var(--txt-s);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:12px}
+.modal-close:hover{color:var(--txt);background:var(--bg-ch)}
+
+/* ── FORM ──────────────────────────────────────────────────── */
+.f-lbl{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-d);margin-bottom:5px}
+.f-inp,.f-sel{width:100%;padding:9px 11px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:7px;color:var(--txt);font-size:12px;font-family:'Noto Sans',sans-serif;transition:border-color .15s}
+.f-inp:focus,.f-sel:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-g)}
+.f-sel option{background:var(--bg-c)}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+/* ── BADGES ────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.b-red{background:rgba(230,57,70,.14);color:#f87171;border:1px solid rgba(230,57,70,.28)}
+.b-orange{background:rgba(249,115,22,.1);color:#fb923c;border:1px solid rgba(249,115,22,.22)}
+.b-yellow{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.b-blue{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.b-green{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.b-gray{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.18)}
+.b-purple{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.2)}
+
+/* ── DETAIL GRID ───────────────────────────────────────────── */
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.det-k{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt-d);margin-bottom:2px}
+.det-v{font-size:11px;color:var(--txt);font-family:'IBM Plex Mono',monospace}
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+#toastHost{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:7px;z-index:9000;pointer-events:none}
+.toast{padding:8px 15px;border-radius:8px;font-size:11px;font-weight:500;color:#fff;animation:toastIn .2s ease;box-shadow:0 6px 24px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
+@keyframes toastIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RADIUS BANNER ─────────────────────────────────────────── */
+#radiusBanner{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(14,165,233,.9);backdrop-filter:blur(8px);color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:500;z-index:700;display:none;pointer-events:auto;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#radiusBanner .cancel{margin-left:10px;background:rgba(255,255,255,.2);border:none;border-radius:4px;color:#fff;padding:2px 8px;cursor:pointer;font-size:10px}
+
+/* ── PULSING RING ANIMATIONS ───────────────────────────────── */
+@keyframes urgentRing{
+  0%{box-shadow:0 0 0 0 rgba(230,57,70,.9),0 3px 10px rgba(0,0,0,.5)}
+  70%{box-shadow:0 0 0 16px rgba(230,57,70,0),0 3px 10px rgba(0,0,0,.5)}
+  100%{box-shadow:0 0 0 0 rgba(230,57,70,0),0 3px 10px rgba(0,0,0,.5)}
+}
+@keyframes neonGlow{
+  0%,100%{filter:drop-shadow(0 0 4px currentColor)}
+  50%{filter:drop-shadow(0 0 12px currentColor)}
+}
+.m-urgent{animation:urgentRing 2s ease-in-out infinite}
+.m-neon{animation:neonGlow 2.5s ease-in-out infinite}
+
+/* ── FULLSCREEN MODE ───────────────────────────────────────── */
+body.fullscreen #topbar{display:none}
+body.fullscreen #sidepanel{display:none}
+body.fullscreen #timelinePanel{right:0}
+body.fullscreen #annotBar{display:none!important}
+body.fullscreen #miniMapWrap{display:none!important}
+#fsHUD{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:12px;
+  background:rgba(5,8,15,.88);backdrop-filter:blur(16px);
+  border:1px solid var(--bdr);border-radius:24px;
+  padding:7px 18px;z-index:700;
+}
+body.fullscreen #fsHUD{display:flex}
+.hud-stat{display:flex;align-items:center;gap:6px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600}
+.hud-sep{width:1px;height:16px;background:var(--bdr)}
+#fsExitBtn{position:fixed;top:14px;right:14px;z-index:700;display:none}
+body.fullscreen #fsExitBtn{display:block}
+
+/* ── LEAFLET POPUP THEME ───────────────────────────────────── */
+.leaflet-popup-content-wrapper{background:var(--bg-p)!important;border:1px solid var(--bdr-l)!important;border-radius:10px!important;box-shadow:0 14px 48px rgba(0,0,0,.7)!important;color:var(--txt)!important}
+.leaflet-popup-tip{background:var(--bg-p)!important}
+.leaflet-popup-close-button{color:var(--txt-s)!important;top:8px!important;right:8px!important}
+.pop{font-family:'Noto Sans',sans-serif;min-width:200px}
+.pop-ttl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
+.pop-row{font-size:10px;color:var(--txt-s);margin-bottom:2px}
+.pop-row strong{color:var(--txt)}
+.pop-cta{display:block;width:100%;margin-top:9px;padding:7px;background:var(--cyan);color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;transition:background .15s}
+.pop-cta:hover{background:#0284c7}
+.pop-sv{display:block;width:100%;margin-top:5px;padding:6px;background:var(--bg-c);border:1px solid var(--bdr);color:var(--txt-s);border-radius:6px;font-size:10px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center}
+.pop-sv:hover{background:var(--bg-ch);color:var(--txt)}
+
+/* ── CLUSTER OVERRIDE ──────────────────────────────────────── */
+.marker-cluster-small{background-color:rgba(14,165,233,.16)}
+.marker-cluster-small div{background-color:rgba(14,165,233,.5);color:#fff}
+.marker-cluster-medium{background-color:rgba(245,158,11,.16)}
+.marker-cluster-medium div{background-color:rgba(245,158,11,.5);color:#fff}
+.marker-cluster-large{background-color:rgba(230,57,70,.16)}
+.marker-cluster-large div{background-color:rgba(230,57,70,.5);color:#fff}
+.marker-cluster div{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px}
+
+/* ── ANNOTATION PIN NOTE ───────────────────────────────────── */
+.ann-note-form{display:flex;flex-direction:column;gap:8px;padding:10px}
+.ann-note-input{background:var(--bg-c);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:11px;padding:6px 9px;font-family:'Noto Sans',sans-serif;resize:none;outline:none}
+.ann-note-input:focus{border-color:var(--cyan)}
+.ann-save{padding:5px 12px;background:var(--cyan);border:none;border-radius:5px;color:#fff;font-size:10px;font-weight:600;cursor:pointer}
+
+/* ── CIRCLE CINEMATIC ─────────────────────────────────────────── */
+@keyframes spoke-draw {
+  from { stroke-dashoffset: var(--spoke-len); opacity: 0; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+.circle-spoke {
+  stroke: #8b5cf6;
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0;
+  stroke-linecap: round;
+}
+@keyframes circle-node-in {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.5); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.circle-node {
+  animation: circle-node-in 0.45s cubic-bezier(.22,1,.36,1) both;
+}
+#circleAnimSvg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 642;
+  overflow: visible;
+}
+
+/* ── ZONE CINEMATIC ───────────────────────────────────────────── */
+.zone-dim  { opacity: 0.06 !important; pointer-events: none !important; transition: opacity .4s; }
+
+@keyframes zone-ping {
+  0%   { transform: scale(0.3); opacity: 0; filter: brightness(4) saturate(3); }
+  45%  { transform: scale(1.55); opacity: 1; filter: brightness(2); }
+  100% { transform: scale(1);   opacity: 1; filter: none; }
+}
+.zone-ping { animation: zone-ping 0.7s cubic-bezier(.22,1,.36,1) both; }
+
+/* Stop button */
+#zoneStopBtn {
+  display: none;
+  position: fixed;
+  top: 72px; right: 16px;
+  z-index: 2000;
+  background: rgba(230,57,70,.92);
+  border: 1px solid rgba(230,57,70,.5);
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(230,57,70,.4);
+  transition: all .15s;
+}
+#zoneStopBtn:hover { background: rgba(230,57,70,1); transform: translateY(-1px); }
+
+/* Phase label */
+#zonePhaseLabel {
+  display: none;
+  position: fixed;
+  bottom: 52px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: rgba(5,8,15,.88);
+  border: 1px solid rgba(14,165,233,.25);
+  border-radius: 24px;
+  color: #e2e8f0;
+  padding: 9px 22px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.6);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Progress bar under phase label */
+#zoneProgressBar {
+  display: none;
+  position: fixed;
+  bottom: 46px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 1999;
+  width: 220px;
+  height: 2px;
+  background: rgba(14,165,233,.15);
+  border-radius: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+#zoneProgressFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+  border-radius: 2px;
+  transition: width .3s ease;
+}
+</style>
+</head>
+<body>
+
+<!-- ── RADAR INTRO ──────────────────────────────────────────── -->
+<div id="radarIntro">
+  <canvas id="radarCanvas" width="280" height="280"></canvas>
+  <div class="intro-brand">FLUG INTEL</div>
+  <div class="intro-sub">Crime Intelligence Operations — East Africa</div>
+</div>
+
+<!-- ── SCANLINES ────────────────────────────────────────────── -->
+<div id="scanlines"></div>
+
+<!-- ── ZONE CINEMATIC UI ────────────────────────────────────── -->
+<button id="zoneStopBtn" onclick="stopZoneSequence()">
+  <i class="fas fa-stop-circle" style="margin-right:6px"></i>STOP SEQUENCE
+</button>
+<div id="zonePhaseLabel"></div>
+<div id="zoneProgressBar"><div id="zoneProgressFill"></div></div>
+
+<!-- ── MAP ──────────────────────────────────────────────────── -->
+<div id="crimeMap">
+  <svg id="circleAnimSvg" style="display:none"></svg>
+</div>
+
+<!-- ── FULLSCREEN HUD ───────────────────────────────────────── -->
+<div id="fsHUD">
+  <div class="hud-stat"><span style="color:var(--cyan)">⬡</span><span id="hudTotal" style="color:var(--cyan)">0</span><span style="font-size:10px;color:var(--txt-s)">SCENES</span></div>
+  <div class="hud-sep"></div>
+  <div class="hud-stat"><span style="color:var(--red)">▲</span><span id="hudUrgent" style="color:var(--red)">0</span><span style="font-size:10px;color:var(--txt-s)">URGENT</span></div>
+  <div class="hud-sep"></div>
+  <div class="hud-stat"><span style="color:var(--green)">✓</span><span id="hudPolice" style="color:var(--green)">0</span><span style="font-size:10px;color:var(--txt-s)">REPORTED</span></div>
+  <div class="hud-sep"></div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)" id="hudTime">—</div>
+</div>
+<button id="fsExitBtn" class="tb-btn" onclick="exitFullscreen()"><i class="fas fa-compress"></i> <span class="tb-lbl">Exit Fullscreen</span></button>
+
+<!-- ── TOPBAR ────────────────────────────────────────────────── -->
+<header id="topbar">
+  <div class="brand">
+    <div class="brand-shield"><i class="fas fa-shield-alt"></i></div>
+    FLUG<span class="brand-accent">INTEL</span>
+    <span class="brand-ver">v3.0</span>
+  </div>
+  <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+  <span class="tb-sp"></span>
+
+  <button class="tb-btn panel-mob" onclick="togglePanel()"><i class="fas fa-layer-group"></i></button>
+  <div class="tb-sep"></div>
+
+  <!-- Cmd+K -->
+  <button class="tb-btn" onclick="openCmd()" title="Command palette">
+    <i class="fas fa-terminal"></i>
+    <span class="tb-lbl">Search</span>
+    <span class="kbd" style="margin-left:3px">⌘K</span>
+  </button>
+
+  <!-- Locate -->
+  <button class="tb-btn" onclick="locateMe()" title="Find my location"><i class="fas fa-crosshairs"></i></button>
+
+  <!-- Radius -->
+  <button id="btnRadius" class="tb-btn" onclick="toggleRadius()" title="Proximity search"><i class="fas fa-circle-notch"></i><span class="tb-lbl">Radius</span></button>
+
+  <!-- Annotate -->
+  <button id="btnAnnot" class="tb-btn" onclick="toggleAnnot()" title="Annotation tools"><i class="fas fa-draw-polygon"></i><span class="tb-lbl">Annotate</span></button>
+
+  <!-- Timeline -->
+  <button id="btnTimeline" class="tb-btn" onclick="toggleTimeline()" title="Incident timeline replay"><i class="fas fa-film"></i><span class="tb-lbl">Replay</span></button>
+
+  <!-- Mini-map -->
+  <button id="btnMinimap" class="tb-btn" onclick="toggleMiniMap()" title="Mini-map"><i class="fas fa-map"></i></button>
+
+  <!-- Fullscreen -->
+  <button class="tb-btn" onclick="enterFullscreen()" title="Presentation mode"><i class="fas fa-expand"></i></button>
+
+  <!-- Theme toggle -->
+  <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode">
+    <i class="fas fa-sun icon-dark"></i>
+    <i class="fas fa-moon icon-light"></i>
+  </button>
+
+  <div class="tb-sep"></div>
+
+  <!-- Tile switcher -->
+  <div class="drop-wrap">
+    <button class="tb-btn" onclick="toggleDrop('tileDrop')">
+      <i class="fas fa-layer-group"></i>
+      <span class="tb-lbl" id="tileLabel">Street</span>
+      <i class="fas fa-chevron-down" style="font-size:8px;opacity:.5"></i>
+    </button>
+    <div id="tileDrop" class="drop-menu">
+      <div class="drop-item active" onclick="switchTile('street')"><i class="fas fa-road"></i> Street</div>
+      <div class="drop-item" onclick="switchTile('dark')"><i class="fas fa-moon"></i> Dark</div>
+      <div class="drop-item" onclick="switchTile('satellite')"><i class="fas fa-satellite"></i> Satellite</div>
+      <div class="drop-item" onclick="switchTile('topo')"><i class="fas fa-mountain"></i> Terrain</div>
+    </div>
+  </div>
+
+  <!-- Export -->
+  <div class="drop-wrap">
+    <button class="tb-btn" onclick="toggleDrop('exportDrop')"><i class="fas fa-download"></i><span class="tb-lbl">Export</span><i class="fas fa-chevron-down" style="font-size:8px;opacity:.5"></i></button>
+    <div id="exportDrop" class="drop-menu">
+      <div class="drop-item" onclick="exportMap('json');closeDrops()"><i class="fas fa-file-code"></i> JSON</div>
+      <div class="drop-item" onclick="exportMap('csv');closeDrops()"><i class="fas fa-file-csv"></i> CSV</div>
+      <div class="drop-item" onclick="snapMap();closeDrops()"><i class="fas fa-camera"></i> Snapshot PNG</div>
+      <div class="drop-item" onclick="printReport();closeDrops()"><i class="fas fa-print"></i> Print Report</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <button class="tb-btn danger" onclick="openFilter()"><i class="fas fa-filter"></i><span class="tb-lbl">Filters</span></button>
+
+  <a href="/evidence/dashboard" class="tb-btn" style="text-decoration:none"><i class="fas fa-th-large"></i></a>
+</header>
+
+<!-- ── ANNOTATION TOOLBAR ─────────────────────────────────── -->
+<div id="annotBar">
+  <button class="ann-btn" id="annPin" onclick="setAnnotTool('pin')" title="">
+    <i class="fas fa-map-pin"></i>
+    <span class="ann-tooltip">Drop Pin</span>
+  </button>
+  <button class="ann-btn" id="annZone" onclick="setAnnotTool('zone')" title="">
+    <i class="fas fa-draw-polygon"></i>
+    <span class="ann-tooltip">Draw Zone</span>
+  </button>
+  <button class="ann-btn" id="annLine" onclick="setAnnotTool('line')" title="">
+    <i class="fas fa-route"></i>
+    <span class="ann-tooltip">Draw Route</span>
+  </button>
+  <button class="ann-btn" id="annCircle" onclick="setAnnotTool('circle')" title="">
+    <i class="fas fa-circle"></i>
+    <span class="ann-tooltip">Draw Radius</span>
+  </button>
+  <div class="ann-sep"></div>
+  <button class="ann-btn" onclick="clearAnnotations()" title="">
+    <i class="fas fa-trash-alt" style="color:var(--red)"></i>
+    <span class="ann-tooltip">Clear All</span>
+  </button>
+  <div class="ann-sep"></div>
+  <button class="ann-btn" onclick="toggleAnnot()" title="">
+    <i class="fas fa-times"></i>
+    <span class="ann-tooltip">Close</span>
+  </button>
+</div>
+
+<!-- ── MINI MAP ───────────────────────────────────────────── -->
+<div id="miniMapWrap">
+  <div id="miniMap"></div>
+  <div class="mini-overlay"></div>
+  <div class="mini-label">OVERVIEW</div>
+</div>
+
+<!-- ── SIDEPANEL ─────────────────────────────────────────── -->
+<aside id="sidepanel">
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('overview')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>Map
+    </button>
+    <button class="tab-btn" onclick="switchTab('analytics')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Intel
+    </button>
+    <button class="tab-btn" onclick="switchTab('feed')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M4 6h16M4 10h16M4 14h10"/></svg>Feed
+    </button>
+    <button class="tab-btn" onclick="switchTab('linked')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>Links
+    </button>
+  </nav>
+
+  <!-- MAP TAB -->
+  <div id="tab-overview" class="tab-panel active">
+    <div class="stat-grid">
+      <div class="stat-card c-cyan">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>
+        </div>
+        <div class="stat-num" id="statTotal">{{ total_evidence }}</div>
+        <div class="stat-lbl">Total Scenes</div>
+      </div>
+      <div class="stat-card c-red">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(220,38,38,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <span style="font-size:8px;font-family:var(--mono);color:#f87171;background:rgba(220,38,38,0.1);padding:1px 6px;border-radius:20px;font-weight:700;letter-spacing:0.06em">URGENT</span>
+        </div>
+        <div class="stat-num" style="color:var(--red)" id="statUrgent">{{ urgent_count }}</div>
+        <div class="stat-lbl">Urgent (Red)</div>
+      </div>
+      <div class="stat-card c-grn">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <span style="font-size:8px;font-family:var(--mono);color:#4ade80;background:rgba(34,197,94,0.1);padding:1px 6px;border-radius:20px;font-weight:700;letter-spacing:0.06em">FILED</span>
+        </div>
+        <div class="stat-num" style="color:var(--green)" id="statPolice">{{ reported_count }}</div>
+        <div class="stat-lbl">Police Reports</div>
+      </div>
+      <div class="stat-card c-amb">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </div>
+          <span style="font-size:8px;font-family:var(--mono);color:#fbbf24;background:rgba(245,158,11,0.1);padding:1px 6px;border-radius:20px;font-weight:700;letter-spacing:0.06em">LIVE</span>
+        </div>
+        <div class="stat-num" style="color:var(--amber)" id="statVisible">—</div>
+        <div class="stat-lbl">Visible Now</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:-1px"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Map Layers
+      </div>
+      <div class="layer-grid">
+        <button id="lyrMarkers"  class="layer-btn active" onclick="toggleMarkers()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Markers</button>
+        <button id="lyrClusters" class="layer-btn" onclick="toggleClusters()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><circle cx="12" cy="12" r="3"/><path d="M6.343 6.343a8 8 0 000 11.314m11.314 0a8 8 0 000-11.314"/></svg>Clusters</button>
+        <button id="lyrHeat"     class="layer-btn" onclick="toggleHeatmap()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>Heatmap</button>
+        <button id="lyrHotspot"  class="layer-btn" onclick="toggleHotspots()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M11 3.055A9.001 9.001 0 0120.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>Hotspots</button>
+        <button id="lyrLinks"    class="layer-btn" onclick="toggleLinkedLines()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>Links</button>
+        <button id="lyrNeon"     class="layer-btn" onclick="toggleNeonMode()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Neon Mode</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:-1px"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>By County
+      </div>
+      <div id="countyList"></div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:-1px"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Quick Actions
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="/evidence/upload" class="act-btn act-prim"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-1px"><path d="M12 4v16m8-8H4"/></svg>Report New Incident</a>
+        <button class="act-btn act-sec" onclick="toggleTimeline()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-1px"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Timeline Replay</button>
+        <button class="act-btn act-sec" onclick="shareMap()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-1px"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>Share Map Link</button>
+      </div>
+    </div>
+
+    <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)">
+      <span style="font-size:9px;color:var(--text-3);font-family:var(--mono)">SYNC <span id="lastRefreshed">—</span></span>
+      <a href="https://www.openstreetmap.org/copyright" target="_blank" style="font-size:9px;color:var(--text-3);font-family:var(--mono);text-decoration:none">© OSM</a>
+    </div>
+  </div>
+
+  <!-- INTEL / ANALYTICS TAB -->
+  <div id="tab-analytics" class="tab-panel">
+    <div class="chart-card">
+      <div class="chart-ttl"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin-right:6px"></span>Incident Types<span style="margin-left:auto;font-size:9px;letter-spacing:0.1em;color:var(--text-3)">LIVE</span></div>
+      <div style="position:relative;height:190px;display:flex;align-items:center;justify-content:center"><canvas id="chartTypes"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl"><span style="width:6px;height:6px;border-radius:50%;background:var(--orange);display:inline-block;margin-right:6px"></span>Emergency Levels</div>
+      <canvas id="chartLevels" height="130"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl"><span style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:6px"></span>Time of Day</div>
+      <canvas id="chartHour" height="180"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px"></span>Monthly Trend</div>
+      <canvas id="chartTimeline" height="140"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl"><span style="width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block;margin-right:6px"></span>Case Status</div>
+      <div style="position:relative;height:180px;display:flex;align-items:center;justify-content:center"><canvas id="chartStatus"></canvas></div>
+    </div>
+  </div>
+
+  <!-- LIVE FEED TAB -->
+  <div id="tab-feed" class="tab-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-1);letter-spacing:-0.01em">Live Activity</div>
+        <div style="font-size:10px;color:var(--text-3);font-family:var(--mono);margin-top:1px">Real-time incident feed</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:20px">
+          <div style="width:5px;height:5px;border-radius:50%;background:#22c55e"></div>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.08em">LIVE</span>
+        </div>
+        <button onclick="refreshFeed()" class="flug-icon-btn" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="liveFeed" style="display:flex;flex-direction:column;gap:2px">
+      <div style="text-align:center;padding:40px 0;color:var(--text-3)"><i class="fas fa-satellite-dish" style="font-size:22px;display:block;margin-bottom:8px"></i><div style="font-size:10px">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- LINKED CASES TAB -->
+  <div id="tab-linked" class="tab-panel">
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--text-1);letter-spacing:-0.01em">Case Networks</div>
+      <div style="font-size:10px;color:var(--text-3);font-family:var(--mono);margin-top:1px">Connected crimes · matching targets &amp; patterns</div>
+    </div>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;margin-bottom:12px" id="linkedHint">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,0.1);display:flex;align-items:center;justify-content:center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:3px">Enable Link Layer</div>
+        <div style="font-size:10px;color:var(--text-3);line-height:1.5">Activate the <strong style="color:var(--text-2)">Links</strong> layer to visualize connected case networks</div>
+      </div>
+      <button onclick="toggleLinkedLines()" class="act-btn act-prim" style="width:100%;justify-content:center">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-1px"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+        Activate Links Layer
+      </button>
+    </div>
+    <div id="linkedList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+</aside>
+
+<!-- ── TIMELINE PANEL ────────────────────────────────────────── -->
+<div id="timelinePanel">
+  <div class="tl-header">
+    <div class="tl-title"><i class="fas fa-film" style="margin-right:6px"></i>Incident Timeline Replay</div>
+    <div class="tl-controls">
+      <button class="tl-btn" onclick="tlStepBack()" title="Step back"><i class="fas fa-step-backward"></i></button>
+      <button id="tlPlayBtn" class="tl-btn" onclick="tlTogglePlay()" title="Play/Pause"><i class="fas fa-play"></i></button>
+      <button class="tl-btn" onclick="tlStepFwd()" title="Step forward"><i class="fas fa-step-forward"></i></button>
+      <div class="tl-date" id="tlDate">—</div>
+      <select class="tl-speed" id="tlSpeed" onchange="tlUpdateSpeed()">
+        <option value="800">0.5×</option>
+        <option value="400" selected>1×</option>
+        <option value="200">2×</option>
+        <option value="80">5×</option>
+      </select>
+      <button class="tl-btn" onclick="closeTimeline()" title="Close"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+  <input type="range" class="tl-slider" id="tlSlider" min="0" value="0" step="1" oninput="tlSeek(this.value)">
+  <div style="display:flex;justify-content:space-between;margin-top:4px">
+    <span id="tlDateMin" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)">—</span>
+    <span id="tlCount" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--cyan)">0 / 0</span>
+    <span id="tlDateMax" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt-d)">—</span>
+  </div>
+</div>
+
+<!-- ── COMMAND PALETTE ───────────────────────────────────────── -->
+<div id="cmdPalette">
+  <div class="cmd-box">
+    <div class="cmd-input-wrap">
+      <i class="fas fa-terminal"></i>
+      <input type="text" id="cmdInput" placeholder="Search cases, counties, jump to case number…" autocomplete="off">
+      <span class="cmd-shortcut">ESC</span>
+    </div>
+    <div id="cmdResults"></div>
+    <div class="cmd-footer">
+      <span class="cmd-hint"><span class="kbd">↑↓</span> navigate</span>
+      <span class="cmd-hint"><span class="kbd">↵</span> jump to</span>
+      <span class="cmd-hint"><span class="kbd">ESC</span> close</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── RADIUS BANNER ──────────────────────────────────────────── -->
+<div id="radiusBanner">
+  <i class="fas fa-circle-notch" style="margin-right:6px"></i>Click map to find incidents within 5 km
+  <button class="cancel" onclick="toggleRadius()">Cancel</button>
+</div>
+
+<!-- ── FILTER MODAL ───────────────────────────────────────────── -->
+<div id="filterModal" class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-ttl"><i class="fas fa-filter" style="color:var(--cyan);margin-right:8px"></i>Map Filters</div>
+      <button class="modal-close" onclick="closeFilter()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="mapFilterForm" style="display:flex;flex-direction:column;gap:13px">
+        <div><label class="f-lbl">Search</label><input type="text" name="q" value="{{ search_query }}" class="f-inp" placeholder="Title, case #, county…"></div>
+        <div><label class="f-lbl">County</label><select name="county" class="f-sel">{{{ county_options }}}</select></div>
+        <div class="f-row">
+          <div><label class="f-lbl">Emergency</label><select name="emergency_level" class="f-sel">{{{ emergency_options }}}</select></div>
+          <div><label class="f-lbl">Type</label><select name="incident_type" class="f-sel">{{{ incident_options }}}</select></div>
+        </div>
+        <div><label class="f-lbl">Status</label><select name="status" class="f-sel">{{{ status_options }}}</select></div>
+        <div class="f-row">
+          <div><label class="f-lbl">Date From</label><input type="date" name="date_from" value="{{ date_from }}" class="f-inp"></div>
+          <div><label class="f-lbl">Date To</label><input type="date" name="date_to" value="{{ date_to }}" class="f-inp"></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt-s);cursor:pointer"><input type="checkbox" name="police_only" style="accent-color:var(--cyan)"> Show police-reported only</label>
+        <div style="display:flex;gap:9px;padding-top:10px;border-top:1px solid var(--bdr)">
+          <button type="button" onclick="window.location.href='/maps/dashboard'" style="flex:1;padding:9px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:7px;color:var(--txt-s);cursor:pointer;font-size:11px"><i class="fas fa-redo" style="margin-right:4px"></i>Reset</button>
+          <button type="submit" style="flex:2;padding:9px;background:var(--cyan);border:none;border-radius:7px;color:#fff;cursor:pointer;font-size:11px;font-weight:600"><i class="fas fa-filter" style="margin-right:4px"></i>Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── EVIDENCE MODAL ─────────────────────────────────────────── -->
+<div id="evidenceModal" class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-ttl" id="modalTitle">Evidence Details</div>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="modalContent"></div>
+      <div style="display:flex;gap:9px;padding-top:14px;border-top:1px solid var(--bdr);margin-top:14px">
+        <button id="viewEvidenceBtn" style="flex:1;padding:10px;background:var(--cyan);border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:11px;font-weight:600"><i class="fas fa-eye" style="margin-right:5px"></i>View Full Evidence</button>
+        <button onclick="closeModal()" style="padding:10px 14px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:8px;color:var(--txt-s);cursor:pointer;font-size:11px">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CIRCLE EVIDENCE MODAL ───────────────────────────────────── -->
+<div id="circleModal" class="modal-bg">
+  <div class="modal-box" style="max-width:600px">
+    <div class="modal-hdr">
+      <div class="modal-ttl" id="circleModalTitle">
+        <i class="fas fa-circle" style="color:var(--purple);margin-right:8px;font-size:13px"></i>
+        Evidence in Area
+      </div>
+      <button class="modal-close" onclick="closeCircleModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Stats bar -->
+      <div id="circleStats" style="display:flex;gap:10px;margin-bottom:14px;padding:12px;background:var(--bg-c);border-radius:10px;border:1px solid var(--bdr)"></div>
+      <!-- Sort & filter bar -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <span style="font-size:10px;color:var(--txt-d);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Sort:</span>
+        <select id="circleSortSel" onchange="renderCircleResults()" style="flex:1;padding:5px 8px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:7px;color:var(--txt);font-size:11px;cursor:pointer">
+          <option value="distance">Nearest First</option>
+          <option value="emergency">Emergency Level</option>
+          <option value="date">Most Recent</option>
+          <option value="type">Incident Type</option>
+        </select>
+        <select id="circleFilterSel" onchange="renderCircleResults()" style="flex:1;padding:5px 8px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:7px;color:var(--txt);font-size:11px;cursor:pointer">
+          <option value="all">All Types</option>
+          <option value="HitAndRun">Hit &amp; Run</option>
+          <option value="Assault">Assault</option>
+          <option value="ThreatToLife">Threat to Life</option>
+          <option value="PropertyDamage">Property Damage</option>
+          <option value="Theft">Theft</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <!-- Results list -->
+      <div id="circleResultsList" style="max-height:420px;overflow-y:auto;padding-right:2px"></div>
+      <!-- Footer actions -->
+      <div style="display:flex;gap:9px;padding-top:14px;border-top:1px solid var(--bdr);margin-top:14px">
+        <button onclick="flyToCircleResults()" style="flex:1;padding:9px;background:var(--cyan);border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:11px;font-weight:600"><i class="fas fa-crosshairs" style="margin-right:5px"></i>Zoom to Area</button>
+        <button onclick="exportCircleResults()" style="flex:1;padding:9px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:8px;color:var(--txt-s);cursor:pointer;font-size:11px"><i class="fas fa-download" style="margin-right:5px"></i>Export CSV</button>
+        <button onclick="closeCircleModal()" style="padding:9px 14px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:8px;color:var(--txt-s);cursor:pointer;font-size:11px">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOASTS ─────────────────────────────────────────────────── -->
+<div id="toastHost" role="status" aria-live="polite"></div>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────────── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA & CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const locationsData = {{ locations_json }};
+const BOUNDS = [[-4.9,33.5],[5.0,42.0]];
+const TILES = {
+  street:    {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap',label:'Street'},
+  dark:      {url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attr:'© Carto',label:'Dark'},
+  satellite: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'© Esri',label:'Satellite'},
+  topo:      {url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'© OpenTopoMap',label:'Terrain'}
+};
+const INC = {
+  HitAndRun:      {emoji:'🚗',label:'Hit & Run',color:'#f97316'},
+  Assault:        {emoji:'⚡',label:'Assault',color:'#e63946'},
+  ThreatToLife:   {emoji:'⚠️',label:'Threat to Life',color:'#dc2626'},
+  PropertyDamage: {emoji:'🏠',label:'Property Damage',color:'#8b5cf6'},
+  Theft:          {emoji:'🎒',label:'Theft',color:'#f59e0b'},
+  Other:          {emoji:'📍',label:'Other',color:'#0ea5e9'}
+};
+const ECOL = {red:'#e63946',orange:'#f97316',yellow:'#f59e0b',blue:'#3b82f6'};
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let map, miniMap, tileLayer, miniTile;
+let markerLayer, clusterGroup, heatLayer, hotspotLayer, linkLayer, annotLayer, radiusLayer;
+let drawControl, drawHandler = null;
+let allMarkers = [];
+let chartsReady = false;
+let proximityMode = false;
+let neonMode = false;
+let showLinks = false;
+const lyrState = {markers:true,clusters:false,heat:false,hotspot:false};
+
+// Timeline state
+let tlSorted = [], tlIndex = 0, tlTimer = null, tlPlaying = false, tlSpeed = 400;
+
+// Command palette state
+let cmdSelectedIndex = -1;
+
+// ═══════════════════════════════════════════════════════════
+//  RADAR INTRO
+// ═══════════════════════════════════════════════════════════
+function runRadarIntro() {
+  const canvas = document.getElementById('radarCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 140, cy = 140, r = 120;
+  let angle = 0;
+
+  // Draw once: static rings
+  function drawBase() {
+    ctx.clearRect(0,0,280,280);
+    ctx.strokeStyle = 'rgba(0,212,255,0.15)';
+    ctx.lineWidth = 1;
+    [30,60,90,120].forEach(rad => {
+      ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.stroke();
+    });
+    // Crosshairs
+    ctx.strokeStyle = 'rgba(0,212,255,0.08)';
+    ctx.beginPath(); ctx.moveTo(cx-r,cy); ctx.lineTo(cx+r,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,cy-r); ctx.lineTo(cx,cy+r); ctx.stroke();
+  }
+
+  // Blips for each location, placed proportionally
+  const blips = locationsData.slice(0,20).map((loc,i) => ({
+    x: cx + (Math.random()-.5) * r * 1.6,
+    y: cy + (Math.random()-.5) * r * 1.6,
+    col: ECOL[loc.emergency_level] || ECOL.blue,
+    lit: false,
+    angle: (i / Math.max(locationsData.length,1)) * Math.PI * 2
+  }));
+
+  function draw() {
+    drawBase();
+    // Sweep
+    const grad = ctx.createConicalGradient ? null : null;
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(angle);
+    const sweep = ctx.createLinearGradient(0,0,r,0);
+    sweep.addColorStop(0,'rgba(0,212,255,0.5)');
+    sweep.addColorStop(1,'rgba(0,212,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,r,-0.4,0);
+    ctx.fillStyle=sweep; ctx.fill();
+    ctx.strokeStyle='rgba(0,212,255,0.8)';
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(r,0); ctx.stroke();
+    ctx.restore();
+
+    // Blips
+    blips.forEach(b => {
+      const diff = ((angle % (Math.PI*2)) - b.angle + Math.PI*2) % (Math.PI*2);
+      if (diff < 0.3) b.lit = true;
+      if (!b.lit) return;
+      const fade = Math.max(0, 1 - diff*0.6);
+      ctx.beginPath();
+      ctx.arc(b.x,b.y,4,0,Math.PI*2);
+      ctx.fillStyle = b.col;
+      ctx.globalAlpha = 0.5 + fade*0.5;
+      ctx.fill();
+      ctx.globalAlpha = fade;
+      ctx.beginPath(); ctx.arc(b.x,b.y,7,0,Math.PI*2);
+      ctx.strokeStyle=b.col; ctx.lineWidth=1; ctx.stroke();
+      ctx.globalAlpha=1;
+    });
+
+    angle += 0.05;
+  }
+
+  let frame;
+  function loop() { draw(); frame = requestAnimationFrame(loop); }
+  loop();
+  setTimeout(()=> cancelAnimationFrame(frame), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAP INIT
+// ═══════════════════════════════════════════════════════════
+function initMap() {
+  const center = locationsData.length > 0
+    ? [locationsData[0].latitude, locationsData[0].longitude]
+    : [-1.2921, 36.8219];
+
+  map = L.map('crimeMap', {
+    maxBounds: BOUNDS, maxBoundsViscosity: 0.85,
+    minZoom: 5, zoomControl: false
+  }).setView(center, 7);
+
+  L.control.zoom({position:'bottomleft'}).addTo(map);
+
+  tileLayer = L.tileLayer(TILES.street.url, {attribution:TILES.street.attr,maxZoom:19}).addTo(map);
+
+  markerLayer  = L.layerGroup().addTo(map);
+  clusterGroup = L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:60,spiderfyOnMaxZoom:true,showCoverageOnHover:false});
+  hotspotLayer = L.layerGroup();
+  linkLayer    = L.layerGroup();
+  annotLayer   = L.layerGroup().addTo(map);
+  radiusLayer  = L.layerGroup().addTo(map);
+
+  // Leaflet.draw setup
+  const drawPlugin = new L.Control.Draw({
+    draw:{
+      polygon:{shapeOptions:{color:'#0ea5e9',fillColor:'#0ea5e9',fillOpacity:.08,dashArray:'6 4'}},
+      polyline:{shapeOptions:{color:'#f59e0b',weight:2,dashArray:'6 3'}},
+      circle:{shapeOptions:{color:'#8b5cf6',fillColor:'#8b5cf6',fillOpacity:.07}},
+      marker:false, rectangle:false, circlemarker:false
+    },
+    edit:false
+  });
+  // Don't add control to map — we call handlers manually
+
+  map.on(L.Draw.Event.CREATED, e => {
+    const layer = e.layer;
+    annotLayer.addLayer(layer);
+    if (e.layerType === 'circle') {
+      const center = layer.getLatLng();
+      const radiusM = layer.getRadius();
+      openCircleModal(center, radiusM, layer);
+    } else if (e.layerType === 'polygon') {
+      zoomToZoneEvidence(layer);
+    } else {
+      showToast('Annotation saved','success');
+    }
+  });
+
+  map.on('click', e => {
+    if (proximityMode) doProximitySearch(e.latlng.lat, e.latlng.lng);
+    if (annotTool === 'pin') dropAnnotPin(e.latlng.lat, e.latlng.lng);
+  });
+
+  buildMarkers();
+  fitBounds();
+  updateVisibleCount();
+  map.on('moveend', updateVisibleCount);
+}
+
+function fitBounds() {
+  if (!locationsData.length) { map.fitBounds(BOUNDS,{padding:[50,50]}); return; }
+  const b = L.latLngBounds(locationsData.map(l=>[l.latitude,l.longitude]));
+  map.fitBounds(b,{padding:[80,80],maxZoom:12});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MINI MAP
+// ═══════════════════════════════════════════════════════════
+let miniMapOpen = false;
+function toggleMiniMap() {
+  miniMapOpen = !miniMapOpen;
+  const wrap = document.getElementById('miniMapWrap');
+  wrap.classList.toggle('open', miniMapOpen);
+  document.getElementById('btnMinimap').classList.toggle('active', miniMapOpen);
+  if (miniMapOpen && !miniMap) {
+    miniMap = L.map('miniMap', {zoomControl:false,dragging:false,scrollWheelZoom:false,attributionControl:false,keyboard:false});
+    miniTile = L.tileLayer(TILES.dark.url,{maxZoom:14}).addTo(miniMap);
+    const center = map.getCenter();
+    miniMap.setView(center, 6);
+    // Dot markers on minimap
+    locationsData.forEach(loc => {
+      L.circleMarker([loc.latitude,loc.longitude],{radius:2.5,color:ECOL[loc.emergency_level]||ECOL.blue,fillColor:ECOL[loc.emergency_level]||ECOL.blue,fillOpacity:.9,weight:0}).addTo(miniMap);
+    });
+    // Sync main map view to mini
+    map.on('move', ()=> miniMap.setView(map.getCenter(), Math.max(map.getZoom()-3,4)));
+  }
+}
+
+// Make mini-map draggable
+(function(){
+  let dragging=false,ox=0,oy=0,startL=0,startT=0;
+  document.addEventListener('mousedown',e=>{
+    const w=document.getElementById('miniMapWrap');
+    if(!w||!w.contains(e.target))return;
+    dragging=true;ox=e.clientX;oy=e.clientY;
+    const r=w.getBoundingClientRect();startL=r.left;startT=r.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const w=document.getElementById('miniMapWrap');
+    if(!w)return;
+    w.style.left=(startL+e.clientX-ox)+'px';
+    w.style.bottom='auto';
+    w.style.top=(startT+e.clientY-oy)+'px';
+  });
+  document.addEventListener('mouseup',()=>{dragging=false});
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  MARKERS
+// ═══════════════════════════════════════════════════════════
+function makeIcon(loc, neon=false) {
+  const col = ECOL[loc.emergency_level] || ECOL.blue;
+  const inc = INC[loc.incident_type] || INC.Other;
+  const urgent = loc.emergency_level === 'red';
+  const glow = neon ? `box-shadow:0 0 14px ${col},0 0 28px ${col}40;` : '';
+  return L.divIcon({
+    className:'',
+    html:`<div class="${urgent?'m-urgent':''}" style="
+      width:32px;height:32px;border-radius:50%;
+      background:${col};border:3px solid ${neon?col:'white'};
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;cursor:pointer;${glow}
+    ">${inc.emoji}</div>`,
+    iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-36]
+  });
+}
+
+function buildMarkers() {
+  markerLayer.clearLayers();
+  clusterGroup.clearLayers();
+  allMarkers = [];
+
+  locationsData.forEach(loc => {
+    const marker = L.marker([loc.latitude,loc.longitude],{icon:makeIcon(loc,neonMode)});
+    marker._loc = loc;
+    bindPopup(marker, loc);
+    marker.on('click',()=>showModal(loc.id));
+    markerLayer.addLayer(marker);
+
+    const cm = L.marker([loc.latitude,loc.longitude],{icon:makeIcon(loc,neonMode)});
+    cm.on('click',()=>showModal(loc.id));
+    clusterGroup.addLayer(cm);
+
+    allMarkers.push(marker);
+  });
+}
+
+function bindPopup(marker, loc) {
+  const col = ECOL[loc.emergency_level]||ECOL.blue;
+  const inc = INC[loc.incident_type]||INC.Other;
+  const svUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.latitude},${loc.longitude}&heading=0&pitch=0`;
+  marker.bindPopup(`
+    <div class="pop">
+      <div class="pop-ttl">${escHtml(loc.title)}</div>
+      <div class="pop-row"><strong>Case:</strong> ${loc.evidence_number}</div>
+      <div class="pop-row"><strong>Type:</strong> ${inc.label}</div>
+      <div class="pop-row"><strong>Level:</strong> <span style="color:${col};font-weight:700">${(loc.emergency_level||'').toUpperCase()}</span></div>
+      <div class="pop-row"><strong>County:</strong> ${loc.county}</div>
+      ${loc.reported_to_police?`<div class="pop-row" style="color:#10b981"><i class="fas fa-shield-alt"></i> <strong>Police Reported</strong></div>`:''}
+      <button class="pop-cta" onclick="showModal('${loc.id}')"><i class="fas fa-info-circle"></i> Full Details</button>
+      <a class="pop-sv" href="${svUrl}" target="_blank" rel="noopener"><i class="fas fa-street-view"></i> Street View Recon</a>
+    </div>
+  `,{maxWidth:260});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NEON MODE
+// ═══════════════════════════════════════════════════════════
+function toggleNeonMode() {
+  neonMode = !neonMode;
+  document.getElementById('lyrNeon').classList.toggle('active',neonMode);
+  if (neonMode) {
+    switchTile('dark');
+    showToast('Neon mode: ON — Dark satellite view activated','info');
+  } else {
+    switchTile('street');
+    showToast('Neon mode: OFF','info');
+  }
+  buildMarkers(); // rebuild with neon icons
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LAYER TOGGLES
+// ═══════════════════════════════════════════════════════════
+function toggleMarkers() {
+  lyrState.markers = !lyrState.markers;
+  lyrState.markers ? markerLayer.addTo(map) : map.removeLayer(markerLayer);
+  document.getElementById('lyrMarkers').classList.toggle('active',lyrState.markers);
+}
+function toggleClusters() {
+  lyrState.clusters = !lyrState.clusters;
+  if (lyrState.clusters) {
+    map.removeLayer(markerLayer); lyrState.markers=false;
+    document.getElementById('lyrMarkers').classList.remove('active');
+    clusterGroup.addTo(map);
+  } else {
+    map.removeLayer(clusterGroup);
+    markerLayer.addTo(map); lyrState.markers=true;
+    document.getElementById('lyrMarkers').classList.add('active');
+  }
+  document.getElementById('lyrClusters').classList.toggle('active',lyrState.clusters);
+}
+function toggleHeatmap() {
+  lyrState.heat = !lyrState.heat;
+  if (lyrState.heat) {
+    const pts = locationsData.map(l=>[l.latitude,l.longitude,{red:1,orange:.7,yellow:.4,blue:.2}[l.emergency_level]||.3]);
+    heatLayer = L.heatLayer(pts,{radius:38,blur:28,maxZoom:10,gradient:{0.2:'#3b82f6',0.45:'#f59e0b',0.7:'#f97316',1.0:'#e63946'}}).addTo(map);
+  } else {
+    if (heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  }
+  document.getElementById('lyrHeat').classList.toggle('active',lyrState.heat);
+}
+function toggleHotspots() {
+  lyrState.hotspot = !lyrState.hotspot;
+  if (lyrState.hotspot) buildHotspots();
+  else {hotspotLayer.clearLayers();map.removeLayer(hotspotLayer);}
+  document.getElementById('lyrHotspot').classList.toggle('active',lyrState.hotspot);
+}
+function buildHotspots() {
+  hotspotLayer.clearLayers();
+  if (locationsData.length < 3) {showToast('Not enough data for hotspot analysis','warn');return;}
+  const byCounty = {};
+  locationsData.forEach(l=>{
+    if(!byCounty[l.county])byCounty[l.county]=[];
+    byCounty[l.county].push([l.longitude,l.latitude]);
+  });
+  let n=0;
+  Object.entries(byCounty).forEach(([county,pts])=>{
+    if(pts.length<3)return;
+    try {
+      const hull=turf.convex(turf.featureCollection(pts.map(p=>turf.point(p))));
+      if(!hull)return;
+      const col=pts.length>=10?'#e63946':pts.length>=5?'#f59e0b':'#3b82f6';
+      L.geoJSON(hull,{style:{color:col,fillColor:col,fillOpacity:.06,weight:2,dashArray:'8 4',opacity:.7}})
+       .bindTooltip(`<b style="font-family:'Rajdhani',sans-serif">${escHtml(county)}</b><br><span style="font-size:10px;color:#94a3b8">${pts.length} incidents</span>`,{sticky:true})
+       .addTo(hotspotLayer);
+      n++;
+    } catch(_){}
+  });
+  hotspotLayer.addTo(map);
+  showToast(`${n} hotspot zone${n!==1?'s':''} identified`,'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LINKED CASES LINES
+// ═══════════════════════════════════════════════════════════
+function toggleLinkedLines() {
+  showLinks = !showLinks;
+  document.getElementById('lyrLinks').classList.toggle('active',showLinks);
+  if (showLinks) buildLinkedLines();
+  else {linkLayer.clearLayers();map.removeLayer(linkLayer);}
+}
+function buildLinkedLines() {
+  linkLayer.clearLayers();
+  let lineCount = 0;
+  const idMap = {};
+  locationsData.forEach(l=>idMap[l.id]=l);
+
+  locationsData.forEach(loc => {
+    if (!loc.linked_evidence_ids || !Array.isArray(loc.linked_evidence_ids)) return;
+    loc.linked_evidence_ids.forEach(linkedId => {
+      const other = idMap[linkedId];
+      if (!other || linkedId <= loc.id) return; // dedupe
+      const line = L.polyline([
+        [loc.latitude,loc.longitude],
+        [other.latitude,other.longitude]
+      ],{color:'rgba(139,92,246,0.55)',weight:2,dashArray:'6 4'});
+      // Animate dashes via CSS class won't work natively, but the dashed line signals connection
+      line.bindTooltip(`<span style="font-family:'IBM Plex Mono',monospace;font-size:10px">Linked: ${escHtml(loc.evidence_number)} ↔ ${escHtml(other.evidence_number)}</span>`,{sticky:true});
+      linkLayer.addLayer(line);
+      lineCount++;
+    });
+  });
+
+  if (lineCount === 0) {
+    // Show sample connections for demo when no real links exist
+    const pairs = locationsData.slice(0, Math.min(10, locationsData.length));
+    for (let i = 0; i < pairs.length - 1; i += 2) {
+      L.polyline([[pairs[i].latitude,pairs[i].longitude],[pairs[i+1].latitude,pairs[i+1].longitude]],
+        {color:'rgba(139,92,246,0.4)',weight:2,dashArray:'5 5',opacity:.7}).addTo(linkLayer);
+    }
+    showToast(`${Math.floor(pairs.length/2)} sample case connections shown`,'info');
+  } else {
+    showToast(`${lineCount} linked case connection${lineCount!==1?'s':''} drawn`,'success');
+  }
+
+  linkLayer.addTo(map);
+  populateLinkedTab();
+}
+
+function populateLinkedTab() {
+  const el = document.getElementById('linkedList');
+  const linked = locationsData.filter(l=>l.linked_evidence_ids?.length>0);
+  if (!linked.length) {
+    el.innerHTML=`<div style="text-align:center;padding:30px 0;color:var(--txt-d);font-size:10px"><i class="fas fa-check-circle" style="font-size:22px;display:block;margin-bottom:8px;color:var(--green)"></i>No cross-linked cases in current dataset</div>`;
+    return;
+  }
+  el.innerHTML = linked.slice(0,15).map(loc=>`
+    <div class="feed-item" onclick="showModal('${loc.id}')">
+      <div class="feed-dot" style="background:${ECOL[loc.emergency_level]||ECOL.blue}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="feed-title">${escHtml(loc.title)}</div>
+        <div class="feed-meta">${loc.evidence_number} · ${loc.linked_evidence_ids.length} connection${loc.linked_evidence_ids.length!==1?'s':''}</div>
+      </div>
+      <span class="badge b-purple"><i class="fas fa-project-diagram"></i></span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ANNOTATION TOOLS
+// ═══════════════════════════════════════════════════════════
+let annotTool = null;
+let annotOpen = false;
+
+function toggleAnnot() {
+  annotOpen = !annotOpen;
+  document.getElementById('annotBar').classList.toggle('open',annotOpen);
+  document.getElementById('btnAnnot').classList.toggle('active',annotOpen);
+  if (!annotOpen) { setAnnotTool(null); }
+}
+
+function setAnnotTool(tool) {
+  // Deactivate current draw handler
+  if (drawHandler) { try{drawHandler.disable();}catch(_){} drawHandler=null; }
+  if (annotTool === tool) { annotTool=null; document.querySelectorAll('.ann-btn').forEach(b=>b.classList.remove('active')); return; }
+  annotTool = tool;
+  document.querySelectorAll('.ann-btn').forEach(b=>b.classList.remove('active'));
+  const btnMap={pin:'annPin',zone:'annZone',line:'annLine',circle:'annCircle'};
+  if (btnMap[tool]) document.getElementById(btnMap[tool])?.classList.add('active');
+
+  const drawOpts = {
+    zone:   new L.Draw.Polygon(map,{shapeOptions:{color:'#0ea5e9',fillColor:'#0ea5e9',fillOpacity:.1,dashArray:'6 4'}}),
+    line:   new L.Draw.Polyline(map,{shapeOptions:{color:'#f59e0b',weight:2}}),
+    circle: new L.Draw.Circle(map,{shapeOptions:{color:'#8b5cf6',fillColor:'#8b5cf6',fillOpacity:.08}})
+  };
+  if (drawOpts[tool]) { drawHandler = drawOpts[tool]; drawHandler.enable(); showToast(`Draw ${tool} on the map`, 'info'); }
+  if (tool==='pin') showToast('Click map to drop an annotation pin','info');
+}
+
+function dropAnnotPin(lat,lng) {
+  const icon = L.divIcon({
+    className:'',
+    html:`<div style="font-size:22px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))">📌</div>`,
+    iconSize:[24,24],iconAnchor:[12,24]
+  });
+  const marker = L.marker([lat,lng],{icon});
+  const form=`<div class="ann-note-form"><textarea class="ann-note-input" placeholder="Investigator note…" rows="3" id="annNoteInput"></textarea><button class="ann-save" onclick="saveAnnotNote(this)">Save Note</button></div>`;
+  marker.bindPopup(form,{maxWidth:220}).addTo(annotLayer).openPopup();
+}
+
+function saveAnnotNote(btn) {
+  const txt=document.getElementById('annNoteInput')?.value||'';
+  const m=btn.closest('.leaflet-popup')?.querySelector;
+  showToast('Note saved','success');
+  map.closePopup();
+}
+
+function clearAnnotations() {
+  annotLayer.clearLayers();
+  showToast('Annotations cleared','info');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TIMELINE REPLAY
+// ═══════════════════════════════════════════════════════════
+let timelineOpen = false;
+
+function toggleTimeline() {
+  timelineOpen = !timelineOpen;
+  const panel = document.getElementById('timelinePanel');
+  panel.classList.toggle('open',timelineOpen);
+  document.getElementById('btnTimeline').classList.toggle('active',timelineOpen);
+  if (timelineOpen) initTimeline();
+  else { tlStop(); map.removeLayer(markerLayer); markerLayer.addTo(map); }
+}
+
+function closeTimeline() {
+  timelineOpen=false;
+  document.getElementById('timelinePanel').classList.remove('open');
+  document.getElementById('btnTimeline').classList.remove('active');
+  tlStop();
+  // Restore all markers
+  markerLayer.clearLayers();
+  allMarkers.forEach(m=>markerLayer.addLayer(m));
+}
+
+function initTimeline() {
+  tlSorted = [...locationsData]
+    .filter(l=>l.incident_time)
+    .sort((a,b)=>new Date(a.incident_time)-new Date(b.incident_time));
+  if (!tlSorted.length){showToast('No dated incidents for replay','warn');return;}
+  tlIndex=0;
+  const slider=document.getElementById('tlSlider');
+  slider.max=tlSorted.length-1; slider.value=0;
+  document.getElementById('tlDateMin').textContent=fmtDate(tlSorted[0].incident_time);
+  document.getElementById('tlDateMax').textContent=fmtDate(tlSorted[tlSorted.length-1].incident_time);
+  tlRender();
+  showToast(`Timeline ready — ${tlSorted.length} incidents to replay`,'info');
+}
+
+function tlRender() {
+  markerLayer.clearLayers();
+  const visible = tlSorted.slice(0,tlIndex+1);
+  visible.forEach(loc=>{
+    const m=L.marker([loc.latitude,loc.longitude],{icon:makeIcon(loc,neonMode)});
+    m.on('click',()=>showModal(loc.id));
+    markerLayer.addLayer(m);
+  });
+  const cur = tlSorted[tlIndex];
+  document.getElementById('tlDate').textContent = fmtDate(cur.incident_time);
+  document.getElementById('tlCount').textContent = `${tlIndex+1} / ${tlSorted.length}`;
+  document.getElementById('tlSlider').value = tlIndex;
+  map.flyTo([cur.latitude,cur.longitude],Math.max(map.getZoom(),9),{duration:.4});
+}
+
+function tlTogglePlay() {
+  tlPlaying ? tlStop() : tlPlay();
+}
+function tlPlay() {
+  tlPlaying=true;
+  document.getElementById('tlPlayBtn').innerHTML='<i class="fas fa-pause"></i>';
+  document.getElementById('tlPlayBtn').classList.add('playing');
+  tlTimer=setInterval(()=>{
+    if(tlIndex>=tlSorted.length-1){tlStop();return;}
+    tlIndex++; tlRender();
+  },tlSpeed);
+}
+function tlStop() {
+  tlPlaying=false;
+  clearInterval(tlTimer);
+  document.getElementById('tlPlayBtn').innerHTML='<i class="fas fa-play"></i>';
+  document.getElementById('tlPlayBtn').classList.remove('playing');
+}
+function tlStepFwd(){tlStop();if(tlIndex<tlSorted.length-1){tlIndex++;tlRender();}}
+function tlStepBack(){tlStop();if(tlIndex>0){tlIndex--;tlRender();}}
+function tlSeek(val){tlStop();tlIndex=parseInt(val);if(tlSorted.length)tlRender();}
+function tlUpdateSpeed(){tlSpeed=parseInt(document.getElementById('tlSpeed').value);if(tlPlaying){tlStop();tlPlay();}}
+
+// ═══════════════════════════════════════════════════════════
+//  COMMAND PALETTE
+// ═══════════════════════════════════════════════════════════
+function openCmd() {
+  document.getElementById('cmdPalette').classList.add('open');
+  document.getElementById('cmdInput').value='';
+  renderCmdResults('');
+  setTimeout(()=>document.getElementById('cmdInput').focus(),50);
+}
+function closeCmd() {
+  document.getElementById('cmdPalette').classList.remove('open');
+  cmdSelectedIndex=-1;
+}
+
+let cmdResultEls=[];
+function renderCmdResults(q) {
+  const res=document.getElementById('cmdResults');
+  q=q.trim().toLowerCase();
+  cmdSelectedIndex=-1;
+
+  // Actions
+  const actions=[
+    {icon:'🔥',label:'Toggle Heatmap',sub:'Layer Control',fn:()=>{toggleHeatmap();closeCmd();}},
+    {icon:'🔵',label:'Toggle Clusters',sub:'Layer Control',fn:()=>{toggleClusters();closeCmd();}},
+    {icon:'🔺',label:'Toggle Hotspots',sub:'Layer Control',fn:()=>{toggleHotspots();closeCmd();}},
+    {icon:'🔗',label:'Toggle Linked Lines',sub:'Layer Control',fn:()=>{toggleLinkedLines();closeCmd();}},
+    {icon:'💡',label:'Neon Mode',sub:'Visual',fn:()=>{toggleNeonMode();closeCmd();}},
+    {icon:'🎬',label:'Timeline Replay',sub:'Tactical',fn:()=>{toggleTimeline();closeCmd();}},
+    {icon:'📍',label:'Locate Me',sub:'Navigation',fn:()=>{locateMe();closeCmd();}},
+    {icon:'⭕',label:'Radius Search',sub:'Tactical',fn:()=>{toggleRadius();closeCmd();}},
+    {icon:'✏️',label:'Annotation Tools',sub:'Investigator',fn:()=>{toggleAnnot();closeCmd();}},
+    {icon:'📸',label:'Snapshot PNG',sub:'Export',fn:()=>{snapMap();closeCmd();}},
+    {icon:'📊',label:'View Analytics',sub:'Tab',fn:()=>{switchTab('analytics');closeCmd();}},
+    {icon:'🗂️',label:'New Evidence Report',sub:'Action',fn:()=>{window.location.href='/evidence/upload';}},
+  ];
+
+  const matchedActs = q ? actions.filter(a=>a.label.toLowerCase().includes(q)||a.sub.toLowerCase().includes(q)) : actions;
+  const matchedLocs = locationsData.filter(l=>
+    !q || l.title?.toLowerCase().includes(q) ||
+          l.evidence_number?.toLowerCase().includes(q) ||
+          l.county?.toLowerCase().includes(q) ||
+          (INC[l.incident_type]?.label||'').toLowerCase().includes(q)
+  ).slice(0,8);
+
+  let html='';
+  if (matchedActs.length) {
+    html+=`<div class="cmd-section">Actions</div>`;
+    html+=matchedActs.slice(0,6).map((a,i)=>`
+      <div class="cmd-result" data-idx="${i}" onclick="cmdActions[${i}].fn()">
+        <div class="cmd-result-icon" style="background:rgba(14,165,233,.1);font-size:16px">${a.icon}</div>
+        <div class="cmd-result-main"><div class="cmd-result-title">${a.label}</div><div class="cmd-result-sub">${a.sub}</div></div>
+      </div>`).join('');
+    window._cmdActions=matchedActs;
+  }
+  if (matchedLocs.length) {
+    const offset=matchedActs.slice(0,6).length;
+    html+=`<div class="cmd-section">Incidents (${matchedLocs.length})</div>`;
+    html+=matchedLocs.map((l,i)=>{
+      const col=ECOL[l.emergency_level]||ECOL.blue;
+      const inc=INC[l.incident_type]||INC.Other;
+      const lvlBadge={red:'b-red',orange:'b-orange',yellow:'b-yellow',blue:'b-blue'}[l.emergency_level]||'b-gray';
+      return `<div class="cmd-result" data-locid="${l.id}" onclick="cmdJump('${l.id}')">
+        <div class="cmd-result-icon" style="background:${col}22;font-size:16px">${inc.emoji}</div>
+        <div class="cmd-result-main">
+          <div class="cmd-result-title">${escHtml(l.title)}</div>
+          <div class="cmd-result-sub">${l.evidence_number} · ${l.county}</div>
+        </div>
+        <span class="cmd-result-badge badge ${lvlBadge}">${(l.emergency_level||'').toUpperCase()}</span>
+      </div>`;
+    }).join('');
+  }
+  if (!matchedActs.length && !matchedLocs.length) {
+    html=`<div class="cmd-empty"><i class="fas fa-search" style="font-size:20px;display:block;margin-bottom:8px;color:var(--txt-d)"></i>No results for "<strong>${escHtml(q)}</strong>"</div>`;
+  }
+  res.innerHTML=html;
+  cmdResultEls=[...res.querySelectorAll('.cmd-result')];
+}
+
+function cmdJump(id) {
+  closeCmd();
+  showModal(id);
+}
+
+document.getElementById('cmdInput').addEventListener('input',e=>renderCmdResults(e.target.value));
+document.getElementById('cmdInput').addEventListener('keydown',e=>{
+  const els=cmdResultEls;
+  if(e.key==='ArrowDown'){e.preventDefault();cmdSelectedIndex=Math.min(cmdSelectedIndex+1,els.length-1);els.forEach((el,i)=>el.classList.toggle('selected',i===cmdSelectedIndex));}
+  else if(e.key==='ArrowUp'){e.preventDefault();cmdSelectedIndex=Math.max(cmdSelectedIndex-1,0);els.forEach((el,i)=>el.classList.toggle('selected',i===cmdSelectedIndex));}
+  else if(e.key==='Enter'&&cmdSelectedIndex>=0){els[cmdSelectedIndex]?.click();}
+  else if(e.key==='Escape'){closeCmd();}
+});
+document.getElementById('cmdPalette').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCmd();});
+
+// ═══════════════════════════════════════════════════════════
+//  TILE SWITCHER
+// ═══════════════════════════════════════════════════════════
+function switchTile(name) {
+  if(tileLayer)map.removeLayer(tileLayer);
+  const cfg=TILES[name]||TILES.street;
+  tileLayer=L.tileLayer(cfg.url,{attribution:cfg.attr,maxZoom:19}).addTo(map);
+  document.getElementById('tileLabel').textContent=cfg.label;
+  document.querySelectorAll('#tileDrop .drop-item').forEach((el,i)=>el.classList.toggle('active',Object.keys(TILES)[i]===name));
+  if(miniMap&&miniTile){miniMap.removeLayer(miniTile);miniTile=L.tileLayer(cfg.url,{maxZoom:14}).addTo(miniMap);}
+  closeDrops();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DROP MENUS
+// ═══════════════════════════════════════════════════════════
+function toggleDrop(id){
+  const el=document.getElementById(id);
+  const wasOpen=el.classList.contains('open');
+  closeDrops();
+  if(!wasOpen)el.classList.add('open');
+}
+function closeDrops(){document.querySelectorAll('.drop-menu').forEach(d=>d.classList.remove('open'));}
+document.addEventListener('click',e=>{if(!e.target.closest('.drop-wrap'))closeDrops();});
+
+// ═══════════════════════════════════════════════════════════
+//  LOCATE ME
+// ═══════════════════════════════════════════════════════════
+function locateMe() {
+  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
+  showToast('Acquiring location…','info');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    map.flyTo([lat,lng],14,{duration:1.5});
+    L.circleMarker([lat,lng],{radius:9,color:'#0ea5e9',fillColor:'#0ea5e9',fillOpacity:.2,weight:2}).addTo(map)
+      .bindPopup('<div class="pop">📍 <strong>Your location</strong></div>').openPopup();
+    showToast('Location acquired','success');
+  },()=>showToast('Location unavailable — check browser permissions','error'));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PROXIMITY SEARCH
+// ═══════════════════════════════════════════════════════════
+function toggleRadius() {
+  proximityMode=!proximityMode;
+  document.getElementById('radiusBanner').style.display=proximityMode?'block':'none';
+  document.getElementById('btnRadius').classList.toggle('active',proximityMode);
+  if(!proximityMode)radiusLayer.clearLayers();
+}
+function doProximitySearch(lat,lng,km=5) {
+  radiusLayer.clearLayers();
+  L.circle([lat,lng],{radius:km*1000,color:'#0ea5e9',fillColor:'#0ea5e9',fillOpacity:.04,weight:2,dashArray:'7 4'}).addTo(radiusLayer);
+  L.circleMarker([lat,lng],{radius:5,color:'#0ea5e9',fillColor:'#0ea5e9',fillOpacity:.9,weight:2}).addTo(radiusLayer);
+  const center=turf.point([lng,lat]);
+  const nearby=locationsData.filter(l=>turf.distance(center,turf.point([l.longitude,l.latitude]),{units:'kilometers'})<=km);
+  showToast(`${nearby.length} incident${nearby.length!==1?'s':''} within ${km} km`,nearby.length?'success':'warn');
+  proximityMode=false;
+  document.getElementById('radiusBanner').style.display='none';
+  document.getElementById('btnRadius').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FULLSCREEN / PRESENTATION MODE
+// ═══════════════════════════════════════════════════════════
+function enterFullscreen() {
+  document.body.classList.add('fullscreen');
+  document.getElementById('hudTotal').textContent=document.getElementById('statTotal').textContent;
+  document.getElementById('hudUrgent').textContent=document.getElementById('statUrgent').textContent;
+  document.getElementById('hudPolice').textContent=document.getElementById('statPolice').textContent;
+  updateHudTime();
+  map.invalidateSize();
+  showToast('Presentation mode — Press ESC or click Exit to leave','info');
+}
+function exitFullscreen() {
+  document.body.classList.remove('fullscreen');
+  map.invalidateSize();
+}
+function updateHudTime(){
+  const el=document.getElementById('hudTime');
+  if(el)el.textContent=new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateHudTime,1000);
+
+// ═══════════════════════════════════════════════════════════
+//  EVIDENCE MODAL
+// ═══════════════════════════════════════════════════════════
+function showModal(id) {
+  const loc=locationsData.find(l=>l.id===id);
+  if(!loc)return;
+  const col=ECOL[loc.emergency_level]||ECOL.blue;
+  const inc=INC[loc.incident_type]||INC.Other;
+  const lvlBadge={red:'b-red',orange:'b-orange',yellow:'b-yellow',blue:'b-blue'}[loc.emergency_level]||'b-gray';
+  const statBadge={draft:'b-gray',submitted:'b-blue',reported:'b-green',under_review:'b-orange',archived:'b-gray',rejected:'b-red'}[loc.status]||'b-gray';
+  const svUrl=`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.latitude},${loc.longitude}&heading=0&pitch=0`;
+
+  document.getElementById('modalTitle').textContent=loc.evidence_number;
+  document.getElementById('modalContent').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:20px">${inc.emoji}</span>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;flex:1;color:var(--txt)">${escHtml(loc.title)}</span>
+      <span class="badge ${lvlBadge}">${(loc.emergency_level||'').toUpperCase()}</span>
+      <span class="badge ${statBadge}">${loc.status||'—'}</span>
+    </div>
+    <div class="det-grid">
+      <div><div class="det-k">Incident Type</div><div class="det-v">${inc.label}</div></div>
+      <div><div class="det-k">County</div><div class="det-v">${loc.county||'—'}</div></div>
+      <div><div class="det-k">Incident Time</div><div class="det-v" style="font-size:10px">${fmtDate(loc.incident_time)}</div></div>
+      <div><div class="det-k">Reported By</div><div class="det-v" style="font-size:10px">${escHtml(loc.uploader_email||'—')}</div></div>
+      <div><div class="det-k">Coordinates</div><div class="det-v" style="font-size:9px">${loc.latitude?.toFixed(5)}, ${loc.longitude?.toFixed(5)}</div></div>
+      <div><div class="det-k">Media Files</div><div class="det-v">${loc.media_count??0} file${loc.media_count!==1?'s':''}</div></div>
+    </div>
+    ${loc.reported_to_police?`
+      <div style="padding:10px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;margin-top:6px">
+        <div style="display:flex;align-items:center;gap:8px;color:#10b981">
+          <i class="fas fa-shield-alt"></i>
+          <div><div style="font-weight:600;font-size:11px">Reported to Police</div><div style="font-size:9px;opacity:.8;font-family:'IBM Plex Mono',monospace">Case ID: ${loc.police_case_id||'Pending'}</div></div>
+        </div>
+      </div>`:`
+      <div style="padding:10px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:8px;margin-top:6px">
+        <div style="display:flex;align-items:center;gap:7px;color:#f59e0b;font-size:11px"><i class="fas fa-exclamation-triangle"></i>Not yet reported to police</div>
+      </div>`}
+    ${loc.needs_attention?`<div style="padding:9px;background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.2);border-radius:8px;margin-top:6px"><div style="color:#f87171;font-size:10px"><i class="fas fa-bell" style="margin-right:6px"></i><strong>Needs Attention</strong></div></div>`:''}
+    <a href="${svUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;background:var(--bg-c);border:1px solid var(--bdr);border-radius:8px;color:var(--txt-s);text-decoration:none;font-size:11px;transition:all .15s" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt-s)'">
+      <i class="fas fa-street-view" style="color:var(--cyan)"></i> Open Street View for Scene Reconnaissance
+      <i class="fas fa-external-link-alt" style="margin-left:auto;font-size:9px"></i>
+    </a>
+  `;
+  document.getElementById('viewEvidenceBtn').onclick=()=>{window.location.href=loc.view_url||`/evidence/view/${loc.id}`;};
+  document.getElementById('evidenceModal').classList.add('active');
+  document.body.style.overflow='hidden';
+  map.flyTo([loc.latitude,loc.longitude],Math.max(map.getZoom(),12),{duration:0.8});
+}
+function closeModal(){document.getElementById('evidenceModal').classList.remove('active');document.body.style.overflow='';}
+function closeFilter(){document.getElementById('filterModal').classList.remove('active');document.body.style.overflow='';}
+function openFilter(){document.getElementById('filterModal').classList.add('active');document.body.style.overflow='hidden';}
+
+// ═══════════════════════════════════════════════════════════
+//  CIRCLE DRAW → CINEMATIC ANIMATION → MODAL
+// ═══════════════════════════════════════════════════════════
+let _circleData    = [];
+let _circleLatlng  = null;
+let _circleRadiusM = 0;
+let _circleLayer   = null;
+let _circleAnimActive  = false;
+let _circleSpotCanvas  = null;
+let _circleRadarCanvas = null;
+let _circleRadarFrame  = null;
+
+// ── Haversine ──────────────────────────────────────────────
+function haversineM(lat1,lng1,lat2,lng2) {
+  const R=6371000, r=Math.PI/180;
+  const dLat=(lat2-lat1)*r, dLng=(lng2-lng1)*r;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ── Entry: run animation then open modal ───────────────────
+function openCircleModal(center, radiusM, layer) {
+  _circleLatlng  = center;
+  _circleRadiusM = radiusM;
+  _circleLayer   = layer;
+  _circleAnimActive = true;
+
+  // Classify evidence
+  _circleData = locationsData
+    .map(loc => ({ loc, distM: haversineM(center.lat, center.lng, loc.latitude, loc.longitude) }))
+    .filter(d => d.distM <= radiusM);
+
+  if (_circleData.length === 0) {
+    showToast('No evidence found in this area','warn');
+    return;
+  }
+
+  // Ghost outside markers
+  allMarkers.forEach(m => {
+    const inside = _circleData.some(d => d.loc.id === m._loc.id);
+    const el = m.getElement();
+    if (el) {
+      if (!inside) el.classList.add('zone-dim');
+      else { el.style.opacity='0'; el.style.transition='opacity .2s'; }
+    }
+  });
+
+  // Show stop button (purple theme)
+  const stopBtn = document.getElementById('zoneStopBtn');
+  stopBtn.style.display = 'block';
+  stopBtn.style.background = 'rgba(139,92,246,.92)';
+  stopBtn.style.boxShadow = '0 4px 20px rgba(139,92,246,.4)';
+  stopBtn.onclick = () => stopCircleAnim(true);
+
+  // Fit to circle bounds then begin
+  map.fitBounds(layer.getBounds(), { padding:[80,80], maxZoom:14, animate:true });
+  map.once('moveend', () => setTimeout(() => {
+    circlePhase1_Spotlight(center, radiusM, () => {
+      circlePhase2_Radar(center, radiusM, () => {
+        circlePhase3_Spokes(center, () => {
+          stopCircleAnim(false);
+          _openCircleModalUI();
+        });
+      });
+    });
+  }, 300));
+}
+
+// ── Phase 1: Circle spotlight ──────────────────────────────
+function circlePhase1_Spotlight(center, radiusM, done) {
+  if (!_circleAnimActive) return;
+  setZonePhase('🔮  Isolating radius…', 0);
+
+  const container = document.getElementById('crimeMap');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:640;';
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  container.appendChild(canvas);
+  _circleSpotCanvas = canvas;
+
+  const ctx = canvas.getContext('2d');
+  const cp  = map.latLngToContainerPoint(center);
+
+  // Compute screen radius: take a point on the circle edge
+  const edgePt = map.latLngToContainerPoint(
+    L.latLng(center.lat + (radiusM/111320), center.lng)
+  );
+  const screenR = Math.hypot(edgePt.x - cp.x, edgePt.y - cp.y);
+
+  let alpha = 0;
+  let pulse = 0;
+  function draw() {
+    if (!_circleAnimActive) return;
+    alpha = Math.min(alpha + 0.028, 0.88);
+    pulse += 0.08;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dark veil outside circle
+    ctx.save();
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cp.x, cp.y, screenR, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    // Pulsing purple glow ring (multiple rings)
+    [0, 8, 18].forEach((offset, i) => {
+      const r = screenR + offset + Math.sin(pulse + i) * 3;
+      const a = (0.9 - i*0.28) * alpha;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cp.x, cp.y, r, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(139,92,246,${a})`;
+      ctx.lineWidth = i === 0 ? 2.5 : 1;
+      ctx.shadowColor = '#8b5cf6';
+      ctx.shadowBlur = 20 - i*5;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    setZonePhase('🔮  Isolating radius…', Math.round(alpha / 0.88 * 100));
+    if (alpha < 0.88) requestAnimationFrame(draw);
+    else { setZonePhase('🔮  Radius isolated', 100); setTimeout(done, 400); }
+  }
+  requestAnimationFrame(draw);
+}
+
+// ── Phase 2: Radar sweep inside circle ────────────────────
+function circlePhase2_Radar(center, radiusM, done) {
+  if (!_circleAnimActive) return;
+  setZonePhase('📡  Scanning for evidence…', 0);
+
+  const container = document.getElementById('crimeMap');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:641;';
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  container.appendChild(canvas);
+  _circleRadarCanvas = canvas;
+
+  const ctx = canvas.getContext('2d');
+  const cp  = map.latLngToContainerPoint(center);
+  const edgePt = map.latLngToContainerPoint(
+    L.latLng(center.lat + (radiusM/111320), center.lng)
+  );
+  const maxR = Math.hypot(edgePt.x - cp.x, edgePt.y - cp.y);
+
+  const START_NORM = 270;
+  const markerData = _circleData.map(({loc}) => {
+    const px = map.latLngToContainerPoint([loc.latitude, loc.longitude]);
+    let angle = Math.atan2(px.y - cp.y, px.x - cp.x) * 180 / Math.PI;
+    if (angle < 0) angle += 360;
+    const revealAt = (angle - START_NORM + 360) % 360;
+    return { loc, px, revealAt, revealed: false };
+  });
+
+  let progress = 0, speed = 1.3, revealed = 0;
+
+  function ripple(x, y) {
+    let r = 12, a = 0.9;
+    function step() {
+      if (!_circleRadarCanvas) return;
+      r += 2.2; a -= 0.05;
+      if (a <= 0) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(139,92,246,${a})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function sweep() {
+    if (!_circleAnimActive) { canvas.remove(); _circleRadarCanvas=null; return; }
+    progress += speed;
+    const norm = (START_NORM + progress) % 360;
+    const rad  = (norm - 90) * Math.PI / 180;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Clip everything to the circle so sweep stays inside
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cp.x, cp.y, maxR, 0, Math.PI*2);
+    ctx.clip();
+
+    // Trailing purple glow sector
+    const TRAIL = 60;
+    for (let i = 0; i <= TRAIL; i += 1.5) {
+      const a = (1 - i/TRAIL) * 0.25;
+      const ang = ((norm - i) - 90) * Math.PI / 180;
+      ctx.beginPath();
+      ctx.moveTo(cp.x, cp.y);
+      ctx.arc(cp.x, cp.y, maxR, ang, ang + 1.8*Math.PI/180);
+      ctx.lineTo(cp.x, cp.y);
+      ctx.fillStyle = `rgba(139,92,246,${a})`;
+      ctx.fill();
+    }
+
+    // Sweep line
+    ctx.beginPath();
+    ctx.moveTo(cp.x, cp.y);
+    ctx.lineTo(cp.x + Math.cos(rad)*maxR, cp.y + Math.sin(rad)*maxR);
+    ctx.strokeStyle = 'rgba(139,92,246,0.95)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#8b5cf6';
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+
+    // Concentric rings
+    [maxR*0.33, maxR*0.66, maxR].forEach(r => {
+      ctx.beginPath();
+      ctx.arc(cp.x, cp.y, r, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(139,92,246,0.1)';
+      ctx.lineWidth = 1;
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    // Center dot
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cp.x, cp.y, 4, 0, Math.PI*2);
+    ctx.fillStyle='#8b5cf6'; ctx.shadowColor='#8b5cf6'; ctx.shadowBlur=14; ctx.fill();
+    ctx.restore();
+
+    // Reveal markers
+    markerData.forEach(md => {
+      if (!md.revealed && progress >= md.revealAt) {
+        md.revealed = true; revealed++;
+        const el = allMarkers.find(m => m._loc.id === md.loc.id)?.getElement();
+        if (el) {
+          el.style.opacity = '1';
+          el.classList.add('zone-ping');
+          setTimeout(() => el.classList.remove('zone-ping'), 800);
+        }
+        ripple(md.px.x, md.px.y);
+      }
+    });
+
+    setZonePhase(`📡  Scanning… ${revealed}/${_circleData.length} found`, Math.min(Math.round(progress/360*100),100));
+
+    if (progress < 360) {
+      _circleRadarFrame = requestAnimationFrame(sweep);
+    } else {
+      _circleData.forEach(({loc}) => {
+        const el = allMarkers.find(m=>m._loc.id===loc.id)?.getElement();
+        if (el) el.style.opacity='1';
+      });
+      setZonePhase(`📡  ${_circleData.length} incident${_circleData.length!==1?'s':''} detected`,100);
+      setTimeout(() => { canvas.remove(); _circleRadarCanvas=null; done(); }, 600);
+    }
+  }
+  _circleRadarFrame = requestAnimationFrame(sweep);
+}
+
+// ── Phase 3: Radial spokes from center to each marker ─────
+function circlePhase3_Spokes(center, done) {
+  if (!_circleAnimActive || _circleData.length === 0) { setTimeout(done,300); return; }
+  setZonePhase('🕸️  Drawing connections…', 0);
+
+  const svg = document.getElementById('circleAnimSvg');
+  svg.innerHTML = '';
+  svg.style.display = 'block';
+  const cp = map.latLngToContainerPoint(center);
+
+  // Sort by distance for nice staggered reveal
+  const sorted = [..._circleData].sort((a,b) => a.distM - b.distM);
+  let drawn = 0;
+
+  sorted.forEach(({loc, distM}, i) => {
+    const col = ECOL[loc.emergency_level] || ECOL.blue;
+    setTimeout(() => {
+      if (!_circleAnimActive) return;
+      const px = map.latLngToContainerPoint([loc.latitude, loc.longitude]);
+      const len = Math.hypot(px.x - cp.x, px.y - cp.y);
+
+      // Spoke line
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', cp.x); line.setAttribute('y1', cp.y);
+      line.setAttribute('x2', px.x); line.setAttribute('y2', px.y);
+      line.setAttribute('stroke', col);
+      line.setAttribute('stroke-width', '1.5');
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('stroke-dasharray', len);
+      line.setAttribute('stroke-dashoffset', len);
+      line.style.opacity = '0.7';
+      line.style.transition = `stroke-dashoffset 0.55s ease ${i*0.02}s, opacity 0.3s`;
+      svg.appendChild(line);
+      setTimeout(() => { line.style.strokeDashoffset = '0'; }, 20);
+
+      // Terminal node circle at marker location
+      const node = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      node.setAttribute('cx', px.x); node.setAttribute('cy', px.y);
+      node.setAttribute('r', '5');
+      node.setAttribute('fill', col);
+      node.setAttribute('opacity','0');
+      node.style.filter = `drop-shadow(0 0 5px ${col})`;
+      svg.appendChild(node);
+      setTimeout(() => {
+        node.setAttribute('opacity','0.9');
+        node.style.transition = 'opacity 0.3s';
+      }, 520);
+
+      // Distance label along the spoke (midpoint)
+      const mx = (cp.x + px.x)/2, my = (cp.y + px.y)/2;
+      const distStr = distM < 1000 ? `${Math.round(distM)}m` : `${(distM/1000).toFixed(1)}km`;
+      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x', mx); text.setAttribute('y', my - 6);
+      text.setAttribute('fill', '#a78bfa');
+      text.setAttribute('font-size', '9');
+      text.setAttribute('font-family', "'IBM Plex Mono', monospace");
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('opacity','0');
+      text.textContent = distStr;
+      svg.appendChild(text);
+      setTimeout(() => { text.setAttribute('opacity','0.75'); text.style.transition='opacity 0.4s'; }, 560);
+
+      drawn++;
+      setZonePhase(`🕸️  ${drawn}/${sorted.length} spokes drawn`, Math.round(drawn/sorted.length*100));
+
+      if (drawn === sorted.length) {
+        setZonePhase(`🕸️  ${drawn} connection${drawn!==1?'s':''} mapped`, 100);
+        setTimeout(done, 1000);
+      }
+    }, i * 90);
+  });
+}
+
+// ── Cleanup circle animation artifacts ────────────────────
+function stopCircleAnim(clearMarkers) {
+  _circleAnimActive = false;
+  if (_circleRadarFrame)  { cancelAnimationFrame(_circleRadarFrame); _circleRadarFrame=null; }
+  if (_circleSpotCanvas)  { _circleSpotCanvas.remove(); _circleSpotCanvas=null; }
+  if (_circleRadarCanvas) { _circleRadarCanvas.remove(); _circleRadarCanvas=null; }
+
+  const svg = document.getElementById('circleAnimSvg');
+  if (svg) { svg.innerHTML=''; svg.style.display='none'; }
+
+  if (clearMarkers) {
+    allMarkers.forEach(m => {
+      const el = m.getElement();
+      if (el) { el.classList.remove('zone-dim','zone-ping'); el.style.opacity=''; el.style.transition=''; }
+    });
+  }
+
+  const stopBtn = document.getElementById('zoneStopBtn');
+  stopBtn.style.display = 'none';
+  stopBtn.style.background = '';
+  stopBtn.style.boxShadow  = '';
+  stopBtn.onclick = () => stopZoneSequence();
+  document.getElementById('zonePhaseLabel').style.display  = 'none';
+  document.getElementById('zoneProgressBar').style.display = 'none';
+  document.getElementById('zoneProgressFill').style.width  = '0%';
+}
+
+// ── Build + open the modal UI (no animation) ──────────────
+function _openCircleModalUI() {
+  const km = (_circleRadiusM/1000).toFixed(2);
+  document.getElementById('circleModalTitle').innerHTML =
+    `<i class="fas fa-circle" style="color:var(--purple);margin-right:8px;font-size:13px"></i>
+     ${_circleData.length} Evidence within ${km} km`;
+
+  const counts = {red:0,orange:0,yellow:0,blue:0};
+  _circleData.forEach(d => { if(counts[d.loc.emergency_level]!==undefined) counts[d.loc.emergency_level]++; });
+  document.getElementById('circleStats').innerHTML = [
+    {label:'Red',    color:'#f87171', count:counts.red},
+    {label:'Orange', color:'#fb923c', count:counts.orange},
+    {label:'Yellow', color:'#fbbf24', count:counts.yellow},
+    {label:'Blue',   color:'#60a5fa', count:counts.blue},
+  ].map(s=>`
+    <div style="flex:1;text-align:center;padding:8px 4px;background:var(--bg-p);border-radius:8px;border:1px solid var(--bdr)">
+      <div style="font-size:18px;font-weight:700;color:${s.color};font-family:'Rajdhani',sans-serif">${s.count}</div>
+      <div style="font-size:9px;color:var(--txt-d);font-weight:600;text-transform:uppercase;letter-spacing:.05em">${s.label}</div>
+    </div>`).join('');
+
+  document.getElementById('circleSortSel').value   = 'distance';
+  document.getElementById('circleFilterSel').value = 'all';
+  renderCircleResults();
+
+  document.getElementById('circleModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  showToast(`${_circleData.length} incident${_circleData.length!==1?'s':''} found — select to investigate`,'success');
+}
+
+function renderCircleResults() {
+  const sort   = document.getElementById('circleSortSel').value;
+  const filter = document.getElementById('circleFilterSel').value;
+  const list   = document.getElementById('circleResultsList');
+
+  const emgOrder = { red:0, orange:1, yellow:2, blue:3 };
+
+  let data = filter === 'all'
+    ? [..._circleData]
+    : _circleData.filter(d => d.loc.incident_type === filter);
+
+  if (sort === 'distance') data.sort((a,b) => a.distM - b.distM);
+  else if (sort === 'emergency') data.sort((a,b) => (emgOrder[a.loc.emergency_level]??9) - (emgOrder[b.loc.emergency_level]??9));
+  else if (sort === 'date') data.sort((a,b) => new Date(b.loc.incident_time||0) - new Date(a.loc.incident_time||0));
+  else if (sort === 'type') data.sort((a,b) => (a.loc.incident_type||'').localeCompare(b.loc.incident_type||''));
+
+  if (data.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--txt-d);font-size:11px">
+      <i class="fas fa-search" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4"></i>
+      No evidence matches the selected filter</div>`;
+    return;
+  }
+
+  list.innerHTML = data.map(({loc, distM}) => {
+    const inc = INC[loc.incident_type] || INC.Other;
+    const col = ECOL[loc.emergency_level] || ECOL.blue;
+    const lvlBadge = {red:'b-red',orange:'b-orange',yellow:'b-yellow',blue:'b-blue'}[loc.emergency_level]||'b-gray';
+    const statBadge = {draft:'b-gray',submitted:'b-blue',reported:'b-green',under_review:'b-orange',archived:'b-gray',rejected:'b-red'}[loc.status]||'b-gray';
+    const distStr = distM < 1000 ? `${Math.round(distM)} m` : `${(distM/1000).toFixed(2)} km`;
+    const needs = loc.needs_attention
+      ? `<span style="font-size:9px;color:#f87171;margin-left:4px"><i class="fas fa-bell"></i></span>` : '';
+    return `
+    <div style="display:flex;align-items:flex-start;gap:11px;padding:11px 10px;border-bottom:1px solid var(--bdr);cursor:pointer;border-radius:8px;transition:all .12s"
+         onclick="closeCircleModal();showModal('${escHtml(loc.id)}')"
+         onmouseover="this.style.background='var(--bg-ch)'"
+         onmouseout="this.style.background=''">
+      <!-- Emoji + emergency stripe -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px">
+        <div style="font-size:20px;line-height:1">${inc.emoji}</div>
+        <div style="width:3px;height:28px;border-radius:2px;background:${col}"></div>
+      </div>
+      <!-- Info -->
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${escHtml(loc.title||'Untitled')}</span>
+          ${needs}
+          <span class="badge ${lvlBadge}">${(loc.emergency_level||'').toUpperCase()}</span>
+          <span class="badge ${statBadge}">${loc.status||'—'}</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <span style="font-size:10px;color:var(--txt-d)"><i class="fas fa-map-marker-alt" style="margin-right:3px;color:var(--cyan)"></i>${escHtml(loc.county||'—')}</span>
+          <span style="font-size:10px;color:var(--txt-d)"><i class="fas fa-clock" style="margin-right:3px"></i>${fmtDate(loc.incident_time)}</span>
+          <span style="font-size:10px;color:var(--txt-d)"><i class="fas fa-photo-video" style="margin-right:3px"></i>${loc.media_count??0} file${loc.media_count!==1?'s':''}</span>
+        </div>
+      </div>
+      <!-- Distance badge -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <div style="background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#a78bfa;font-family:'IBM Plex Mono',monospace">${distStr}</div>
+        <div style="font-size:9px;color:var(--txt-d)">${inc.label}</div>
+        <i class="fas fa-chevron-right" style="font-size:9px;color:var(--txt-d);margin-top:2px"></i>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ZONE DRAW → EVIDENCE FOCUS (no modal — pure map zoom)
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+//  ZONE CINEMATIC SEQUENCE
+//  Phase 1 → Spotlight blackout
+//  Phase 2 → Radar sweep reveals markers
+//  Phase 3 → Web of evidence connections
+//  Phase 4 → Cinematic autopilot tour
+// ═══════════════════════════════════════════════════════════
+let _zoneActive      = false;
+let _zoneSpotCanvas  = null;
+let _zoneRadarCanvas = null;
+let _zoneRadarFrame  = null;
+let _zoneWebLines    = [];
+let _zoneTourTimers  = [];
+let _zoneInsideMarkers = [];
+
+// ── Entry point ────────────────────────────────────────────
+function zoomToZoneEvidence(polygonLayer) {
+  if (_zoneActive) stopZoneSequence();
+
+  // Classify markers with turf
+  const rawRings = polygonLayer.getLatLngs();
+  const ring = Array.isArray(rawRings[0]) ? rawRings[0] : rawRings;
+  const coords = ring.map(ll => [ll.lng, ll.lat]);
+  if (coords[0][0] !== coords[coords.length-1][0] || coords[0][1] !== coords[coords.length-1][1])
+    coords.push([...coords[0]]);
+  const turfPoly = turf.polygon([coords]);
+
+  const inside = [], outside = [];
+  allMarkers.forEach(m => {
+    const pt = turf.point([m._loc.longitude, m._loc.latitude]);
+    (turf.booleanPointInPolygon(pt, turfPoly) ? inside : outside).push(m);
+  });
+
+  if (inside.length === 0) { showToast('No evidence inside the drawn zone','warn'); return; }
+
+  _zoneActive = true;
+  _zoneInsideMarkers = inside;
+
+  // Ghost all outside markers right away
+  outside.forEach(m => { const el=m.getElement(); if(el) el.classList.add('zone-dim'); });
+
+  // Hide inside markers — radar will reveal them
+  inside.forEach(m => { const el=m.getElement(); if(el) { el.style.opacity='0'; el.style.transition='opacity .2s'; } });
+
+  // Show stop button
+  document.getElementById('zoneStopBtn').style.display = 'block';
+
+  // Fit to polygon bounds, then kick off sequence
+  map.fitBounds(polygonLayer.getBounds(), { padding:[80,80], maxZoom:14, animate:true });
+  map.once('moveend', () => {
+    setTimeout(() => {
+      zonePhase1_Spotlight(polygonLayer, inside, outside, () => {
+        zonePhase2_Radar(polygonLayer, inside, () => {
+          zonePhase3_Web(inside, () => {
+            zonePhase4_Tour(inside);
+          });
+        });
+      });
+    }, 300);
+  });
+}
+
+// ── Helper: update phase label + optional progress ──────────
+function setZonePhase(text, pct) {
+  const lbl = document.getElementById('zonePhaseLabel');
+  const bar = document.getElementById('zoneProgressBar');
+  const fill = document.getElementById('zoneProgressFill');
+  lbl.textContent = text;
+  lbl.style.display = 'block';
+  if (pct !== undefined) {
+    bar.style.display = 'block';
+    setTimeout(() => { fill.style.width = pct + '%'; }, 30);
+  } else {
+    bar.style.display = 'none';
+    fill.style.width = '0%';
+  }
+}
+
+// ── Phase 1: Spotlight ─────────────────────────────────────
+function zonePhase1_Spotlight(polygonLayer, inside, outside, done) {
+  if (!_zoneActive) return;
+  setZonePhase('🔦  Isolating zone…', 0);
+
+  const container = document.getElementById('crimeMap');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:640;';
+  canvas.width  = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  container.appendChild(canvas);
+  _zoneSpotCanvas = canvas;
+
+  const ctx = canvas.getContext('2d');
+  const ring = polygonLayer.getLatLngs();
+  const pts = (Array.isArray(ring[0]) ? ring[0] : ring).map(ll => map.latLngToContainerPoint(ll));
+
+  let alpha = 0;
+  function fadeIn() {
+    if (!_zoneActive) return;
+    alpha = Math.min(alpha + 0.03, 0.87);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dark veil
+    ctx.save();
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Cut out polygon — makes it fully transparent
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Glowing polygon border drawn ON TOP
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    ctx.strokeStyle = `rgba(14,165,233,${alpha * 1.1})`;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#0ea5e9';
+    ctx.shadowBlur = 18;
+    ctx.stroke();
+    ctx.restore();
+
+    setZonePhase('🔦  Isolating zone…', Math.round(alpha / 0.87 * 100));
+
+    if (alpha < 0.87) requestAnimationFrame(fadeIn);
+    else { setZonePhase('🔦  Zone isolated', 100); setTimeout(done, 500); }
+  }
+  requestAnimationFrame(fadeIn);
+}
+
+// ── Phase 2: Radar sweep ────────────────────────────────────
+function zonePhase2_Radar(polygonLayer, inside, done) {
+  if (!_zoneActive) return;
+  setZonePhase('📡  Scanning for evidence…', 0);
+
+  const container = document.getElementById('crimeMap');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:641;';
+  canvas.width  = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  container.appendChild(canvas);
+  _zoneRadarCanvas = canvas;
+
+  const ctx = canvas.getContext('2d');
+  const center = polygonLayer.getBounds().getCenter();
+  const cp = map.latLngToContainerPoint(center);
+
+  const bnds = polygonLayer.getBounds();
+  const ne = map.latLngToContainerPoint(bnds.getNorthEast());
+  const sw = map.latLngToContainerPoint(bnds.getSouthWest());
+  const maxR = Math.sqrt(Math.pow(ne.x-sw.x,2) + Math.pow(ne.y-sw.y,2)) * 0.7;
+
+  // Pre-compute each marker's reveal angle
+  // Sweep starts at "north" (270° screen) going clockwise
+  const START_NORM = 270;
+  const markerData = inside.map(m => {
+    const px = map.latLngToContainerPoint([m._loc.latitude, m._loc.longitude]);
+    let angle = Math.atan2(px.y - cp.y, px.x - cp.x) * 180 / Math.PI;
+    if (angle < 0) angle += 360;
+    const revealAt = (angle - START_NORM + 360) % 360;
+    return { marker: m, revealAt, revealed: false };
+  });
+
+  let progress = 0; // 0 → 360
+  const speed = 1.2;
+  let revealed = 0;
+
+  function ripple(x, y, startR) {
+    let r = startR, a = 0.9;
+    function draw() {
+      if (!_zoneRadarCanvas) return;
+      r += 2.5; a -= 0.055;
+      if (a <= 0) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(14,165,233,${a})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function sweep() {
+    if (!_zoneActive) { canvas.remove(); _zoneRadarCanvas=null; return; }
+    progress += speed;
+
+    const norm = (START_NORM + progress) % 360;
+    const rad  = (norm - 90) * Math.PI / 180; // canvas angle (0=right, CCW)
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Trailing glow sector
+    const TRAIL = 55;
+    for (let i = 0; i <= TRAIL; i += 1.5) {
+      const a = (1 - i/TRAIL) * 0.22;
+      const ang = ((norm - i) - 90) * Math.PI / 180;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cp.x, cp.y);
+      ctx.arc(cp.x, cp.y, maxR, ang, ang + 1.6*Math.PI/180);
+      ctx.lineTo(cp.x, cp.y);
+      ctx.fillStyle = `rgba(14,165,233,${a})`;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Sweep line
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cp.x, cp.y);
+    ctx.lineTo(cp.x + Math.cos(rad)*maxR, cp.y + Math.sin(rad)*maxR);
+    ctx.strokeStyle = 'rgba(14,165,233,0.95)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#0ea5e9';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.restore();
+
+    // Rotating rings on center
+    [18, 36, 54].forEach((r, i) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cp.x, cp.y, r, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(14,165,233,${0.12 - i*0.03})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // Center dot
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cp.x, cp.y, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#0ea5e9';
+    ctx.shadowColor = '#0ea5e9';
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.restore();
+
+    // Reveal markers whose angle we've swept past
+    markerData.forEach(md => {
+      if (!md.revealed && progress >= md.revealAt) {
+        md.revealed = true;
+        revealed++;
+        const el = md.marker.getElement();
+        if (el) {
+          el.style.opacity = '1';
+          el.classList.add('zone-ping');
+          setTimeout(() => el.classList.remove('zone-ping'), 800);
+        }
+        const px = map.latLngToContainerPoint([md.marker._loc.latitude, md.marker._loc.longitude]);
+        ripple(px.x, px.y, 14);
+      }
+    });
+
+    setZonePhase(`📡  Scanning… ${revealed}/${inside.length} found`, Math.min(Math.round(progress/360*100), 100));
+
+    if (progress < 360) {
+      _zoneRadarFrame = requestAnimationFrame(sweep);
+    } else {
+      // Ensure any un-swept markers are visible (edge case)
+      inside.forEach(m => { const el=m.getElement(); if(el) el.style.opacity='1'; });
+      setZonePhase(`📡  ${inside.length} incident${inside.length!==1?'s':''} detected`, 100);
+      setTimeout(() => {
+        canvas.remove(); _zoneRadarCanvas = null;
+        done();
+      }, 700);
+    }
+  }
+  _zoneRadarFrame = requestAnimationFrame(sweep);
+}
+
+// ── Phase 3: Web of evidence ───────────────────────────────
+function zonePhase3_Web(inside, done) {
+  if (!_zoneActive || inside.length < 2) { setTimeout(done, 400); return; }
+  setZonePhase('🕸️  Mapping connections…', 0);
+
+  const locs = inside.map(m => m._loc);
+  const drawnKeys = new Set();
+  const lines = [];
+
+  locs.forEach((loc, i) => {
+    const dists = locs
+      .map((other, j) => ({ j, d: Math.hypot(loc.latitude-other.latitude, loc.longitude-other.longitude) }))
+      .filter(x => x.j !== i)
+      .sort((a,b) => a.d-b.d)
+      .slice(0, Math.min(2, locs.length-1));
+
+    dists.forEach(({j}) => {
+      const key = [Math.min(i,j), Math.max(i,j)].join('-');
+      if (!drawnKeys.has(key)) {
+        drawnKeys.add(key);
+        lines.push({ from: locs[i], to: locs[j] });
+      }
+    });
+  });
+
+  let drawn = 0;
+  lines.forEach(({from, to}, idx) => {
+    setTimeout(() => {
+      if (!_zoneActive) return;
+      const polyline = L.polyline(
+        [[from.latitude, from.longitude],[to.latitude, to.longitude]],
+        { color:'#0ea5e9', weight:1.5, opacity:0, interactive:false }
+      ).addTo(map);
+      _zoneWebLines.push(polyline);
+
+      // Animate stroke via SVG path
+      const path = polyline._path;
+      if (path) {
+        const len = path.getTotalLength();
+        path.style.strokeDasharray  = len;
+        path.style.strokeDashoffset = len;
+        path.style.transition = 'stroke-dashoffset 0.7s ease, opacity 0.3s';
+        setTimeout(() => {
+          polyline.setStyle({ opacity:0.55 });
+          path.style.strokeDashoffset = 0;
+        }, 20);
+      }
+
+      drawn++;
+      setZonePhase(`🕸️  Mapping connections…`, Math.round(drawn/lines.length*100));
+      if (drawn === lines.length) {
+        setZonePhase(`🕸️  ${lines.length} connection${lines.length!==1?'s':''} mapped`, 100);
+        setTimeout(done, 900);
+      }
+    }, idx * 100);
+  });
+
+  if (lines.length === 0) setTimeout(done, 400);
+}
+
+// ── Phase 4: Cinematic autopilot tour ─────────────────────
+function zonePhase4_Tour(inside) {
+  if (!_zoneActive || inside.length === 0) return;
+
+  // Sort by emergency severity for dramatic ordering
+  const order = {red:0,orange:1,yellow:2,blue:3};
+  const sorted = [...inside].sort((a,b) => (order[a._loc.emergency_level]??9) - (order[b._loc.emergency_level]??9));
+
+  let idx = 0;
+  setZonePhase(`🎬  Touring — incident 1 of ${sorted.length}`, 0);
+
+  function visitNext() {
+    if (!_zoneActive || idx >= sorted.length) {
+      setZonePhase(`✅  Zone complete — ${sorted.length} incident${sorted.length!==1?'s':''} reviewed`, 100);
+      setTimeout(() => {
+        document.getElementById('zonePhaseLabel').style.display = 'none';
+        document.getElementById('zoneProgressBar').style.display = 'none';
+        document.getElementById('zoneStopBtn').style.display = 'none';
+        // Restore map to full zone view
+        if (_zoneWebLines.length > 0) {
+          const group = L.featureGroup(_zoneWebLines);
+          map.fitBounds(group.getBounds().pad(0.3));
+        }
+      }, 3000);
+      return;
+    }
+
+    const marker = sorted[idx];
+    const loc = marker._loc;
+    const pct = Math.round((idx+1)/sorted.length*100);
+    idx++;
+
+    map.flyTo([loc.latitude, loc.longitude], 15, { animate:true, duration:1.1, easeLinearity:0.35 });
+    setZonePhase(`🎬  ${idx} of ${sorted.length} — ${INC[loc.incident_type]?.label||'Incident'}`, pct);
+
+    map.once('moveend', () => {
+      if (!_zoneActive) return;
+      marker.openPopup();
+      const t = setTimeout(visitNext, 2800);
+      _zoneTourTimers.push(t);
+    });
+  }
+
+  visitNext();
+}
+
+// ── Stop / cleanup ─────────────────────────────────────────
+function stopZoneSequence() {
+  _zoneActive = false;
+
+  if (_zoneRadarFrame)  { cancelAnimationFrame(_zoneRadarFrame); _zoneRadarFrame = null; }
+  _zoneTourTimers.forEach(t => clearTimeout(t)); _zoneTourTimers = [];
+
+  if (_zoneSpotCanvas)  { _zoneSpotCanvas.remove();  _zoneSpotCanvas = null; }
+  if (_zoneRadarCanvas) { _zoneRadarCanvas.remove(); _zoneRadarCanvas = null; }
+
+  _zoneWebLines.forEach(l => { try { map.removeLayer(l); } catch(_){} });
+  _zoneWebLines = [];
+
+  allMarkers.forEach(m => {
+    const el = m.getElement();
+    if (el) {
+      el.classList.remove('zone-dim','zone-ping');
+      el.style.opacity = '';
+      el.style.transition = '';
+    }
+  });
+
+  map.closePopup();
+  document.getElementById('zoneStopBtn').style.display      = 'none';
+  document.getElementById('zonePhaseLabel').style.display   = 'none';
+  document.getElementById('zoneProgressBar').style.display  = 'none';
+  document.getElementById('zoneProgressFill').style.width   = '0%';
+}
+
+function closeCircleModal() {
+  document.getElementById('circleModal').classList.remove('active');
+  document.body.style.overflow = '';
+  // Fade out and clear spokes
+  const svg = document.getElementById('circleAnimSvg');
+  if (svg && svg.style.display !== 'none') {
+    svg.style.opacity = '0';
+    svg.style.transition = 'opacity 0.5s';
+    setTimeout(() => { svg.innerHTML=''; svg.style.display='none'; svg.style.opacity=''; svg.style.transition=''; }, 520);
+  }
+  // Restore all marker visibility
+  allMarkers.forEach(m => {
+    const el = m.getElement();
+    if (el) { el.classList.remove('zone-dim','zone-ping'); el.style.opacity=''; el.style.transition=''; }
+  });
+}
+document.getElementById('circleModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeCircleModal();
+});
+
+function flyToCircleResults() {
+  if (!_circleLayer) return;
+  closeCircleModal();
+  map.fitBounds(_circleLayer.getBounds(), { padding:[40,40], maxZoom:15 });
+}
+
+function exportCircleResults() {
+  if (!_circleData.length) return;
+  const filter = document.getElementById('circleFilterSel').value;
+  const data = filter === 'all' ? _circleData : _circleData.filter(d => d.loc.incident_type === filter);
+  const rows = [
+    ['ID','Evidence Number','Title','Incident Type','Emergency Level','Status','County','Incident Time','Latitude','Longitude','Distance (m)','Media Count','Police Reported']
+  ];
+  data.sort((a,b)=>a.distM-b.distM).forEach(({loc,distM}) => {
+    rows.push([
+      loc.id, loc.evidence_number||'', (loc.title||'').replace(/,/g,';'),
+      loc.incident_type||'', loc.emergency_level||'', loc.status||'',
+      loc.county||'', loc.incident_time||'', loc.latitude, loc.longitude,
+      Math.round(distM), loc.media_count||0, loc.reported_to_police?'Yes':'No'
+    ]);
+  });
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `circle_evidence_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(`Exported ${data.length} records to CSV`,'success');
+}
+
+
+document.getElementById('evidenceModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById('filterModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeFilter();});
+
+// ═══════════════════════════════════════════════════════════
+//  COUNTY LIST
+// ═══════════════════════════════════════════════════════════
+function initCountyList() {
+  const counts={};
+  locationsData.forEach(l=>{if(l.county)counts[l.county]=(counts[l.county]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max=sorted[0]?.[1]||1;
+  const el=document.getElementById('countyList');
+  if(!sorted.length){el.innerHTML=`<div style="color:var(--txt-d);font-size:10px;text-align:center;padding:12px">No county data</div>`;return;}
+  const rankColors=['#eab308','#94a3b8','#b45309'];
+  el.innerHTML=sorted.map(([county,count],i)=>`
+    <div class="county-row" onclick="zoomToCounty('${escHtml(county)}')">
+      <div style="font-size:10px;font-weight:700;font-family:var(--mono);width:16px;text-align:right;flex-shrink:0;color:${rankColors[i]||'var(--text-3)'}">${i+1}</div>
+      <div class="county-wrap">
+        <div class="county-name">${escHtml(county)}</div>
+        <div class="county-bar"><div class="county-fill" style="width:${Math.round(count/max*100)}%"></div></div>
+      </div>
+      <div class="county-n">${count}</div>
+    </div>`).join('');
+}
+
+function zoomToCounty(county) {
+  const pts=locationsData.filter(l=>l.county===county);
+  if(!pts.length)return;
+  map.fitBounds(L.latLngBounds(pts.map(l=>[l.latitude,l.longitude])),{padding:[60,60],maxZoom:12});
+  showToast(`${county} — ${pts.length} scene${pts.length!==1?'s':''}`, 'info');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VISIBLE COUNT
+// ═══════════════════════════════════════════════════════════
+function updateVisibleCount() {
+  const b=map.getBounds();
+  const n=locationsData.filter(l=>b.contains([l.latitude,l.longitude])).length;
+  const el=document.getElementById('statVisible');
+  if(el)el.textContent=n;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LIVE FEED
+// ═══════════════════════════════════════════════════════════
+function refreshFeed() {
+  const feed=document.getElementById('liveFeed');
+  if(!locationsData.length){feed.innerHTML=`<div style="text-align:center;padding:30px 0;color:var(--txt-d);font-size:10px">No activity</div>`;return;}
+  const recent=[...locationsData].sort((a,b)=>new Date(b.incident_time)-new Date(a.incident_time)).slice(0,25);
+  feed.innerHTML=recent.map(loc=>{
+    const col=ECOL[loc.emergency_level]||ECOL.blue;
+    const inc=INC[loc.incident_type]||INC.Other;
+    return `<div class="feed-item" onclick="showModal('${loc.id}')">
+      <div class="feed-dot" style="background:${col}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="feed-title">${inc.emoji} ${escHtml(loc.title)}</div>
+        <div class="feed-meta">${escHtml(loc.county)} · ${getTimeAgo(new Date(loc.incident_time))} · ${(loc.emergency_level||'').toUpperCase()}</div>
+      </div>
+    </div>`;
+  }).join('');
+  const el=document.getElementById('lastRefreshed');
+  if(el)el.textContent=new Date().toLocaleTimeString();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════════════════════════
+
+function flugChartDefaults() {
+  const isDark = !document.body.classList.contains('light');
+  const textColor  = isDark ? 'rgba(255,255,255,0.28)' : '#94a3b8';
+  const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9';
+  Chart.defaults.color = textColor;
+  Chart.defaults.font.family = "'Space Grotesk', system-ui, sans-serif";
+  Chart.defaults.font.size = 10;
+  return { isDark, textColor, gridColor };
+}
+
+function initCharts() {
+  if(chartsReady)return;
+  chartsReady=true;
+  const { isDark, textColor, gridColor } = flugChartDefaults();
+
+  const RED='#dc2626',ORANGE='#f97316',AMBER='#f59e0b',GREEN='#22c55e',BLUE='#3b82f6',PURPLE='#8b5cf6',SLATE='#64748b';
+  const palette=[RED,ORANGE,AMBER,GREEN,BLUE,PURPLE,SLATE];
+  const pa=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;};
+  const segBorder = isDark?'#0d1117':'#ffffff';
+
+  const tt={
+    backgroundColor:isDark?'#111827':'#ffffff',
+    borderColor:isDark?'rgba(255,255,255,0.09)':'#e2e8f0',
+    borderWidth:1,titleColor:isDark?'#f8fafc':'#0f172a',
+    bodyColor:isDark?'rgba(255,255,255,0.55)':'#475569',
+    padding:10,cornerRadius:10,
+    titleFont:{family:"'Space Grotesk',system-ui,sans-serif",size:11,weight:'700'},
+    bodyFont:{family:"'JetBrains Mono',monospace",size:10},
+  };
+  const grid={color:gridColor,borderColor:'transparent',tickColor:'transparent'};
+  const ticks={color:textColor,font:{family:"'JetBrains Mono',monospace",size:9},padding:4};
+
+  // 1. Incident Types — Doughnut
+  const typeMap={};
+  locationsData.forEach(l=>{const lbl=INC[l.incident_type]?.label||'Other';typeMap[lbl]=(typeMap[lbl]||0)+1;});
+  const tKeys=Object.keys(typeMap);
+  new Chart(document.getElementById('chartTypes'),{type:'doughnut',data:{labels:tKeys,datasets:[{data:Object.values(typeMap),backgroundColor:tKeys.map((_,i)=>pa(palette[i%palette.length],0.85)),borderColor:segBorder,borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:8,boxHeight:8,padding:10,color:textColor,font:{family:"'JetBrains Mono',monospace",size:9}}},tooltip:{...tt}}}});
+
+  // 2. Emergency Levels — Horizontal bar
+  const lvlCounts=['red','orange','yellow','blue'].map(k=>locationsData.filter(l=>l.emergency_level===k).length);
+  new Chart(document.getElementById('chartLevels'),{type:'bar',data:{labels:['Critical','High','Medium','Low'],datasets:[{data:lvlCounts,backgroundColor:[RED,ORANGE,AMBER,BLUE].map(c=>pa(c,0.8)),borderRadius:6,borderSkipped:false,borderWidth:0}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...tt}},scales:{x:{grid,ticks,border:{color:'transparent'},beginAtZero:true},y:{grid:{display:false},ticks,border:{color:'transparent'}}}}});
+
+  // 3. Time of Day — Area line
+  const hourBuckets=Array(24).fill(0);
+  locationsData.forEach(l=>{try{const h=new Date(l.incident_time).getHours();hourBuckets[h]++;}catch(_){}});
+  new Chart(document.getElementById('chartHour'),{type:'line',data:{labels:['12a','1','2','3','4','5','6a','7','8','9','10','11','12p','1','2','3','4','5','6p','7','8','9','10','11'],datasets:[{data:hourBuckets,borderColor:RED,borderWidth:2,backgroundColor:isDark?'rgba(220,38,38,0.08)':'rgba(220,38,38,0.06)',fill:true,tension:0.4,pointRadius:2,pointBackgroundColor:RED,pointBorderColor:segBorder,pointBorderWidth:2,pointHoverRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:ctx=>`  ${ctx.raw} incident${ctx.raw!==1?'s':''}`}}},scales:{x:{grid:{display:false},ticks,border:{color:'transparent'}},y:{grid,ticks:{...ticks,stepSize:1},border:{color:'transparent'},beginAtZero:true}}}});
+
+  // 4. Monthly Trend — Bar
+  const now=new Date();
+  const mMap={};
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mMap[d.toLocaleString('default',{month:'short',year:'2-digit'})]=0;}
+  locationsData.forEach(l=>{try{const d=new Date(l.incident_time);const k=d.toLocaleString('default',{month:'short',year:'2-digit'});if(k in mMap)mMap[k]++;}catch(_){}});
+  const mVals=Object.values(mMap),maxM=Math.max(...mVals,1);
+  new Chart(document.getElementById('chartTimeline'),{type:'bar',data:{labels:Object.keys(mMap),datasets:[{data:mVals,backgroundColor:mVals.map(v=>pa(v===maxM?RED:BLUE,v===maxM?0.85:0.6)),borderRadius:8,borderSkipped:false,borderWidth:0}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...tt}},scales:{x:{grid:{display:false},ticks,border:{color:'transparent'}},y:{grid,ticks:{...ticks,stepSize:1},border:{color:'transparent'},beginAtZero:true}}}});
+
+  // 5. Case Status — Doughnut
+  const sPal={draft:SLATE,submitted:BLUE,reported:GREEN,under_review:ORANGE,archived:SLATE,rejected:RED};
+  const sMap={};
+  locationsData.forEach(l=>{sMap[l.status]=(sMap[l.status]||0)+1;});
+  const sKeys=Object.keys(sMap);
+  new Chart(document.getElementById('chartStatus'),{type:'doughnut',data:{labels:sKeys,datasets:[{data:Object.values(sMap),backgroundColor:sKeys.map(k=>pa(sPal[k]||SLATE,0.85)),borderColor:segBorder,borderWidth:3,hoverOffset:6}]},options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{boxWidth:8,boxHeight:8,padding:10,color:textColor,font:{family:"'JetBrains Mono',monospace",size:9}}},tooltip:{...tt}}}});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════
+function switchTab(name) {
+  const names=['overview','analytics','feed','linked'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`tab-${name}`)?.classList.add('active');
+  if(name==='analytics')initCharts();
+  if(name==='feed')refreshFeed();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPORT / SNAPSHOT / PRINT / SHARE
+// ═══════════════════════════════════════════════════════════
+function exportMap(fmt) {
+  if(fmt==='csv'){
+    const hdrs=['evidence_number','title','emergency_level','incident_type','county','latitude','longitude','status','reported_to_police','police_case_id','incident_time'];
+    const rows=locationsData.map(l=>hdrs.map(h=>JSON.stringify(l[h]??'')).join(','));
+    dlFile([hdrs.join(','),...rows].join('\n'),`flug_intel_${today()}.csv`,'text/csv');
+  } else {
+    dlFile(JSON.stringify({timestamp:new Date().toISOString(),total:locationsData.length,locations:locationsData},null,2),`flug_intel_${today()}.json`,'application/json');
+  }
+  showToast(`Exported as ${fmt.toUpperCase()}`,'success');
+}
+
+function snapMap() {
+  showToast('Capturing map snapshot…','info');
+  html2canvas(document.getElementById('crimeMap'),{useCORS:true,allowTaint:true,scale:1.5,backgroundColor:'#05080f'}).then(canvas=>{
+    const a=document.createElement('a');
+    a.download=`flug_map_${today()}.png`;
+    a.href=canvas.toDataURL('image/png',0.92);
+    a.click();
+    showToast('Snapshot saved!','success');
+  }).catch(()=>showToast('Snapshot failed — try a different tile layer','error'));
+}
+
+function printReport() {
+  const urgent=locationsData.filter(l=>l.emergency_level==='red').length;
+  const police=locationsData.filter(l=>l.reported_to_police).length;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>FLUG Intel Report — ${new Date().toLocaleDateString()}</title>
+  <style>body{font-family:Arial,sans-serif;margin:28px;color:#111;font-size:12px}h1{font-size:20px;border-bottom:3px solid #e63946;padding-bottom:8px}.sub{color:#666;margin:4px 0 18px;font-size:11px}.stats{display:flex;gap:16px;margin:16px 0 24px}.sbox{background:#f5f5f5;border-radius:6px;padding:10px 18px;text-align:center}.snum{font-size:22px;font-weight:bold}.slbl{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:.05em}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#111;color:white;padding:6px 8px;text-align:left;font-size:9px;letter-spacing:.05em;text-transform:uppercase}td{padding:5px 8px;border-bottom:1px solid #eee}tr:nth-child(even)td{background:#fafafa}.foot{margin-top:24px;color:#999;font-size:9px;text-align:center;border-top:1px solid #eee;padding-top:12px}</style>
+  </head><body>
+  <h1>🛡️ FLUG Crime Intelligence Report</h1>
+  <div class="sub">Generated: ${new Date().toLocaleString()} · CONFIDENTIAL · Authorized Personnel Only</div>
+  <div class="stats">
+    <div class="sbox"><div class="snum">${locationsData.length}</div><div class="slbl">Total Scenes</div></div>
+    <div class="sbox"><div class="snum" style="color:#e63946">${urgent}</div><div class="slbl">Urgent (Red)</div></div>
+    <div class="sbox"><div class="snum" style="color:#10b981">${police}</div><div class="slbl">Police Reported</div></div>
+    <div class="sbox"><div class="snum">${locationsData.filter(l=>l.has_media).length}</div><div class="slbl">With Media</div></div>
+  </div>
+  <table><tr><th>Case #</th><th>Title</th><th>Type</th><th>Level</th><th>County</th><th>Status</th><th>Police</th><th>Date</th></tr>
+  ${locationsData.map(l=>`<tr>
+    <td style="font-family:monospace">${l.evidence_number}</td>
+    <td>${escHtmlBasic(l.title)}</td>
+    <td>${INC[l.incident_type]?.label||l.incident_type}</td>
+    <td style="color:${ECOL[l.emergency_level]||'#333'};font-weight:700">${(l.emergency_level||'').toUpperCase()}</td>
+    <td>${l.county}</td><td>${l.status}</td>
+    <td>${l.reported_to_police?'✅':'—'}</td>
+    <td style="font-family:monospace;font-size:9px">${fmtDate(l.incident_time)}</td>
+  </tr>`).join('')}
+  </table>
+  <div class="foot">FLUG Evidence System · ${window.location.href}</div>
+  </body></html>`);
+  w.document.close();w.print();
+}
+
+function shareMap(){
+  const url=window.location.href;
+  if(navigator.share)navigator.share({title:'FLUG Crime Intelligence Map',url});
+  else navigator.clipboard?.writeText(url).then(()=>showToast('Map link copied!','success'));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PANEL / MOBILE
+// ═══════════════════════════════════════════════════════════
+function togglePanel(){document.getElementById('sidepanel').classList.toggle('open');}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTO REFRESH (silent AJAX)
+// ═══════════════════════════════════════════════════════════
+function startAutoRefresh(){
+  setInterval(async()=>{
+    try{
+      const r=await fetch('/api/maps/data'+window.location.search,{credentials:'same-origin'});
+      if(!r.ok)return;
+      const json=await r.json();
+      if(json.success){const el=document.getElementById('lastRefreshed');if(el)el.textContent=new Date().toLocaleTimeString();}
+    }catch(_){}
+  },5*60*1000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+function escHtml(s){if(s==null)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+function escHtmlBasic(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtDate(s){if(!s)return'—';try{return new Date(s).toLocaleString('en-KE',{dateStyle:'medium',timeStyle:'short'});}catch(_){return s;}}
+function getTimeAgo(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return'just now';const m=Math.floor(s/60);if(m<60)return`${m}m ago`;const h=Math.floor(m/60);if(h<24)return`${h}h ago`;return`${Math.floor(h/24)}d ago`;}
+function dlFile(content,name,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=name;a.click();}
+function today(){return new Date().toISOString().split('T')[0];}
+function showToast(msg,type='info',dur=3200){
+  const cols={success:'#10b981',error:'#e63946',warn:'#f59e0b',info:'#0ea5e9'};
+  const el=document.createElement('div');
+  el.className='toast';el.style.background=cols[type]||cols.info;el.textContent=msg;
+  document.getElementById('toastHost').appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .3s';el.style.opacity='0';setTimeout(()=>el.remove(),320);},dur);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  THEME TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('flugintel-theme', isLight ? 'light' : 'dark');
+
+  // Switch to a friendlier tile in light mode
+  if (isLight) {
+    switchTile('street');
+    showToast('Light mode — daytime operations view', 'info');
+  } else {
+    switchTile('dark');
+    showToast('Dark mode — tactical ops view', 'info');
+  }
+}
+
+function applyStoredTheme() {
+  const stored = localStorage.getItem('flugintel-theme');
+  if (stored === 'light') document.body.classList.add('light');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmd();return;}
+  if((e.metaKey||e.ctrlKey)&&e.key==='f'){e.preventDefault();openFilter();return;}
+  if(e.key==='Escape'){closeModal();closeFilter();closeCmd();if(document.body.classList.contains('fullscreen'))exitFullscreen();}
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='h')toggleHeatmap();
+  if(e.key==='c')toggleClusters();
+  if(e.key==='r')toggleRadius();
+  if(e.key==='a')toggleAnnot();
+  if(e.key==='t')toggleTimeline();
+  if(e.key==='n')toggleNeonMode();
+  if(e.key==='f')openFilter();
+  if(e.key==='m')toggleMiniMap();
+  if(e.key==='l')locateMe();
+  if(e.key==='p')toggleTheme();
+  if(e.key==='F'){e.shiftKey?exitFullscreen():enterFullscreen();}
+});
+
+// ═══════════════════════════════════════════════════════════
+//  FILTER FORM
+// ═══════════════════════════════════════════════════════════
+document.getElementById('mapFilterForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  window.location.href='/maps/dashboard?'+new URLSearchParams(new FormData(e.target)).toString();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  // 0. Restore saved theme preference
+  applyStoredTheme();
+
+  // 1. Radar intro
+  runRadarIntro();
+
+  // 2. Wait slightly then init map (after intro starts)
+  setTimeout(()=>{
+    initMap();
+    initCountyList();
+    refreshFeed();
+    startAutoRefresh();
+    const el=document.getElementById('lastRefreshed');
+    if(el)el.textContent=new Date().toLocaleTimeString();
+  },200);
+});
+</script>
+</body>
+</html>

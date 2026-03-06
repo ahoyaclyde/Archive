@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — FLUG Evidence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #dc2626;
+            --accent-dark: #b91c1c;
+            --panel-dark: #0f1117;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; }
+        .font-serif-display { font-family: 'DM Serif Display', serif; }
+
+        /* ── Step transitions ── */
+        .step-content { display: none; animation: fadeUp 0.4s ease; }
+        .step-content.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+
+        /* ── Carousel ── */
+        .carousel-slide {
+            position: absolute; inset: 0;
+            opacity: 0; transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        .carousel-slide.active-slide { opacity: 1; pointer-events: auto; }
+
+        .carousel-panel { display: none; }
+        .carousel-panel.active-panel { display: block; }
+
+        /* ── Progress bar dot states ── */
+        .dot-done    { background: #111827; }
+        .dot-current { background: #374151; box-shadow: 0 0 0 3px #fff, 0 0 0 5px #374151; }
+        .dot-future  { background: #d1d5db; }
+
+        /* ── Input focus ring ── */
+        .flug-input {
+            width: 100%;
+            border-radius: 0.75rem;
+            border: 1.5px solid #e5e7eb;
+            background: #f9fafb;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            color: #111827;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9375rem;
+        }
+        .flug-input:focus {
+            border-color: #111827;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(17,24,39,0.07);
+        }
+        .flug-input.error { border-color: #ef4444; background: #fff5f5; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        /* ── Checklist item ── */
+        .check-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.875rem; border-radius: 0.625rem; font-size: 0.875rem; }
+        .check-item.done { background: #f0fdf4; color: #166534; }
+        .check-item.pending { background: #f9fafb; color: #9ca3af; }
+
+        /* ── Wallet banner ── */
+        .wallet-banner {
+            border: 1.5px dashed #e5e7eb;
+            border-radius: 1rem;
+            background: #fafafa;
+            padding: 1rem 1.25rem;
+            display: flex; align-items: center; gap: 1rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .wallet-banner:hover { border-color: #9ca3af; background: #f3f4f6; }
+
+        /* ── Strength bar segments ── */
+        .strength-seg {
+            height: 4px; border-radius: 9999px; flex: 1;
+            background: #e5e7eb; transition: background 0.3s;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+<div class="flex w-screen min-h-screen flex-wrap text-slate-800">
+
+    <!-- ════════════════════════════════════════════
+         LEFT PANEL — FORM
+    ════════════════════════════════════════════ -->
+    <div class="flex w-full flex-col md:w-1/2">
+
+        <!-- Logo bar -->
+        <div class="flex items-center justify-between px-8 pt-8 pb-4">
+            <a href="/" class="flex items-center gap-2.5">
+                <div class="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center">
+                    <i class="fas fa-camera-retro text-white text-xs"></i>
+                </div>
+                <span class="text-lg font-semibold tracking-tight text-gray-900">FLUG<span class="text-red-600">.</span></span>
+            </a>
+            <a href="/login" class="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+                Sign in <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+        </div>
+
+        <!-- Form scroll container -->
+        <div class="flex-1 overflow-y-auto">
+        <div class="mx-auto w-full max-w-md px-8 pb-16 pt-6">
+
+            <!-- ── Progress dots ── -->
+            <div class="mb-10">
+                <div class="relative">
+                    <div class="absolute left-0 top-2.5 h-0.5 w-full bg-gray-200">
+                        <div id="progress-track" class="absolute h-full bg-gray-900 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <ul class="relative flex w-full justify-between">
+                        <li><button id="dot-1" class="dot-current flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white transition-all duration-300">1</button></li>
+                        <li><button id="dot-2" class="dot-future  flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white transition-all duration-300">2</button></li>
+                        <li><button id="dot-3" class="dot-future  flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white transition-all duration-300">3</button></li>
+                    </ul>
+                </div>
+                <div class="mt-3 flex justify-between text-xs text-gray-400 font-medium">
+                    <span>Your info</span>
+                    <span>Password</span>
+                    <span>Complete</span>
+                </div>
+            </div>
+
+            <!-- ════════════════════
+                 STEP 1 — REGISTER
+            ════════════════════ -->
+            <div id="step1-content" class="step-content active">
+
+                <!-- Wallet escape hatch -->
+                <a href="/connect-wallet" class="wallet-banner group mb-6 block no-underline">
+                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gray-900 group-hover:bg-red-600 transition-colors">
+                        <i class="fas fa-wallet text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800">Register Anonymously with a Wallet</p>
+                        <p class="text-xs text-gray-400 mt-0.5">MetaMask, Phantom, or any Web3 wallet — no email required</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs flex-shrink-0 group-hover:text-gray-600 transition-colors"></i>
+                </a>
+
+                <div class="relative my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="mx-4 flex-shrink text-xs font-medium uppercase tracking-widest text-gray-400">or with email</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <h2 class="font-serif-display text-2xl text-gray-900 mb-1">Create your account</h2>
+                <p class="text-sm text-gray-500 mb-7">Join Kenya's evidence reporting network.</p>
+
+                <!-- Error banner -->
+                <div id="step1-error" class="hidden mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                    <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                    <span id="step1-error-text"></span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Email -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">Email Address</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-envelope text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="email" id="reg-email" autocomplete="email"
+                                class="flug-input" placeholder="you@example.com">
+                            <div id="email-ok" class="absolute inset-y-0 right-0 hidden items-center pr-3.5">
+                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">Kenyan Phone Number</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <span class="text-base leading-none">🇰🇪</span>
+                            </div>
+                            <input type="tel" id="reg-phone" autocomplete="tel"
+                                class="flug-input" placeholder="0712 345 678">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-400">Accepted: 07XXXXXXXX · 011XXXXXXX · +254XXXXXXXXX</p>
+                    </div>
+
+                    <!-- Terms note -->
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        By continuing you agree to our
+                        <a href="#" class="text-gray-700 underline hover:text-gray-900">Terms of Service</a> and
+                        <a href="#" class="text-gray-700 underline hover:text-gray-900">Privacy Policy</a>.
+                        Email verification is optional and can be done from your profile.
+                    </p>
+
+                    <button onclick="submitRegister()" id="register-btn"
+                        class="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 py-3.5 text-sm font-semibold text-white transition-all hover:bg-gray-700 active:scale-[.98]">
+                        <span>Create Account</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ════════════════════
+                 STEP 2 — PASSWORD
+            ════════════════════ -->
+            <div id="step2-content" class="step-content">
+
+                <div class="mb-7 flex items-start gap-4">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-100">
+                        <i class="fas fa-lock text-emerald-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-serif-display text-2xl text-gray-900 leading-tight">Secure your account</h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Setting password for <span id="step2-email-display" class="font-semibold text-gray-700"></span></p>
+                    </div>
+                </div>
+
+                <!-- Error banner -->
+                <div id="step2-error" class="hidden mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                    <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                    <span id="step2-error-text"></span>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- Password field -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                            Password <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-key text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="password" id="new-password" autocomplete="new-password"
+                                class="flug-input" placeholder="Enter a strong password">
+                            <button type="button" id="toggle-password"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="fas fa-eye text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Strength indicator — 4 segments -->
+                        <div class="mt-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs text-gray-500">Password strength</span>
+                                <span id="strength-label" class="text-xs font-semibold text-gray-400">—</span>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <div id="seg-1" class="strength-seg"></div>
+                                <div id="seg-2" class="strength-seg"></div>
+                                <div id="seg-3" class="strength-seg"></div>
+                                <div id="seg-4" class="strength-seg"></div>
+                            </div>
+                            <!-- Requirements grid -->
+                            <div class="mt-3 grid grid-cols-2 gap-y-1.5 gap-x-4">
+                                <div class="flex items-center gap-1.5">
+                                    <i id="req-length"    class="fas fa-times text-xs text-gray-300"></i>
+                                    <span class="text-xs text-gray-500">8+ characters</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <i id="req-uppercase" class="fas fa-times text-xs text-gray-300"></i>
+                                    <span class="text-xs text-gray-500">Uppercase letter</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <i id="req-lowercase" class="fas fa-times text-xs text-gray-300"></i>
+                                    <span class="text-xs text-gray-500">Lowercase letter</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <i id="req-number"    class="fas fa-times text-xs text-gray-300"></i>
+                                    <span class="text-xs text-gray-500">Number</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm password -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                            Confirm Password <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-key text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="password" id="confirm-password" autocomplete="new-password"
+                                class="flug-input" placeholder="Re-enter your password">
+                        </div>
+                        <div id="confirm-error" class="hidden mt-2 flex items-center gap-1.5 text-sm text-rose-600">
+                            <i class="fas fa-exclamation-circle text-xs"></i>
+                            <span>Passwords do not match</span>
+                        </div>
+                    </div>
+
+                    <!-- Tips box — carried from setup_password.html -->
+                    <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-lightbulb text-blue-500 mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-blue-900">Password Tips</p>
+                                <ul class="mt-1.5 space-y-1 text-xs text-blue-700">
+                                    <li><i class="fas fa-check mr-1.5"></i>Mix letters, numbers, and symbols</li>
+                                    <li><i class="fas fa-check mr-1.5"></i>Avoid personal information or common words</li>
+                                    <li><i class="fas fa-check mr-1.5"></i>Consider a password manager for safety</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3 pt-1">
+                        <button onclick="goToStep(1)"
+                            class="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-arrow-left text-xs"></i> Back
+                        </button>
+                        <button onclick="submitPassword()" id="password-btn"
+                            class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-700 active:scale-[.98]">
+                            <span>Set Password</span>
+                            <i class="fas fa-shield-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════
+                 STEP 3 — SUCCESS
+            ════════════════════ -->
+            <div id="step3-content" class="step-content">
+                <div class="text-center">
+                    <!-- Checkmark -->
+                    <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+                        <i class="fas fa-check text-green-600 text-3xl"></i>
+                    </div>
+
+                    <h2 class="font-serif-display text-2xl text-gray-900 mb-1">You're in!</h2>
+                    <p class="text-sm text-gray-500 mb-1">Account created for</p>
+                    <p id="success-email" class="mb-7 font-semibold text-gray-900 text-base"></p>
+
+                    <!-- Checklist -->
+                    <div class="mb-7 space-y-2 text-left">
+                        <div class="check-item done">
+                            <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-200">
+                                <i class="fas fa-check text-green-700 text-xs"></i>
+                            </div>
+                            <span>Email & phone registered</span>
+                        </div>
+                        <div class="check-item done">
+                            <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-200">
+                                <i class="fas fa-check text-green-700 text-xs"></i>
+                            </div>
+                            <span>Password secured</span>
+                        </div>
+                        <div class="check-item pending">
+                            <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
+                                <i class="fas fa-wallet text-gray-400 text-xs"></i>
+                            </div>
+                            <span>Wallet connect — optional</span>
+                        </div>
+                        <div class="check-item pending">
+                            <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
+                                <i class="fas fa-user text-gray-400 text-xs"></i>
+                            </div>
+                            <span>Complete profile — after login</span>
+                        </div>
+                    </div>
+
+                    <!-- Wallet prompt -->
+                    <div class="mb-5 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gray-900">
+                                <i class="fas fa-wallet text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-gray-800">Connect a Crypto Wallet?</p>
+                                <p class="text-xs text-gray-400">Sign evidence anonymously — connect anytime from your profile</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="/connect-wallet"
+                                class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 py-2.5 text-sm font-semibold text-white hover:bg-gray-700 transition-colors no-underline">
+                                <i class="fas fa-wallet text-xs"></i> Connect Wallet
+                            </a>
+                            <a href="/login"
+                                class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors no-underline">
+                                Skip for now
+                            </a>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        A verification link is on its way to your inbox.
+                        You can verify anytime from your profile settings.
+                    </p>
+                </div>
+            </div>
+
+        </div><!-- /max-w-md -->
+        </div><!-- /scroll container -->
+    </div><!-- /left panel -->
+
+
+    <!-- ════════════════════════════════════════════
+         RIGHT PANEL — ANIMATED CAROUSEL
+    ════════════════════════════════════════════ -->
+    <div class="relative hidden h-screen overflow-hidden select-none md:block md:w-1/2">
+
+        <!-- ── STEP 1 PANEL: Evidence Reporting ── -->
+        <div id="carousel-step1" class="carousel-panel active-panel absolute inset-0" style="background: #0f1117;">
+            <!-- Slide 1 -->
+            <div id="s1-1" class="carousel-slide active-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-25" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Evidence Integrity</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Every piece of evidence <br/><em class="text-red-400 not-italic">tells a story.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">FLUG creates immutable, timestamped records that hold up in court — protecting communities through verifiable truth.</p>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div id="s1-2" class="carousel-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-25" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Community Safety</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Thousands of reports. <br/><em class="text-red-400 not-italic">Millions protected.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Citizens across Kenya are using FLUG to document, track, and report incidents that matter to their communities.</p>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div id="s1-3" class="carousel-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-25" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Digital Forensics</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">From street level <br/><em class="text-red-400 not-italic">to court room.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Forensic-grade metadata, GPS tagging, and blockchain anchoring make every submission prosecution-ready.</p>
+                </div>
+            </div>
+            <!-- Slide dots -->
+            <div class="absolute bottom-6 right-10 flex gap-2" id="c1-dots">
+                <div class="h-1.5 w-6 rounded-full bg-white transition-all duration-300"></div>
+                <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all duration-300"></div>
+                <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- ── STEP 2 PANEL: Security ── -->
+        <div id="carousel-step2" class="carousel-panel absolute inset-0" style="background: #0d1f17;">
+            <!-- Slide 1 -->
+            <div id="s2-1" class="carousel-slide active-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300 backdrop-blur-sm">Account Security</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Your identity, <br/><em class="text-emerald-400 not-italic">your control.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">We use bcrypt hashing — your raw password is never stored anywhere. Not even our own team can read it.</p>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div id="s2-2" class="carousel-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300 backdrop-blur-sm">Zero Knowledge</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">We never store <br/><em class="text-emerald-400 not-italic">plain passwords.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Zero-knowledge hashing means only you can authenticate. Even a database breach exposes nothing useful.</p>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div id="s2-3" class="carousel-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300 backdrop-blur-sm">Privacy First</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Strong password, <br/><em class="text-emerald-400 not-italic">strong evidence.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Protect your reports, your identity, and your submissions. Security is not optional — it's built in.</p>
+                </div>
+            </div>
+            <div class="absolute bottom-6 right-10 flex gap-2" id="c2-dots">
+                <div class="h-1.5 w-6 rounded-full bg-white transition-all duration-300"></div>
+                <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all duration-300"></div>
+                <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- ── STEP 3 PANEL: Welcome ── -->
+        <div id="carousel-step3" class="carousel-panel absolute inset-0" style="background: #0a1628;">
+            <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1200&q=80"
+                 class="absolute inset-0 h-full w-full object-cover opacity-15" alt="">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+            <div class="absolute inset-0 flex flex-col justify-center p-12">
+                <!-- Big icon -->
+                <div class="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                    <i class="fas fa-shield-alt text-red-400 text-3xl"></i>
+                </div>
+                <span class="inline-block mb-5 w-fit rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Welcome to FLUG</span>
+                <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">You're part of <br/><em class="text-red-400 not-italic">the solution.</em></h3>
+                <p class="text-sm text-gray-300 leading-relaxed max-w-sm mb-8">Every report you submit becomes an immutable piece of the public record — safe, verifiable, and powerful.</p>
+                <!-- Mini feature list -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-3">
+                        <i class="fas fa-camera-retro text-red-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">Submit your first evidence report</span>
+                    </div>
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-3">
+                        <i class="fas fa-map-marker-alt text-red-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">GPS-tagged, timestamped, court-ready</span>
+                    </div>
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-3">
+                        <i class="fas fa-users text-red-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">Kenya's evidence reporting network</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /right panel -->
+
+</div><!-- /flex wrapper -->
+
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentStep = 1;
+const TOTAL_STEPS = 3;
+let registeredEmail = '';
+
+// ══════════════════════════════════════════
+// STEP NAVIGATION
+// ══════════════════════════════════════════
+function goToStep(step) {
+    // Hide all step content panels
+    document.querySelectorAll('.step-content').forEach(el => {
+        el.classList.remove('active');
+    });
+
+    // Show target
+    const target = document.getElementById(`step${step}-content`);
+    if (target) target.classList.add('active');
+
+    // Progress bar
+    const pct = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
+    document.getElementById('progress-track').style.width = `${pct}%`;
+
+    // Dots
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (!dot) continue;
+        dot.classList.remove('dot-done', 'dot-current', 'dot-future');
+        if (i < step) {
+            dot.classList.add('dot-done');
+            dot.innerHTML = '<i class="fas fa-check" style="font-size:9px"></i>';
+        } else if (i === step) {
+            dot.classList.add('dot-current');
+            dot.textContent = i;
+        } else {
+            dot.classList.add('dot-future');
+            dot.textContent = i;
+        }
+    }
+
+    // Switch carousel panel
+    document.querySelectorAll('.carousel-panel').forEach(el => el.classList.remove('active-panel'));
+    const panel = document.getElementById(`carousel-step${step}`);
+    if (panel) panel.classList.add('active-panel');
+
+    currentStep = step;
+    window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════
+// STEP 1: REGISTER
+// ══════════════════════════════════════════
+async function submitRegister() {
+    const email = document.getElementById('reg-email').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim().replace(/\s/g, '');
+    const btn   = document.getElementById('register-btn');
+
+    // Validation
+    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRx  = /^(07\d{8}|011\d{7}|\+2547\d{8}|\+25411\d{7})$/;
+
+    hideError('step1');
+
+    if (!email || !emailRx.test(email)) {
+        showError('step1', 'Please enter a valid email address.');
+        document.getElementById('reg-email').classList.add('error');
+        return;
+    }
+    if (!phone || !phoneRx.test(phone)) {
+        showError('step1', 'Please enter a valid Kenyan phone number (e.g. 0712345678).');
+        document.getElementById('reg-phone').classList.add('error');
+        return;
+    }
+
+    setLoading(btn, true, 'Creating account...');
+
+    try {
+        const res  = await fetch('/api/auth/register', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, phone_number: phone }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            registeredEmail = email;
+            document.getElementById('step2-email-display').textContent = email;
+            goToStep(2);
+        } else {
+            showError('step1', data.message || 'Registration failed. Please try again.');
+        }
+    } catch (_) {
+        showError('step1', 'Network error. Please check your connection and try again.');
+    } finally {
+        setLoading(btn, false, 'Create Account <i class="fas fa-arrow-right text-xs ml-2"></i>');
+    }
+}
+
+// ══════════════════════════════════════════
+// STEP 2: SET PASSWORD
+// ══════════════════════════════════════════
+async function submitPassword() {
+    const password = document.getElementById('new-password').value;
+    const confirm  = document.getElementById('confirm-password').value;
+    const btn      = document.getElementById('password-btn');
+
+    hideError('step2');
+    document.getElementById('confirm-error').classList.add('hidden');
+
+    if (!checkPasswordStrength(password)) {
+        showError('step2', 'Please choose a stronger password — it needs 8+ chars, upper, lower, and a number.');
+        return;
+    }
+    if (password !== confirm) {
+        document.getElementById('confirm-error').classList.remove('hidden');
+        return;
+    }
+
+    setLoading(btn, true, 'Securing...');
+
+    try {
+        const res  = await fetch('/api/auth/setup-password', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email: registeredEmail, password }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('success-email').textContent = registeredEmail;
+            goToStep(3);
+        } else {
+            showError('step2', data.message || 'Failed to set password. Please try again.');
+        }
+    } catch (_) {
+        showError('step2', 'Network error. Please check your connection and try again.');
+    } finally {
+        setLoading(btn, false, 'Set Password <i class="fas fa-shield-alt text-xs ml-2"></i>');
+    }
+}
+
+// ══════════════════════════════════════════
+// PASSWORD STRENGTH (from setup_password.html)
+// ══════════════════════════════════════════
+function checkPasswordStrength(password) {
+    const hasLength  = password.length >= 8;
+    const hasUpper   = /[A-Z]/.test(password);
+    const hasLower   = /[a-z]/.test(password);
+    const hasNumber  = /[0-9]/.test(password);
+    const score      = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+
+    // Requirement icons
+    const setReq = (id, ok) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = ok
+            ? 'fas fa-check text-xs text-green-500'
+            : 'fas fa-times text-xs text-gray-300';
+    };
+    setReq('req-length',    hasLength);
+    setReq('req-uppercase', hasUpper);
+    setReq('req-lowercase', hasLower);
+    setReq('req-number',    hasNumber);
+
+    // Segment colours
+    const colours = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+    const labels  = ['—', 'Weak', 'Fair', 'Good', 'Strong'];
+    const txtCls  = ['text-gray-400', 'text-red-500', 'text-orange-500', 'text-yellow-600', 'text-green-600'];
+
+    for (let i = 1; i <= 4; i++) {
+        const seg = document.getElementById(`seg-${i}`);
+        seg.className = `strength-seg ${i <= score ? colours[score] : ''}`;
+    }
+
+    const lbl = document.getElementById('strength-label');
+    lbl.textContent = labels[score];
+    lbl.className   = `text-xs font-semibold ${txtCls[score]}`;
+
+    return score >= 3;
+}
+
+// ══════════════════════════════════════════
+// CAROUSEL AUTO-ADVANCE
+// ══════════════════════════════════════════
+function startCarousel(prefix, count, dotContainerId) {
+    let idx = 0;
+    return setInterval(() => {
+        idx = (idx + 1) % count;
+        for (let i = 1; i <= count; i++) {
+            const slide = document.getElementById(`${prefix}-${i}`);
+            if (slide) slide.classList.toggle('active-slide', i === idx + 1);
+        }
+        // Dots
+        const dots = document.querySelectorAll(`#${dotContainerId} > div`);
+        dots.forEach((d, i) => {
+            d.className = i === idx
+                ? 'h-1.5 w-6 rounded-full bg-white transition-all duration-300'
+                : 'h-1.5 w-2 rounded-full bg-white/30 transition-all duration-300';
+        });
+    }, 4500);
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function showError(step, msg) {
+    const div  = document.getElementById(`${step}-error`);
+    const text = document.getElementById(`${step}-error-text`);
+    if (div && text) { text.textContent = msg; div.classList.remove('hidden'); }
+}
+function hideError(step) {
+    const div = document.getElementById(`${step}-error`);
+    if (div) div.classList.add('hidden');
+}
+function setLoading(btn, loading, html) {
+    btn.disabled = loading;
+    btn.innerHTML = loading
+        ? '<i class="fas fa-spinner fa-spin mr-2"></i>' + html
+        : html;
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    goToStep(1);
+
+    // Carousels
+    startCarousel('s1', 3, 'c1-dots');
+    startCarousel('s2', 3, 'c2-dots');
+
+    // Password toggle
+    document.getElementById('toggle-password').addEventListener('click', function () {
+        const input = document.getElementById('new-password');
+        const icon  = this.querySelector('i');
+        const show  = input.type === 'password';
+        input.type  = show ? 'text' : 'password';
+        icon.className = show ? 'fas fa-eye-slash text-sm' : 'fas fa-eye text-sm';
+    });
+
+    // Live password strength
+    document.getElementById('new-password').addEventListener('input', function () {
+        checkPasswordStrength(this.value);
+        const cf = document.getElementById('confirm-password').value;
+        if (cf) document.getElementById('confirm-error').classList.toggle('hidden', this.value === cf);
+    });
+
+    // Live confirm match
+    document.getElementById('confirm-password').addEventListener('input', function () {
+        const pw = document.getElementById('new-password').value;
+        document.getElementById('confirm-error').classList.toggle('hidden', this.value === pw);
+    });
+
+    // Email green tick
+    document.getElementById('reg-email').addEventListener('input', function () {
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value.trim());
+        document.getElementById('email-ok').classList.toggle('hidden', !ok);
+        this.classList.toggle('error', false);
+    });
+
+    // Clear phone error on input
+    document.getElementById('reg-phone').addEventListener('input', function () {
+        this.classList.remove('error');
+    });
+
+    // Enter-key shortcuts
+    ['reg-email', 'reg-phone'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') submitRegister();
+        });
+    });
+    ['new-password', 'confirm-password'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') submitPassword();
+        });
+    });
+
+    // Handle template-injected error ({{error_message}} from Rust)
+    const errEl = document.getElementById('server-error');
+    if (errEl && errEl.dataset.msg) {
+        showError('step1', errEl.dataset.msg);
+    }
+});
+</script>
+
+<!-- Server-side error injection point (populated by Rust template renderer) -->
+{{#if error_message}}
+<span id="server-error" data-msg="{{error_message}}" class="hidden"></span>
+{{/if}}
+
+</body>
+</html>

@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Evidence — FLUG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #f2f3f6; margin: 0; }
+
+/* ─── TOP HEADER ──────────────────────────────────── */
+.flug-header {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1.5px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.flug-logo {
+    display: flex; align-items: center; gap: .625rem;
+    text-decoration: none;
+}
+.flug-logo-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #111827;
+    display: flex; align-items: center; justify-content: center;
+}
+.flug-logo-text {
+    font-size: 1rem; font-weight: 700; letter-spacing: -.01em; color: #111827;
+}
+.flug-logo-text span { color: #dc2626; }
+.flug-header-tag {
+    font-size: .75rem; font-weight: 600; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: .08em;
+}
+
+/* ─── LAYOUT ──────────────────────────────────────── */
+.ew {
+    display: flex;
+    min-height: calc(100vh - 56px);
+}
+
+/* ─── DARK STEP SIDEBAR ───────────────────────────── */
+.ws {
+    width: 256px;
+    flex-shrink: 0;
+    background: #0d0d0d;
+    min-height: 100%;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+}
+
+.ws-brand {
+    font-size: .625rem;
+    font-weight: 800;
+    letter-spacing: .2em;
+    color: #dc2626;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* Progress bar in sidebar */
+.ws-prog-rail {
+    height: 2px;
+    background: #1a1a1a;
+    border-radius: 1px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+.ws-prog-fill {
+    height: 2px;
+    background: linear-gradient(90deg, #dc2626, #f87171);
+    border-radius: 1px;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+}
+
+/* Step items */
+.ws-item {
+    display: flex;
+    align-items: center;
+    gap: .875rem;
+    padding: .6875rem .875rem;
+    border-radius: .625rem;
+    transition: background .18s;
+    cursor: default;
+}
+.ws-item.cur { background: #181818; }
+
+.ws-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1.5px solid #222;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700;
+    color: #444; flex-shrink: 0;
+    transition: all .25s;
+    font-family: 'DM Sans', sans-serif;
+}
+.ws-item.done .ws-num { background: #16a34a; border-color: #16a34a; color: #fff; }
+.ws-item.cur  .ws-num {
+    background: #dc2626; border-color: #dc2626; color: #fff;
+    box-shadow: 0 0 0 3px rgba(220,38,38,.2);
+}
+
+.ws-txt-label {
+    font-size: .625rem; font-weight: 700;
+    letter-spacing: .14em; color: #444;
+    text-transform: uppercase;
+}
+.ws-txt-name {
+    font-size: .8125rem; font-weight: 600; color: #555;
+    margin-top: .125rem; transition: color .18s;
+    font-family: 'DM Sans', sans-serif;
+}
+.ws-item.cur  .ws-txt-name { color: #f9fafb; }
+.ws-item.done .ws-txt-name { color: #4ade80; }
+
+/* Connector line */
+.ws-line {
+    width: 1.5px; height: 20px;
+    background: #1a1a1a;
+    margin-left: 1.875rem;
+    transition: background .25s;
+}
+.ws-line.done { background: #166534; }
+
+/* Footer */
+.ws-foot {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid #181818;
+}
+.ws-foot-lbl {
+    font-size: .625rem; font-weight: 700;
+    letter-spacing: .16em; color: #444;
+    text-transform: uppercase; margin-bottom: .25rem;
+}
+.ws-foot-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.125rem; color: #f9fafb;
+    letter-spacing: -.01em;
+}
+.ws-badge {
+    display: inline-flex; align-items: center; gap: .375rem;
+    margin-top: .625rem;
+    background: rgba(251,191,36,.08);
+    border: 1px solid rgba(251,191,36,.18);
+    color: #fcd34d; font-size: .625rem; font-weight: 700;
+    letter-spacing: .12em;
+    padding: .25rem .625rem; border-radius: 9999px;
+    text-transform: uppercase;
+}
+.ws-pulse {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #fcd34d;
+    animation: pulse_ 1.5s ease-in-out infinite;
+}
+@keyframes pulse_ { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+/* ─── MAIN CONTENT ────────────────────────────────── */
+.wr {
+    flex: 1;
+    padding: 2.25rem 2.75rem 5rem;
+    min-width: 0;
+    max-width: 1260px;
+    margin:0 auto;
+}
+
+/* Bio strip */
+.bio {
+    display: flex; align-items: center;
+    background: #fff; border: 1.5px solid #e5e7eb;
+    border-radius: 1rem; overflow: hidden;
+    margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.bio-block { padding: .875rem 1.25rem; }
+.bio-div   { width: 1px; background: #e5e7eb; align-self: stretch; }
+.bio-lbl   { font-size: .625rem; font-weight: 700; letter-spacing: .12em; color: #9ca3af; text-transform: uppercase; margin-bottom: .2rem; }
+.bio-val   { font-family: 'DM Serif Display', serif; font-size: .9375rem; color: #111827; }
+.bio-sub   { font-size: .75rem; color: #6b7280; margin-top: .125rem; }
+.bio-draft {
+    margin-left: auto; padding: 0 1.25rem;
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .625rem; font-weight: 700; letter-spacing: .1em;
+    color: #92400e; text-transform: uppercase;
+}
+.bio-draft-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; animation: pulse_ 1.5s ease-in-out infinite; }
+
+/* Top progress rail */
+.wbar-wrap { height: 3px; background: #e5e7eb; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+.wbar-fill { height: 3px; background: linear-gradient(90deg,#dc2626,#f87171); border-radius: 2px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+
+/* ─── STEP PANELS ─────────────────────────────────── */
+.wp { display: none; }
+.wp.on { display: block; animation: pinIn .3s cubic-bezier(.4,0,.2,1) both; }
+.wp.bk { display: block; animation: pinBk .3s cubic-bezier(.4,0,.2,1) both; }
+@keyframes pinIn { from{ opacity:0; transform:translateX(14px) } to{ opacity:1; transform:none } }
+@keyframes pinBk { from{ opacity:0; transform:translateX(-14px)} to{ opacity:1; transform:none } }
+
+/* ─── SECTION CARDS ───────────────────────────────── */
+.sc {
+    background: #fff; border: 1.5px solid #e5e7eb;
+    border-radius: 1rem; overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.sc-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1.5px solid #f3f4f6;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: .75rem; flex-wrap: wrap;
+}
+.sc-title { font-size: .875rem; font-weight: 700; color: #111827; }
+.sc-sub   { font-size: .75rem; color: #9ca3af; margin-top: .125rem; }
+.sc-body  { padding: 1.25rem; }
+
+/* ─── STEP HEADINGS ───────────────────────────────── */
+.sh  { font-family: 'DM Serif Display', serif; font-size: 1.625rem; color: #0d0d0d; line-height: 1.2; margin-bottom: .375rem; }
+.shs { font-size: .9375rem; color: #6b7280; line-height: 1.55; margin-bottom: 0; }
+
+/* ─── EMERGENCY CARDS ─────────────────────────────── */
+.em-wrap { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; margin-top: 1.5rem; }
+@media(min-width:640px){ .em-wrap { grid-template-columns: repeat(4,1fr); } }
+
+.emc {
+    position: relative; cursor: pointer;
+    background: #fff; border: 1.5px solid #e5e7eb;
+    border-radius: 1rem; padding: 1.125rem 1rem;
+    transition: all .2s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.emc:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.09); }
+.emc.em-Red    { border-color:#dc2626; background:linear-gradient(135deg,#fff 0%,#fef2f2 100%); box-shadow:0 0 0 3px rgba(220,38,38,.1),0 6px 18px rgba(220,38,38,.08); }
+.emc.em-Orange { border-color:#ea580c; background:linear-gradient(135deg,#fff 0%,#fff7ed 100%); box-shadow:0 0 0 3px rgba(234,88,12,.1),0 6px 18px rgba(234,88,12,.08); }
+.emc.em-Yellow { border-color:#d97706; background:linear-gradient(135deg,#fff 0%,#fffbeb 100%); box-shadow:0 0 0 3px rgba(217,119,6,.1),0 6px 18px rgba(217,119,6,.08); }
+.emc.em-Blue   { border-color:#2563eb; background:linear-gradient(135deg,#fff 0%,#eff6ff 100%); box-shadow:0 0 0 3px rgba(37,99,235,.1),0 6px 18px rgba(37,99,235,.08); }
+
+.emc-tick {
+    position: absolute; top: 10px; right: 10px;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid #d1d5db; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: transparent; transition: all .2s;
+}
+.emc.em-Red    .emc-tick { background:#dc2626;border-color:#dc2626;color:#fff; }
+.emc.em-Orange .emc-tick { background:#ea580c;border-color:#ea580c;color:#fff; }
+.emc.em-Yellow .emc-tick { background:#d97706;border-color:#d97706;color:#fff; }
+.emc.em-Blue   .emc-tick { background:#2563eb;border-color:#2563eb;color:#fff; }
+
+.emc-dot  { width:9px;height:9px;border-radius:50%;margin-bottom:.625rem; }
+.emc-lvl  { font-size:.6875rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.25rem; }
+.emc-name { font-family:'DM Serif Display',serif;font-size:1.125rem;color:#111827;margin-bottom:.375rem; }
+.emc-desc { font-size:.75rem;color:#6b7280;line-height:1.5; }
+.emc-bar-bg { margin-top:.875rem;height:3px;border-radius:2px;background:#f3f4f6; }
+.emc-bar    { height:3px;border-radius:2px; }
+
+/* ─── INCIDENT TYPE CARDS ─────────────────────────── */
+.inc-wrap { display:grid;grid-template-columns:repeat(3,1fr);gap:.625rem;margin-top:1.25rem; }
+@media(min-width:640px){ .inc-wrap { grid-template-columns:repeat(6,1fr); } }
+
+.incc {
+    cursor:pointer; text-align:center;
+    background:#fff; border:1.5px solid #e5e7eb;
+    border-radius:.875rem; padding:1rem .625rem;
+    transition:all .2s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.incc:hover { transform:translateY(-2px);border-color:#d1d5db;box-shadow:0 5px 14px rgba(0,0,0,.08); }
+.incc.sel {
+    border-color:#dc2626;
+    background:linear-gradient(135deg,#fff,#fef2f2);
+    box-shadow:0 0 0 3px rgba(220,38,38,.1),0 5px 14px rgba(220,38,38,.07);
+    transform:translateY(-2px);
+}
+.incc-ico  { font-size:1.5rem;margin-bottom:.5rem;display:block;transition:transform .2s; }
+.incc.sel .incc-ico { transform:scale(1.12); }
+.incc-name { font-size:.75rem;font-weight:700;color:#111827;line-height:1.3; }
+.incc-sub  { font-size:.6875rem;color:#9ca3af;margin-top:.2rem; }
+
+/* ─── INPUTS ──────────────────────────────────────── */
+.flug-input {
+    width:100%; border-radius:.75rem; border:1.5px solid #e5e7eb;
+    background:#f9fafb; padding:.6875rem 1rem;
+    color:#111827; outline:none; font-family:'DM Sans',sans-serif;
+    font-size:.9375rem; transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.flug-input:focus { border-color:#111827;background:#fff;box-shadow:0 0 0 3px rgba(17,24,39,.07); }
+.flug-input::placeholder { color:#9ca3af; }
+select.flug-input {
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5l5 5 5-5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;
+}
+textarea.flug-input { resize:vertical;min-height:96px; }
+
+.flug-label {
+    display:block;font-size:.8125rem;font-weight:600;
+    color:#374151;margin-bottom:.375rem;letter-spacing:.01em;
+}
+
+/* ─── TOGGLE ROWS ─────────────────────────────────── */
+.tr {
+    display:flex;align-items:center;justify-content:space-between;
+    padding:1rem 1.125rem;border-radius:.75rem;
+    border:1.5px solid #e9eaec;background:#fafafa;
+    cursor:pointer;transition:all .18s;margin-bottom:.625rem;
+}
+.tr:hover { background:#f3f4f6;border-color:#e0e0e0; }
+.tr.t-on        { background:#fef2f2;border-color:#fecaca; }
+.tr.t-on-green  { background:#f0fdf4;border-color:#bbf7d0; }
+.tr.t-on-indigo { background:#eef2ff;border-color:#c7d2fe; }
+
+.tr-left  { display:flex;align-items:center;gap:.875rem; }
+.tr-ico   { width:36px;height:36px;border-radius:.625rem;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; }
+.tr-title { font-size:.875rem;font-weight:700;color:#111827; }
+.tr-sub   { font-size:.75rem;color:#6b7280;margin-top:.125rem; }
+
+.ps  { width:40px;height:22px;border-radius:11px;background:#d1d5db;position:relative;transition:background .2s;flex-shrink:0; }
+.psk { position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s; }
+.ps.on   { background:#dc2626; } .ps.on   .psk { left:21px; }
+.ps.on-g { background:#16a34a; } .ps.on-g .psk { left:21px; }
+.ps.on-i { background:#4f46e5; } .ps.on-i .psk { left:21px; }
+
+#policeFields { display:none;margin-top:.875rem;padding:1.125rem;background:#fef2f2;border-radius:.625rem;border:1.5px solid #fecaca; }
+
+/* ─── SUMMARY ─────────────────────────────────────── */
+.sum-r { display:flex;justify-content:space-between;align-items:flex-start;padding:.625rem 0;border-bottom:1px solid #f3f4f6; }
+.sum-r:last-child { border-bottom:none; }
+.sum-k { font-size:.8125rem;color:#6b7280; }
+.sum-v { font-size:.8125rem;font-weight:700;color:#111827;text-align:right;max-width:60%; }
+
+/* ─── NAV ROW ─────────────────────────────────────── */
+.nav-row { display:flex;align-items:center;justify-content:space-between;margin-top:2rem;padding-top:1.25rem;border-top:1.5px solid #e9eaec; }
+
+.btn-bk {
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.625rem 1.25rem;border-radius:.75rem;
+    border:1.5px solid #e5e7eb;background:#fff;
+    color:#374151;font-weight:600;font-size:.875rem;
+    cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif;
+}
+.btn-bk:hover { background:#f9fafb;border-color:#d1d5db; }
+
+.btn-nx {
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.6875rem 1.5rem;border-radius:.75rem;border:none;
+    background:#dc2626;color:#fff;font-weight:700;font-size:.875rem;
+    cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;
+}
+.btn-nx:hover { background:#b91c1c;transform:translateY(-1px);box-shadow:0 4px 14px rgba(220,38,38,.35); }
+
+.btn-pub {
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.75rem 1.75rem;border-radius:.75rem;border:none;
+    background:#111827;color:#fff;font-weight:700;font-size:.9375rem;
+    cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;
+}
+.btn-pub:hover { background:#1f2937;transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,0,0,.28); }
+.btn-pub:disabled { opacity:.5;cursor:not-allowed;transform:none;box-shadow:none; }
+
+/* ─── MISC ────────────────────────────────────────── */
+.wdiv { height:1px;background:#f0f1f3;margin:1.75rem 0; }
+.werr { color:#dc2626;font-size:.75rem;font-weight:600;margin-top:.5rem;display:none; }
+.werr.show { display:block; }
+#targetsViewGrid img { border-radius:.625rem;width:100%;aspect-ratio:1;object-fit:cover;border:1.5px solid #e5e7eb; }
+
+/* ─── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:768px){
+    .ws { display:none; }
+    .wr { padding:1.25rem 1rem 4rem; }
+}
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:#f3f4f6; }
+::-webkit-scrollbar-thumb { background:#d1d5db;border-radius:3px; }
+</style>
+</head>
+
+<body>
+
+<!-- ─── TOP HEADER ──────────────────────────────────── -->
+<header class="flug-header">
+    <a href="/" class="flug-logo">
+        <div class="flug-logo-icon">
+            <i class="fas fa-camera-retro text-white" style="font-size:.7rem"></i>
+        </div>
+        <span class="flug-logo-text">FLUG<span>.</span></span>
+    </a>
+    <span class="flug-header-tag">Complete Evidence</span>
+    <a href="/" class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+        <i class="fas fa-arrow-left" style="font-size:.65rem"></i> Back to dashboard
+    </a>
+</header>
+
+<!-- ─── LAYOUT ──────────────────────────────────────── -->
+<div class="ew">
+
+    <!-- ═══ DARK STEP SIDEBAR ═══ -->
+    <aside class="ws">
+        <div class="ws-brand">
+            <span style="font-size:.875rem">⬡</span> FLUG · Evidence
+        </div>
+
+        <!-- Sidebar progress bar -->
+        <div class="ws-prog-rail">
+            <div class="ws-prog-fill" id="ws-prog"></div>
+        </div>
+
+        <nav>
+            <div class="ws-item cur" data-f="1">
+                <div class="ws-num" id="sn1">1</div>
+                <div>
+                    <p class="ws-txt-label">Step 1</p>
+                    <p class="ws-txt-name">Classify</p>
+                </div>
+            </div>
+            <div class="ws-line" id="ln1"></div>
+
+            <div class="ws-item" data-f="2">
+                <div class="ws-num" id="sn2">2</div>
+                <div>
+                    <p class="ws-txt-label">Step 2</p>
+                    <p class="ws-txt-name">Location &amp; Time</p>
+                </div>
+            </div>
+            <div class="ws-line" id="ln2"></div>
+
+            <div class="ws-item" data-f="3">
+                <div class="ws-num" id="sn3">3</div>
+                <div>
+                    <p class="ws-txt-label">Step 3</p>
+                    <p class="ws-txt-name">Your Account</p>
+                </div>
+            </div>
+            <div class="ws-line" id="ln3"></div>
+
+            <div class="ws-item" data-f="4">
+                <div class="ws-num" id="sn4">4</div>
+                <div>
+                    <p class="ws-txt-label">Step 4</p>
+                    <p class="ws-txt-name">Agency &amp; Privacy</p>
+                </div>
+            </div>
+            <div class="ws-line" id="ln4"></div>
+
+            <div class="ws-item" data-f="5">
+                <div class="ws-num" id="sn5">5</div>
+                <div>
+                    <p class="ws-txt-label">Step 5</p>
+                    <p class="ws-txt-name">Review &amp; Publish</p>
+                </div>
+            </div>
+        </nav>
+
+        <div class="ws-foot">
+            <p class="ws-foot-lbl">Evidence Ref</p>
+            <p class="ws-foot-num">#{{ evidence_number }}</p>
+            <div class="ws-badge"><span class="ws-pulse"></span> Draft</div>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="wr">
+
+        <!-- Bio strip -->
+        <div class="bio">
+            <div class="bio-block">
+                <p class="bio-lbl">Crime Scene</p>
+                <p class="bio-val">#{{ evidence_number }}</p>
+            </div>
+            <div class="bio-div"></div>
+            <div class="bio-block">
+                <p class="bio-lbl">Files</p>
+                <p class="bio-val">{{ media_files_count }}</p>
+            </div>
+            <div class="bio-div"></div>
+            <div class="bio-block">
+                <p class="bio-lbl">Captured</p>
+                <p class="bio-sub">{{ today }} · {{ current_time }}</p>
+            </div>
+            <div class="bio-draft">
+                <div class="bio-draft-dot"></div>
+                Draft — Awaiting Details
+            </div>
+        </div>
+
+        <!-- Top progress rail -->
+        <div class="wbar-wrap">
+            <div class="wbar-fill" id="wbar" style="width:20%"></div>
+        </div>
+
+        <!-- ════ FORM ════ -->
+        <form id="completeForm" onsubmit="completeEvidence(event)">
+            <input type="hidden" name="evidence_id"        value="{{ evidence_id }}">
+            <input type="hidden" name="emergency_level"    id="hEM"  value="Blue">
+            <input type="hidden" name="incident_type"      id="hINC" value="">
+            <input type="hidden" name="reported_to_police" id="hPOL" value="false">
+            <input type="hidden" name="is_anonymous"       id="hANO" value="false">
+            <input type="hidden" name="sign_with_wallet"   id="hWAL" value="false">
+            <input type="hidden" name="sub_type"           value="">
+
+            <!-- ══ STEP 1 — CLASSIFY ══ -->
+            <div class="wp on" data-step="1">
+                <h1 class="sh">How urgent is this incident?</h1>
+                <p class="shs">Select the emergency level that best reflects what happened on the ground.</p>
+
+                <div class="em-wrap">
+                    <div class="emc em-Blue" onclick="pickEM(this,'Blue')">
+                        <div class="emc-tick">✓</div>
+                        <div class="emc-dot" style="background:#2563eb"></div>
+                        <div class="emc-lvl" style="color:#2563eb">Informational</div>
+                        <div class="emc-name">Blue</div>
+                        <div class="emc-desc">Low severity. Documentation & awareness purposes.</div>
+                        <div class="emc-bar-bg"><div class="emc-bar" style="background:#2563eb;width:25%"></div></div>
+                    </div>
+                    <div class="emc" onclick="pickEM(this,'Yellow')">
+                        <div class="emc-tick">✓</div>
+                        <div class="emc-dot" style="background:#d97706"></div>
+                        <div class="emc-lvl" style="color:#d97706">Medium</div>
+                        <div class="emc-name">Yellow</div>
+                        <div class="emc-desc">Needs attention within 24–48 hours.</div>
+                        <div class="emc-bar-bg"><div class="emc-bar" style="background:#d97706;width:50%"></div></div>
+                    </div>
+                    <div class="emc" onclick="pickEM(this,'Orange')">
+                        <div class="emc-tick">✓</div>
+                        <div class="emc-dot" style="background:#ea580c"></div>
+                        <div class="emc-lvl" style="color:#ea580c">High Priority</div>
+                        <div class="emc-name">Orange</div>
+                        <div class="emc-desc">Urgent — not immediately life-threatening.</div>
+                        <div class="emc-bar-bg"><div class="emc-bar" style="background:#ea580c;width:75%"></div></div>
+                    </div>
+                    <div class="emc" onclick="pickEM(this,'Red')">
+                        <div class="emc-tick">✓</div>
+                        <div class="emc-dot" style="background:#dc2626"></div>
+                        <div class="emc-lvl" style="color:#dc2626">Emergency</div>
+                        <div class="emc-name">Red</div>
+                        <div class="emc-desc">Immediate danger to life. Active threat.</div>
+                        <div class="emc-bar-bg"><div class="emc-bar" style="background:#dc2626;width:100%"></div></div>
+                    </div>
+                </div>
+
+                <div class="wdiv"></div>
+
+                <h2 class="sh" style="font-size:1.25rem">What type of incident?</h2>
+                <p class="shs" style="font-size:.875rem;margin-top:.25rem">Select the category that best describes what occurred.</p>
+
+                <div class="inc-wrap">
+                    <div class="incc" onclick="pickINC(this,'Hit &amp; Run')">      <span class="incc-ico">🚗</span><p class="incc-name">Hit &amp; Run</p>     <p class="incc-sub">Vehicle fled</p></div>
+                    <div class="incc" onclick="pickINC(this,'Assault')">            <span class="incc-ico">👊</span><p class="incc-name">Assault</p>          <p class="incc-sub">Physical attack</p></div>
+                    <div class="incc" onclick="pickINC(this,'ThreatToLife')">       <span class="incc-ico">⚠️</span><p class="incc-name">Threat to Life</p>  <p class="incc-sub">Credible danger</p></div>
+                    <div class="incc" onclick="pickINC(this,'PropertyDamage')">     <span class="incc-ico">🏚️</span><p class="incc-name">Property Dmg</p>   <p class="incc-sub">Asset destruction</p></div>
+                    <div class="incc" onclick="pickINC(this,'Theft')">              <span class="incc-ico">💰</span><p class="incc-name">Theft</p>            <p class="incc-sub">Robbery / stealing</p></div>
+                    <div class="incc" onclick="pickINC(this,'Other')">              <span class="incc-ico">📋</span><p class="incc-name">Other</p>            <p class="incc-sub">Specify below</p></div>
+                </div>
+
+                <p class="werr" id="e1">⚠ Please select both an emergency level and an incident type to continue.</p>
+            </div>
+
+            <!-- ══ STEP 2 — LOCATION & TIME ══ -->
+            <div class="wp" data-step="2">
+                <h1 class="sh">Where &amp; when did it happen?</h1>
+                <p class="shs">Location is auto-detected. Adjust if the incident occurred at a different place or earlier time.</p>
+
+                <div id="locationStatus" style="display:flex;align-items:center;gap:.625rem;padding:.75rem 1rem;border-radius:.75rem;background:#eff6ff;border:1.5px solid #bfdbfe;font-size:.875rem;color:#1e40af;margin-top:1.25rem;margin-bottom:1rem">
+                    <i class="fas fa-circle-notch fa-spin" style="color:#3b82f6;flex-shrink:0"></i>
+                    <span>Detecting your location automatically…</span>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head">
+                        <div>
+                            <p class="sc-title">📍 Location Details</p>
+                            <p class="sc-sub">GPS pre-filled · adjust if needed</p>
+                        </div>
+                        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                            <button type="button" onclick="fetchRealLocation()" style="display:inline-flex;align-items:center;gap:.375rem;padding:.4375rem .875rem;border-radius:.625rem;background:#2563eb;color:#fff;font-size:.75rem;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">
+                                <i class="fas fa-location-dot"></i> Auto-detect
+                            </button>
+                            <button type="button" onclick="getBrowserLocation()" style="display:inline-flex;align-items:center;gap:.375rem;padding:.4375rem .875rem;border-radius:.625rem;background:#16a34a;color:#fff;font-size:.75rem;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">
+                                <i class="fas fa-satellite-dish"></i> Device GPS
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sc-body">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.875rem">
+                            <div>
+                                <label class="flug-label">County / Region *</label>
+                                <select name="county" id="countySelect" class="flug-input">
+                                    <option value="">Select County</option>{{ county_options }}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="flug-label">Constituency / Area</label>
+                                <input type="text" name="constituency" id="constituencyInput" placeholder="e.g. Embakasi West" class="flug-input">
+                            </div>
+                            <div>
+                                <label class="flug-label">Ward / Village</label>
+                                <input type="text" name="ward" id="wardInput" placeholder="e.g. Umoja" class="flug-input">
+                            </div>
+                            <div>
+                                <label class="flug-label">Nearby Landmark</label>
+                                <input type="text" name="landmark" id="landmarkInput" placeholder="e.g. Near Umoja Market" class="flug-input">
+                            </div>
+                            <div>
+                                <label class="flug-label">Latitude *</label>
+                                <input type="number" step="0.000001" name="latitude" id="latitudeInput" placeholder="-1.2921" value="0.0" class="flug-input">
+                            </div>
+                            <div>
+                                <label class="flug-label">Longitude *</label>
+                                <input type="number" step="0.000001" name="longitude" id="longitudeInput" placeholder="36.8219" value="0.0" class="flug-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head">
+                        <div>
+                            <p class="sc-title">🕐 Date &amp; Time of Incident</p>
+                            <p class="sc-sub">Pre-filled · the incident cannot be in the future</p>
+                        </div>
+                    </div>
+                    <div class="sc-body">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
+                            <div>
+                                <label class="flug-label">Date *</label>
+                                <input type="date" name="incident_date" id="incidentDate" value="{{ today }}" max="{{ today }}" class="flug-input">
+                                <p class="werr" id="eDateErr">⚠ Incident date cannot be in the future.</p>
+                            </div>
+                            <div>
+                                <label class="flug-label">Time *</label>
+                                <input type="time" name="incident_time" id="incidentTime" value="{{ current_time }}" class="flug-input">
+                                <p class="werr" id="eTimeErr">⚠ Incident time cannot be in the future.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head">
+                        <div>
+                            <p class="sc-title">🚗 Vehicle Involved</p>
+                            <p class="sc-sub">Optional — leave blank if no vehicle</p>
+                        </div>
+                    </div>
+                    <div class="sc-body">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
+                            <div>
+                                <label class="flug-label">Vehicle Type</label>
+                                <select name="vehicle_type" class="flug-input">
+                                    <option value="">No vehicle involved</option>
+                                    <option value="Saloon">Saloon Car</option>
+                                    <option value="SUV">SUV / 4x4</option>
+                                    <option value="Bus">Bus</option>
+                                    <option value="Matatu">Matatu</option>
+                                    <option value="Motorcycle">Motorcycle / Boda</option>
+                                    <option value="Heavy Truck">Heavy Truck</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="flug-label">SACCO / Service</label>
+                                <input type="text" name="sacco_name" placeholder="e.g. Super Metro SACCO" class="flug-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ STEP 3 — YOUR ACCOUNT ══ -->
+            <div class="wp" data-step="3">
+                <h1 class="sh">Tell us exactly what happened.</h1>
+                <p class="shs">Write a clear, factual account. This becomes the permanent official record.</p>
+
+                <div class="sc" style="margin-top:1.5rem">
+                    <div class="sc-body" style="display:flex;flex-direction:column;gap:1rem">
+                        <div>
+                            <label class="flug-label">Incident Title / Headline *</label>
+                            <input type="text" name="title" required placeholder="e.g. Armed robbery outside Umoja market — suspect fled north on foot" class="flug-input">
+                            <p style="font-size:.6875rem;color:#9ca3af;margin-top:.375rem">A concise headline that captures what happened.</p>
+                        </div>
+                        <div>
+                            <label class="flug-label">Detailed Description *</label>
+                            <textarea name="description" required rows="6" placeholder="Describe chronologically what you witnessed — sequence of events, actions taken, number of people involved, and any context observed." class="flug-input"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head">
+                        <div><p class="sc-title">Injuries &amp; Damage</p><p class="sc-sub">Write "None" where not applicable</p></div>
+                    </div>
+                    <div class="sc-body">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
+                            <div>
+                                <label class="flug-label">Injuries Incurred</label>
+                                <textarea name="injuries" rows="4" placeholder="Describe any physical injuries to victims…" class="flug-input"></textarea>
+                            </div>
+                            <div>
+                                <label class="flug-label">Property / Asset Damage</label>
+                                <textarea name="property_damage" rows="4" placeholder="Damage to property, vehicles or assets." class="flug-input"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head">
+                        <div><p class="sc-title">🔍 Suspect Description</p><p class="sc-sub">Supplements auto-extracted target photos</p></div>
+                    </div>
+                    <div class="sc-body">
+                        <label class="flug-label">Physical Description &amp; Behaviour</label>
+                        <textarea name="suspect_description" rows="4" placeholder="Height, build, skin tone, clothing, distinguishing features, direction of flight…" class="flug-input"></textarea>
+                    </div>
+                </div>
+
+                <p class="werr" id="e3">⚠ Please fill in a headline and description before continuing.</p>
+            </div>
+
+            <!-- ══ STEP 4 — AGENCY & PRIVACY ══ -->
+            <div class="wp" data-step="4">
+                <h1 class="sh">Agency &amp; Privacy.</h1>
+                <p class="shs">Confirm police reporting status and how you want your identity handled.</p>
+
+                <div class="sc" style="margin-top:1.5rem">
+                    <div class="sc-head"><p class="sc-title">🚔 Police / Agency Report</p></div>
+                    <div class="sc-body">
+                        <input type="checkbox" id="reportedToPolice" name="reported_to_police_cb" value="true" style="display:none">
+                        <div class="tr t-on" id="trPolice" onclick="setPol(true)">
+                            <div class="tr-left">
+                                <div class="tr-ico" style="background:#fee2e2">🚔</div>
+                                <div><p class="tr-title">Yes — Already Reported</p><p class="tr-sub">I have an OB number or police case reference</p></div>
+                            </div>
+                            <div class="ps on" id="swPol"><div class="psk"></div></div>
+                        </div>
+                        <div id="policeFields">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
+                                <div>
+                                    <label class="flug-label">Case / OB Number</label>
+                                    <input type="text" name="police_case_id" placeholder="e.g. OB 123/2024" class="flug-input">
+                                </div>
+                                <div>
+                                    <label class="flug-label">Police Station</label>
+                                    <input type="text" name="police_station" placeholder="e.g. Umoja Police Station" class="flug-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head"><p class="sc-title">🛡️ Submission Privacy</p></div>
+                    <div class="sc-body">
+                        <div class="tr" id="trAnon" onclick="setAnon()">
+                            <div class="tr-left">
+                                <div class="tr-ico">🕵️</div>
+                                <div><p class="tr-title">Submit Anonymously</p><p class="tr-sub">Your identity will not appear publicly on this report</p></div>
+                            </div>
+                            <div class="ps" id="swAnon"><div class="psk"></div></div>
+                        </div>
+                        <div class="tr" id="trWal" onclick="setWal()">
+                            <div class="tr-left">
+                                <div class="tr-ico" style="background:#eef2ff">🔐</div>
+                                <div><p class="tr-title">Cryptographic Wallet Signing</p><p class="tr-sub">Sign with your connected wallet to verify authenticity on-chain</p></div>
+                            </div>
+                            <div class="ps" id="swWal"><div class="psk"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ STEP 5 — REVIEW & PUBLISH ══ -->
+            <div class="wp" data-step="5">
+                <h1 class="sh">Review &amp; Confirm.</h1>
+                <p class="shs">Double-check everything before publishing. This becomes a permanent, immutable record.</p>
+
+                <div class="sc" style="margin-top:1.5rem">
+                    <div class="sc-head"><p class="sc-title">📋 Submission Summary</p></div>
+                    <div class="sc-body"><div id="wizSummary"></div></div>
+                </div>
+
+                <div class="sc">
+                    <div class="sc-head" style="flex-wrap:wrap;gap:.75rem">
+                        <div style="display:flex;align-items:center;gap:.75rem">
+                            <div style="width:36px;height:36px;border-radius:.625rem;background:#f3f4f6;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-crosshairs" style="color:#6b7280;font-size:.875rem"></i></div>
+                            <div><p class="sc-title">Auto-Extracted Targets</p><p class="sc-sub">Secured on Storj · cannot be modified</p></div>
+                        </div>
+                        <span id="targetsViewCount" style="display:none;padding:.25rem .75rem;border-radius:9999px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;font-size:.75rem;font-weight:700"></span>
+                    </div>
+                    <div class="sc-body">
+                        <div style="display:flex;align-items:flex-start;gap:.5rem;padding:.75rem 1rem;border-radius:.75rem;background:#eff6ff;border:1.5px solid #bfdbfe;font-size:.8125rem;color:#1e40af;margin-bottom:.875rem">
+                            <i class="fas fa-circle-info" style="margin-top:.125rem;flex-shrink:0"></i>
+                            <span>Target photos are extracted autonomously from your video. They are already secured on Storj.</span>
+                        </div>
+                        <div id="targetsViewLoader" style="display:flex;align-items:center;justify-content:center;gap:.625rem;padding:2.25rem 0;color:#9ca3af;font-size:.875rem">
+                            <i class="fas fa-circle-notch fa-spin" style="color:#9ca3af"></i> Loading target photos…
+                        </div>
+                        <p id="targetsViewEmpty" style="display:none;padding:1.75rem;text-align:center;color:#9ca3af;font-size:.875rem">No target photos extracted for this evidence.</p>
+                        <div id="targetsViewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.625rem"></div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 1.125rem;border-radius:.75rem;background:#fffbeb;border:1.5px solid #fde68a;margin-bottom:.875rem">
+                    <i class="fas fa-triangle-exclamation" style="color:#d97706;margin-top:.125rem;flex-shrink:0"></i>
+                    <p style="font-size:.875rem;color:#92400e;line-height:1.55">Once published, this evidence is submitted and <strong>cannot be edited</strong>. Ensure all details are accurate and truthful.</p>
+                </div>
+
+                <div id="statusMessages" class="space-y-2"></div>
+            </div>
+
+            <!-- ══ NAV ══ -->
+            <div class="nav-row">
+                <button type="button" id="btnBk" onclick="wPrev()" class="btn-bk" style="visibility:hidden">
+                    <i class="fas fa-arrow-left" style="font-size:.7rem"></i> Go Back
+                </button>
+                <div style="display:flex;align-items:center;gap:.625rem">
+                    <button type="button" id="btnNx" onclick="wNext()" class="btn-nx">
+                        Next Step <i class="fas fa-arrow-right" style="font-size:.7rem"></i>
+                    </button>
+                    <button type="submit" id="submitBtn" class="btn-pub" style="display:none">
+                        <i class="fas fa-lock" style="font-size:.7rem"></i> Publish Evidence
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </div><!-- /wr -->
+</div><!-- /ew -->
+
+<!-- ══════════ WIZARD JS ══════════ -->
+<script>
+(function(){
+    let s=1, TOTAL=5, polOn=false, anonOn=false, walOn=false, emSel='Blue', incSel='';
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        const dIn=document.getElementById('incidentDate');
+        if(dIn) dIn.max=todayStr;
+        setPol(true);
+        draw(1,false);
+    });
+
+    window.pickEM=function(el,val){
+        document.querySelectorAll('.emc').forEach(c=>{ c.className='emc'; });
+        el.classList.add('em-'+val);
+        emSel=val;
+        document.getElementById('hEM').value=val;
+    };
+
+    window.pickINC=function(el,val){
+        document.querySelectorAll('.incc').forEach(c=>c.classList.remove('sel'));
+        el.classList.add('sel');
+        incSel=val;
+        document.getElementById('hINC').value=val;
+    };
+
+    window.setPol=function(on){
+        polOn=on;
+        document.getElementById('hPOL').value=on?'true':'false';
+        const cb=document.getElementById('reportedToPolice');
+        if(cb) cb.checked=on;
+        const sw=document.getElementById('swPol'),row=document.getElementById('trPolice'),pf=document.getElementById('policeFields');
+        if(on){ sw.className='ps on';row.classList.add('t-on');pf.style.display='block'; }
+        else  { sw.className='ps';row.classList.remove('t-on');pf.style.display='none'; }
+    };
+
+    window.setAnon=function(){
+        anonOn=!anonOn;
+        document.getElementById('hANO').value=anonOn?'true':'false';
+        const sw=document.getElementById('swAnon'),row=document.getElementById('trAnon');
+        if(anonOn){ sw.className='ps on-g';row.classList.add('t-on-green'); }
+        else       { sw.className='ps';row.classList.remove('t-on-green'); }
+    };
+
+    window.setWal=function(){
+        walOn=!walOn;
+        document.getElementById('hWAL').value=walOn?'true':'false';
+        const sw=document.getElementById('swWal'),row=document.getElementById('trWal');
+        if(walOn){ sw.className='ps on-i';row.classList.add('t-on-indigo'); }
+        else      { sw.className='ps';row.classList.remove('t-on-indigo'); }
+    };
+
+    function validateDateTime(){
+        const dIn=document.getElementById('incidentDate');
+        const tIn=document.getElementById('incidentTime');
+        const dErr=document.getElementById('eDateErr');
+        const tErr=document.getElementById('eTimeErr');
+        if(!dIn) return true;
+        const dateVal=dIn.value, timeVal=tIn?.value||'00:00';
+        if(dateVal>todayStr){ dErr.classList.add('show');dIn.style.borderColor='#dc2626';return false; }
+        dErr.classList.remove('show');dIn.style.borderColor='';
+        if(dateVal===todayStr){
+            const nowTime=new Date().toTimeString().slice(0,5);
+            if(timeVal>nowTime){ tErr.classList.add('show');tIn.style.borderColor='#dc2626';return false; }
+        }
+        tErr.classList.remove('show');if(tIn)tIn.style.borderColor='';
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        const dIn=document.getElementById('incidentDate');
+        const tIn=document.getElementById('incidentTime');
+        if(dIn) dIn.addEventListener('change',validateDateTime);
+        if(tIn) tIn.addEventListener('change',validateDateTime);
+    });
+
+    function ok(step){
+        if(step===1){
+            const err=document.getElementById('e1');
+            if(!emSel||!incSel){ err.classList.add('show');return false; }
+            err.classList.remove('show');
+        }
+        if(step===2){ if(!validateDateTime()) return false; }
+        if(step===3){
+            const t=document.querySelector('[name="title"]')?.value?.trim();
+            const d=document.querySelector('[name="description"]')?.value?.trim();
+            const err=document.getElementById('e3');
+            if(!t||!d){ err.classList.add('show');return false; }
+            err.classList.remove('show');
+        }
+        return true;
+    }
+
+    window.wNext=function(){ if(ok(s)&&s<TOTAL){ s++;draw(s,false); } };
+    window.wPrev=function(){ if(s>1){ s--;draw(s,true); } };
+
+    function draw(n,back){
+        /* Panels */
+        document.querySelectorAll('.wp').forEach(p=>{ p.classList.remove('on','bk');p.style.display='none'; });
+        const active=document.querySelector(`.wp[data-step="${n}"]`);
+        if(active){ active.style.display='block';void active.offsetWidth;active.classList.add(back?'bk':'on'); }
+
+        /* Sidebar items */
+        for(let i=1;i<=TOTAL;i++){
+            const item=document.querySelector(`.ws-item[data-f="${i}"]`);
+            const num =document.getElementById('sn'+i);
+            const line=document.getElementById('ln'+i);
+            if(!item) continue;
+            item.className='ws-item'+(i<n?' done':i===n?' cur':'');
+            if(i<n) num.innerHTML='<i class="fas fa-check" style="font-size:.5rem"></i>';
+            else num.textContent=i;
+            if(line) line.className='ws-line'+(i<n?' done':'');
+        }
+
+        /* Sidebar progress bar */
+        const prog=document.getElementById('ws-prog');
+        if(prog) prog.style.width=Math.round((n-1)/(TOTAL-1)*100)+'%';
+
+        /* Top progress bar */
+        document.getElementById('wbar').style.width=Math.round(n/TOTAL*100)+'%';
+
+        /* Back button */
+        document.getElementById('btnBk').style.visibility=n===1?'hidden':'visible';
+
+        /* Next / Submit */
+        const nx=document.getElementById('btnNx'),sb=document.getElementById('submitBtn');
+        if(n===TOTAL){
+            nx.style.display='none';sb.style.display='inline-flex';
+            buildSum();
+            if(typeof loadTargetPhotos==='function') loadTargetPhotos('{{ evidence_id }}');
+        } else {
+            nx.style.display='inline-flex';sb.style.display='none';
+        }
+
+        window.scrollTo(0,0);
+    }
+
+    function buildSum(){
+        const colors={Red:'#dc2626',Orange:'#ea580c',Yellow:'#d97706',Blue:'#2563eb'};
+        const c=colors[emSel]||'#2563eb';
+        const title =document.querySelector('[name="title"]')?.value||'—';
+        const date  =document.getElementById('incidentDate')?.value||'—';
+        const time  =document.getElementById('incidentTime')?.value||'—';
+        const county=document.getElementById('countySelect')?.value||'—';
+        const rows=[
+            ['Evidence ID',`<span style="font-family:monospace">#{{ evidence_number }}</span>`],
+            ['Emergency Level',`<span style="color:${c};font-weight:800">● ${emSel}</span>`],
+            ['Incident Type',incSel||'—'],
+            ['Headline',title.length>64?title.slice(0,64)+'…':title],
+            ['Date &amp; Time',`${date} · ${time}`],
+            ['County',county],
+            ['Reported to Police',polOn?'✅ Yes':'✗ Not yet'],
+            ['Anonymous',anonOn?'✅ Yes':'✗ No'],
+            ['Wallet Signing',walOn?'✅ Enabled':'✗ Disabled'],
+        ];
+        document.getElementById('wizSummary').innerHTML=rows.map(([k,v])=>
+            `<div class="sum-r"><span class="sum-k">${k}</span><span class="sum-v">${v}</span></div>`
+        ).join('');
+    }
+})();
+</script>
+
+<!-- Location JavaScript -->
+<script>{{ location_javascript }}</script>
+
+<!-- Evidence Complete JS (target viewer + form submit) -->
+<script>{{ evidence_complete_js }}</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HTML OVERRIDES
+     evidence_complete_js injects dark/purple-themed markup into
+     #targetsViewGrid and #statusMessages. These override every
+     function that injects HTML to match the FLUG light theme.
+     Defined AFTER evidence_complete_js so they take precedence.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── loadTargetPhotos — re-styles the target grid after original renders ────
+(function () {
+    const _original = window.loadTargetPhotos;
+
+    window.loadTargetPhotos = function (evidenceId) {
+        if (typeof _original !== 'function') return;
+
+        // Call original to do the fetch
+        _original(evidenceId);
+
+        // Poll until loader hides, then re-style whatever was rendered
+        const loader  = document.getElementById('targetsViewLoader');
+        const grid    = document.getElementById('targetsViewGrid');
+        const counter = document.getElementById('targetsViewCount');
+        let attempts  = 0;
+        const poll = setInterval(() => {
+            attempts++;
+            if (attempts > 125) { clearInterval(poll); return; } // 15 s timeout
+            const loaderGone = !loader || loader.style.display === 'none' || loader.style.display === '';
+            const hasContent = grid && grid.children.length > 0;
+            if (loaderGone && hasContent) {
+                clearInterval(poll);
+                _restyleGrid(grid, counter);
+            }
+        }, 120);
+    };
+
+    function _restyleGrid(grid, counter) {
+        const imgs = Array.from(grid.querySelectorAll('img'));
+        if (!imgs.length) return;
+        const srcs = imgs.map(img => img.src);
+
+        grid.innerHTML = srcs.map((src, i) => `
+            <div style="
+                position:relative;aspect-ratio:16/9;border-radius:.625rem;
+                overflow:hidden;border:1.5px solid #e5e7eb;background:#0f1117;
+                cursor:pointer;transition:transform .15s,box-shadow .15s;
+                box-shadow:0 1px 3px rgba(0,0,0,.06);"
+                onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 6px 18px rgba(0,0,0,.14)'"
+                onmouseout="this.style.transform='';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'"
+                onclick="window.open('${src}','_blank')" title="Click to open full size">
+                <img src="${src}" loading="lazy"
+                    style="width:100%;height:100%;object-fit:cover;display:block;">
+                <div style="
+                    position:absolute;bottom:4px;left:5px;
+                    font-size:.6rem;font-weight:600;color:rgba(255,255,255,.85);
+                    background:rgba(0,0,0,.55);border-radius:3px;padding:1px 5px;
+                    backdrop-filter:blur(2px);font-variant-numeric:tabular-nums;">T${i + 1}</div>
+            </div>`).join('');
+
+        if (counter) {
+            counter.textContent = srcs.length + ' target' + (srcs.length > 1 ? 's' : '');
+            counter.style.cssText = 'display:inline-block;padding:.25rem .75rem;border-radius:9999px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;font-size:.75rem;font-weight:700;';
+        }
+    }
+})();
+
+// ── showStatus / showError ─────────────────────────────────────────────────
+function _injectStatusMsg(message, type) {
+    const container = document.getElementById('statusMessages');
+    if (!container) return;
+    const themes = {
+        success: { bg:'#f0fdf4', border:'#bbf7d0', color:'#15803d', icon:'fa-check-circle',         ic:'#22c55e'  },
+        error:   { bg:'#fef2f2', border:'#fecaca', color:'#b91c1c', icon:'fa-exclamation-circle',    ic:'#ef4444'  },
+        warning: { bg:'#fffbeb', border:'#fde68a', color:'#92400e', icon:'fa-exclamation-triangle',  ic:'#d97706'  },
+        info:    { bg:'#f9fafb', border:'#e5e7eb', color:'#374151', icon:'fa-info-circle',           ic:'#9ca3af'  },
+    };
+    const t = themes[type] || themes.info;
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:flex-start;gap:.625rem;padding:.75rem 1rem;border-radius:.75rem;border:1.5px solid ${t.border};background:${t.bg};color:${t.color};font-size:.875rem;line-height:1.5;margin-bottom:.5rem;`;
+    el.innerHTML = `
+        <i class="fas ${t.icon}" style="color:${t.ic};margin-top:.125rem;flex-shrink:0;font-size:.875rem"></i>
+        <span style="flex:1">${message}</span>
+        <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;opacity:.4;padding:0;margin-left:.25rem;color:inherit;font-size:.75rem;line-height:1;">
+            <i class="fas fa-times"></i>
+        </button>`;
+    container.insertAdjacentElement('afterbegin', el);
+    if (type !== 'error') setTimeout(() => el.remove(), 7000);
+}
+window.showStatus = function(msg, type) { _injectStatusMsg(msg, type || 'info'); };
+window.showError  = function(msg)       { _injectStatusMsg(msg, 'error'); };
+
+// ── showSuccessMessage — published card ────────────────────────────────────
+(function () {
+    const _origComplete = window.completeEvidence;
+    if (typeof _origComplete !== 'function') return;
+
+    window.completeEvidence = async function (event) {
+        // Swap showSuccessMessage before original runs
+        const _origSuccess = window.showSuccessMessage;
+        window.showSuccessMessage = function (data) {
+            const container = document.getElementById('statusMessages');
+            if (!container) { _origSuccess?.(data); return; }
+            container.scrollIntoView({ behavior:'smooth', block:'start' });
+            container.innerHTML = `
+                <div style="border-radius:1rem;border:1.5px solid #e5e7eb;background:#fff;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.06);">
+
+                    <div style="display:flex;align-items:center;gap:.875rem;padding:1.25rem 1.5rem;border-bottom:1.5px solid #f3f4f6;">
+                        <div style="width:44px;height:44px;border-radius:.875rem;background:#f0fdf4;border:1.5px solid #bbf7d0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-check" style="color:#16a34a;font-size:1.125rem"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:.9375rem;font-weight:700;color:#111827;margin:0;">Evidence Published</p>
+                            <p style="font-size:.75rem;color:#6b7280;margin:.2rem 0 0;">${data?.evidence_number || 'Evidence'} is now live on the FLUG network</p>
+                        </div>
+                        <span style="margin-left:auto;padding:.3rem .875rem;border-radius:9999px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Published</span>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1.5px solid #f3f4f6;">
+                        ${[
+                            ['Evidence #', data?.evidence_number || '—'],
+                            ['Files',      (data?.media_files   || '—') + (data?.media_files ? ' file(s)' : '')],
+                            ['Targets',    data?.targets_count  ? data.targets_count + ' frame(s)' : 'None'],
+                        ].map(([k, v], i) => `
+                            <div style="padding:.875rem 1rem;${i < 2 ? 'border-right:1.5px solid #f3f4f6;' : ''}">
+                                <p style="font-size:.65rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:0 0 .25rem">${k}</p>
+                                <p style="font-size:.8125rem;font-weight:700;color:#111827;margin:0;font-family:'DM Sans',sans-serif;">${v}</p>
+                            </div>`).join('')}
+                    </div>
+
+                    <div style="display:flex;align-items:flex-start;gap:.625rem;padding:.875rem 1.25rem;background:#eff6ff;border-bottom:1.5px solid #dbeafe;">
+                        <i class="fas fa-info-circle" style="color:#3b82f6;margin-top:.125rem;flex-shrink:0;font-size:.8125rem"></i>
+                        <p style="font-size:.8125rem;color:#1e40af;margin:0;line-height:1.5;">Your evidence is encrypted, GPS-tagged, and blockchain timestamped. It is now visible to verified FLUG investigators.</p>
+                    </div>
+
+                    <div style="display:flex;">
+                        <a href="/evidence/dashboard"
+                           style="flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;text-decoration:none;font-size:.875rem;font-weight:700;color:#fff;background:#111827;border-right:1px solid #1f2937;transition:background .15s;"
+                           onmouseover="this.style.background='#374151'" onmouseout="this.style.background='#111827'">
+                            <i class="fas fa-th-large" style="font-size:.7rem"></i> Dashboard
+                        </a>
+                        <a href="/evidence/${data?.evidence_id || ''}"
+                           style="flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;text-decoration:none;font-size:.875rem;font-weight:600;color:#374151;background:#fff;transition:background .15s;"
+                           onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                            <i class="fas fa-eye" style="font-size:.7rem;color:#9ca3af"></i> View Evidence
+                        </a>
+                    </div>
+                </div>`;
+
+            const btn = document.getElementById('submitBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-check" style="font-size:.7rem"></i> Published'; }
+        };
+
+        return _origComplete(event);
+    };
+})();
+</script>
+
+</body>
+</html>

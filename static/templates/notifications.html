@@ -1,0 +1,1459 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+      Notifications | Dashboard
+    </title>
+  <link rel="icon" href="images/favicon.ico">
+  <link href="../static/css/style.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style id="flug-design-system">
+/* ════════════════════════════════════════════════
+   FLUG CRIME BANKING — DESIGN SYSTEM TOKENS
+   Matches evidence_dashboard.html exactly.
+════════════════════════════════════════════════ */
+:root {
+  --red:        #dc2626;
+  --red-glow:   rgba(220,38,38,0.18);
+  --red-soft:   rgba(220,38,38,0.08);
+  --mono:       'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  --sans:       'Space Grotesk', system-ui, sans-serif;
+  --surface-0:  #ffffff;
+  --surface-1:  #f8fafc;
+  --surface-2:  #f1f5f9;
+  --border:     #e2e8f0;
+  --border-md:  #cbd5e1;
+  --text-1:     #0f172a;
+  --text-2:     #475569;
+  --text-3:     #94a3b8;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+.dark {
+  --surface-0:  #0d1117;
+  --surface-1:  #111827;
+  --surface-2:  #1a2234;
+  --border:     rgba(255,255,255,0.07);
+  --border-md:  rgba(255,255,255,0.12);
+  --text-1:     #f8fafc;
+  --text-2:     rgba(255,255,255,0.55);
+  --text-3:     rgba(255,255,255,0.28);
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* ── Base font ── */
+body, main, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a {
+  font-family: var(--sans) !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+/* ════════════════════════════════════════════════
+   FLUG OBSIDIAN — dark mode overrides only.
+   Light mode: completely unaffected.
+   Dark mode: replaces dark-blue with obsidian.
+════════════════════════════════════════════════ */
+
+/* ── Body ─────────────────────────────────────── */
+.dark { background: #080c13 !important; }
+
+/* ── Header ───────────────────────────────────── */
+.dark header.sticky {
+  background: #0d1117 !important;
+  border-bottom-color: rgba(255,255,255,0.06) !important;
+}
+.dark header.sticky [class*="border-gray-"] {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+.dark header.sticky > div > div button {
+  background: transparent !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.55) !important;
+}
+.dark header.sticky > div > div button:hover {
+  background: rgba(255,255,255,0.05) !important;
+  color: #f8fafc !important;
+}
+/* Search input */
+.dark header.sticky input {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #f8fafc !important;
+}
+.dark header.sticky input::placeholder { color: rgba(255,255,255,0.28) !important; }
+/* ⌘K badge */
+.dark header.sticky #search-button {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ── Sidebar ──────────────────────────────────── */
+.dark aside.sidebar {
+  background: #080c13 !important;
+  border-right-color: rgba(255,255,255,0.05) !important;
+}
+.dark aside.sidebar h3 { color: rgba(255,255,255,0.25) !important; }
+.dark aside.sidebar .menu-item { color: rgba(255,255,255,0.55) !important; }
+.dark aside.sidebar .menu-item:hover {
+  background: rgba(255,255,255,0.04) !important;
+  color: #f8fafc !important;
+}
+.dark aside.sidebar .menu-item-active {
+  background: rgba(220,38,38,0.1) !important;
+  color: #f87171 !important;
+}
+.dark aside.sidebar .menu-dropdown-item { color: rgba(255,255,255,0.45) !important; }
+.dark aside.sidebar .menu-dropdown-item:hover {
+  background: rgba(255,255,255,0.04) !important;
+  color: #f8fafc !important;
+}
+.dark aside.sidebar .menu-item-icon-active { fill: #f87171 !important; }
+.dark aside.sidebar .menu-item-icon-inactive {
+  fill: rgba(255,255,255,0.35) !important;
+  color: rgba(255,255,255,0.35) !important;
+}
+/* Promo box */
+.dark aside.sidebar .rounded-2xl.bg-gray-50,
+.dark aside.sidebar [class*="dark:bg-white"] {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+.dark aside.sidebar .bg-brand-500 { background: #dc2626 !important; }
+.dark aside.sidebar .hover\:bg-brand-600:hover { background: #b91c1c !important; }
+
+/* ── Mobile overlay ───────────────────────────── */
+.dark .bg-gray-900\/50 { background: rgba(0,0,0,0.6) !important; }
+
+/* ── Main content cards ───────────────────────── */
+.dark .rounded-2xl.border.bg-white,
+.dark .rounded-2xl[class*="dark:bg-white"] {
+  background: #0d1117 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+.dark .rounded-2xl .border-b,
+.dark .rounded-2xl .border-t {
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Filter pill strip ────────────────────────── */
+.dark .flex.items-center.gap-1.rounded-lg {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── "Mark all read" button ───────────────────── */
+.dark button[onclick="markAllRead()"] {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.55) !important;
+}
+.dark button[onclick="markAllRead()"]:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #f8fafc !important;
+}
+
+/* ── Notification row dividers ────────────────── */
+.dark #notifications-list { divide-color: rgba(255,255,255,0.05); }
+.dark #notifications-list > div + div { border-top-color: rgba(255,255,255,0.05) !important; }
+/* Read row hover */
+.dark #notifications-list > div:not([class*="bg-brand"]):hover {
+  background: rgba(255,255,255,0.025) !important;
+}
+
+/* ── Embed cards inside notification rows ─────── */
+.dark #notifications-list .rounded-xl.border.bg-gray-50,
+.dark #notifications-list [class*="dark:bg-gray-8"] {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+/* Icon bubble in embed */
+.dark #notifications-list .rounded-lg.bg-white,
+.dark #notifications-list [class*="dark:bg-gray-7"] {
+  background: rgba(255,255,255,0.07) !important;
+}
+/* "View" / "Open case" link in embed */
+.dark #notifications-list a.rounded-lg.border.bg-white,
+.dark #notifications-list a[class*="dark:bg-transparent"] {
+  background: transparent !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.55) !important;
+}
+.dark #notifications-list a.rounded-lg.border.bg-white:hover,
+.dark #notifications-list a[class*="dark:hover:bg-gray-7"]:hover,
+.dark #notifications-list a[class*="dark:hover:bg-gray-8"]:hover {
+  background: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Empty state ──────────────────────────────── */
+.dark #empty-state .rounded-full { background: rgba(255,255,255,0.05) !important; }
+
+/* ── Quick action links ───────────────────────── */
+.dark a[href="/evidence"],
+.dark a[href="/profile"] {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  color: rgba(255,255,255,0.6) !important;
+}
+.dark a[href="/evidence"]:hover,
+.dark a[href="/profile"]:hover {
+  background: rgba(255,255,255,0.07) !important;
+  color: #f8fafc !important;
+}
+
+/* ── Type breakdown progress track ───────────── */
+.dark .h-1\.5.w-full.rounded-full {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+/* ── User & notification dropdowns ───────────── */
+.dark [x-data*="dropdownOpen"] > div.absolute,
+.dark [x-data*="notifying"] > div.absolute {
+  background: #111827 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+.dark [x-data*="dropdownOpen"] a,
+.dark [x-data*="dropdownOpen"] button {
+  color: rgba(255,255,255,0.55) !important;
+}
+.dark [x-data*="dropdownOpen"] a:hover,
+.dark [x-data*="dropdownOpen"] button:hover {
+  background: rgba(255,255,255,0.05) !important;
+  color: #f8fafc !important;
+}
+.dark [x-data*="dropdownOpen"] .border-b,
+.dark [x-data*="dropdownOpen"] .border-t {
+  border-color: rgba(255,255,255,0.07) !important;
+}
+/* User avatar area */
+.dark [class*="dark:border-gray-8"].rounded-full { border-color: rgba(255,255,255,0.08) !important; }
+
+/* ── Breadcrumb ───────────────────────────────── */
+.dark nav[aria-label] ol a,
+.dark nav ol a { color: rgba(255,255,255,0.45) !important; }
+.dark nav ol li:last-child { color: rgba(255,255,255,0.8) !important; }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 1279px) {
+  .grid[class*="xl:grid-cols-"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+  <body x-data="{ page: 'notifications', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }" x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" :class="{'dark bg-gray-900': darkMode === true}">
+    <!-- ===== Preloader Start ===== -->
+
+
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <aside :class="sidebarToggle ? 'translate-x-0 xl:w-[90px]' : '-translate-x-full'" class="sidebar fixed top-0 left-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 xl:static xl:translate-x-0 dark:border-gray-800 dark:bg-black" @click.outside="sidebarToggle = false">
+  <!-- SIDEBAR HEADER -->
+  <div :class="sidebarToggle ? 'justify-center' : 'justify-between'" class="sidebar-header flex items-center gap-2 pt-8 pb-7">
+    <a href="index.html">
+      <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
+        <img class="dark:hidden" src="../static/img/logo.svg" alt="Logo">
+        <img class="hidden dark:block" src="../static/img/logo-dark.svg" alt="Logo">
+      </span>
+
+      <img class="logo-icon" :class="sidebarToggle ? 'xl:block' : 'hidden'" src="../static/img/logo-icon.svg" alt="Logo">
+    </a>
+  </div>
+  <!-- SIDEBAR HEADER -->
+
+  <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+    <!-- Sidebar Menu -->
+    <nav x-data="{selected: $persist('Dashboard')}">
+
+      <!-- ══ MAIN GROUP ══ -->
+      <div>
+        <h3 class="mb-4 text-xs leading-[20px] text-gray-400 uppercase">
+          <span class="menu-group-title" :class="sidebarToggle ? 'xl:hidden' : ''">PLATFORM</span>
+          <svg :class="sidebarToggle ? 'xl:block hidden' : 'hidden'" class="menu-group-icon mx-auto fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.999 10.245a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm12 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm-4.25 1.75a1.75 1.75 0 10-3.5 0 1.75 1.75 0 003.5 0z" fill="currentColor"/></svg>
+        </h3>
+        <ul class="mb-6 flex flex-col gap-1">
+
+          <!-- Evidence Dashboard -->
+          <li>
+            <a href="/evidence/dashboard" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25C4.257 3.25 3.25 4.257 3.25 5.5V9C3.25 10.243 4.257 11.25 5.5 11.25H9C10.243 11.25 11.25 10.243 11.25 9V5.5C11.25 4.257 10.243 3.25 9 3.25H5.5zM4.75 5.5c0-.414.336-.75.75-.75H9c.414 0 .75.336.75.75V9c0 .414-.336.75-.75.75H5.5A.75.75 0 014.75 9V5.5zM5.5 12.75C4.257 12.75 3.25 13.757 3.25 15v3.5C3.25 19.743 4.257 20.75 5.5 20.75H9c1.243 0 2.25-1.007 2.25-2.25V15c0-1.243-1.007-2.25-2.25-2.25H5.5zM4.75 15c0-.414.336-.75.75-.75H9c.414 0 .75.336.75.75v3.5c0 .414-.336.75-.75.75H5.5a.75.75 0 01-.75-.75V15zM15 3.25c-1.243 0-2.25 1.007-2.25 2.25V9c0 1.243 1.007 2.25 2.25 2.25h3.5c1.243 0 2.25-1.007 2.25-2.25V5.5c0-1.243-1.007-2.25-2.25-2.25H15zm-.75 2.25c0-.414.336-.75.75-.75h3.5c.414 0 .75.336.75.75V9c0 .414-.336.75-.75.75H15A.75.75 0 0114.25 9V5.5zM15 12.75c-1.243 0-2.25 1.007-2.25 2.25v3.5c0 1.243 1.007 2.25 2.25 2.25h3.5c1.243 0 2.25-1.007 2.25-2.25V15c0-1.243-1.007-2.25-2.25-2.25H15zm-.75 2.25c0-.414.336-.75.75-.75h3.5c.414 0 .75.336.75.75v3.5c0 .414-.336.75-.75.75H15a.75.75 0 01-.75-.75V15z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Evidence Dashboard</span>
+            </a>
+          </li>
+
+          <!-- Upload Crime Scene -->
+          <li>
+            <a href="/evidence/upload" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 16v2.5A1.5 1.5 0 0118.5 20h-13A1.5 1.5 0 014 18.5V16M12 4v12M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Upload Crime Scene</span>
+              <span :class="sidebarToggle ? 'xl:hidden' : ''" class="absolute right-10">
+                <span class="menu-dropdown-badge menu-dropdown-badge-inactive">New</span>
+              </span>
+            </a>
+          </li>
+
+          <!-- Crime Billboard -->
+          <li>
+            <a href="/evidence/browse" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25A2.25 2.25 0 003.25 5.5v13A2.25 2.25 0 005.5 20.75h13a2.25 2.25 0 002.25-2.25V5.5A2.25 2.25 0 0018.5 3.25H5.5zM4.75 5.5c0-.414.336-.75.75-.75h13c.414 0 .75.336.75.75v13a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75V5.5zM7 9.714A.75.75 0 017.75 9h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 017 9.714zM7.75 13.5a.75.75 0 000 1.5H17a.75.75 0 000-1.5H7.75z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Crime Billboard</span>
+            </a>
+          </li>
+
+          <!-- My Crime Scenes -->
+          <li>
+            <a href="/evidence/my" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5zm-1.5 6a.75.75 0 00-.75.75v5.69l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V9.75A.75.75 0 0012 9z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">My Crime Scenes</span>
+            </a>
+          </li>
+
+          <!-- Target Profiles -->
+          <li>
+            <a href="/targets" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.75 2.43V7.7M9.42 13.67A5.083 5.083 0 0012 14.917a5.083 5.083 0 002.578-1.247M20 12v6.5A1.5 1.5 0 0118.5 20h-13A1.5 1.5 0 014 18.5V12a8 8 0 1116 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.504 9.875v.01M14.496 9.875v.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Target Profiles</span>
+            </a>
+          </li>
+
+          <!-- Linked Cases -->
+          <li>
+            <a href="/linked-cases" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1-1.1m-.756-4.9a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Linked Cases</span>
+            </a>
+          </li>
+
+          <!-- Crime Map -->
+          <li>
+            <a href="/maps/dashboard" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a.75.75 0 00-.75.75V12a.75.75 0 00.75.75h9.25a.75.75 0 00.75-.75A10 10 0 0012 2zm.75 9.5V3.533A8.502 8.502 0 0120.468 11.25H12.75zM9.75 3.803A8.502 8.502 0 003.532 11.25H2a10 10 0 017.75-9.197v1.75zm0 16.394A8.502 8.502 0 0120.2 14.25H21.75a10 10 0 01-12 7.697v-1.75z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Crime Map</span>
+              <span :class="sidebarToggle ? 'xl:hidden' : ''" class="absolute right-10">
+                <span class="menu-dropdown-badge menu-dropdown-badge-inactive">New</span>
+              </span>
+            </a>
+          </li>
+
+          <!-- Notifications -->
+          <li>
+            <a href="/notifications" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Notifications</span>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- ══ ACCOUNT GROUP ══ -->
+      <div>
+        <h3 class="mb-4 text-xs leading-[20px] text-gray-400 uppercase">
+          <span class="menu-group-title" :class="sidebarToggle ? 'xl:hidden' : ''">Account</span>
+          <svg :class="sidebarToggle ? 'xl:block hidden' : 'hidden'" class="menu-group-icon mx-auto fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.999 10.245a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm12 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm-4.25 1.75a1.75 1.75 0 10-3.5 0 1.75 1.75 0 003.5 0z" fill="currentColor"/></svg>
+        </h3>
+        <ul class="mb-6 flex flex-col gap-1">
+
+          <!-- Account Settings -->
+          <li>
+            <a href="/user/settings" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.4854 3.5H13.5146C13.9338 3.5 14.2761 3.82754 14.2929 4.24634L14.3774 6.37044C14.9571 6.60264 15.4995 6.91548 15.9926 7.29328L17.9688 6.46092C18.3573 6.29658 18.8053 6.44855 19.0146 6.81174L20.5293 9.43826C20.7386 9.80146 20.6468 10.2625 20.3135 10.5209L18.6665 11.7938C18.7212 12.1265 18.75 12.4676 18.75 12.8157C18.75 13.1638 18.7212 13.5049 18.6665 13.8376L20.3135 15.1105C20.6468 15.3689 20.7386 15.8299 20.5293 16.1931L19.0146 18.8196C18.8053 19.1828 18.3573 19.3348 17.9688 19.1705L15.9926 18.3381C15.4995 18.7159 14.9571 19.0288 14.3774 19.261L14.2929 21.3851C14.2761 21.8039 13.9338 22.1314 13.5146 22.1314H10.4854C10.0662 22.1314 9.72386 21.8039 9.70708 21.3851L9.62258 19.261C9.04291 19.0288 8.50053 18.7159 8.00737 18.3381L6.03118 19.1705C5.64271 19.3348 5.19473 19.1828 4.9854 18.8196L3.47065 16.1931C3.26133 15.8299 3.35318 15.3689 3.68645 15.1105L5.33354 13.8376C5.27882 13.5049 5.25 13.1638 5.25 12.8157C5.25 12.4676 5.27882 12.1265 5.33354 11.7938L3.68645 10.5209C3.35318 10.2625 3.26133 9.80146 3.47065 9.43826L4.9854 6.81174C5.19473 6.44855 5.64271 6.29658 6.03118 6.46092L8.00737 7.29328C8.50053 6.91548 9.04291 6.60264 9.62258 6.37044L9.70708 4.24634C9.72386 3.82754 10.0662 3.5 10.4854 3.5ZM12 15.5657C13.5188 15.5657 14.75 14.3345 14.75 12.8157C14.75 11.2969 13.5188 10.0657 12 10.0657C10.4812 10.0657 9.25 11.2969 9.25 12.8157C9.25 14.3345 10.4812 15.5657 12 15.5657Z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Account Settings</span>
+            </a>
+          </li>
+
+          <!-- Account Profile -->
+          <li>
+            <a href="/user/profile" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm10-4.75a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zm-3.25 7.75c0-1.657 1.343-3.25 3.25-3.25s3.25 1.343 3.25 3.25v.347a7.96 7.96 0 01-6.5 0V15z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Account Profile</span>
+            </a>
+          </li>
+
+          <!-- Log Out -->
+          <li>
+            <a href="/logout" class="menu-item group menu-item-inactive">
+              <svg class="menu-item-icon-inactive" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.1007 19.247C14.6865 19.247 14.3507 18.9112 14.3507 18.497L14.3507 14.245H12.8507V18.497C12.8507 19.7396 13.8581 20.747 15.1007 20.747H18.5007C19.7434 20.747 20.7507 19.7396 20.7507 18.497L20.7507 5.49609C20.7507 4.25345 19.7433 3.24609 18.5007 3.24609H15.1007C13.8581 3.24609 12.8507 4.25345 12.8507 5.49609V9.74501L14.3507 9.74501V5.49609C14.3507 5.08188 14.6865 4.74609 15.1007 4.74609L18.5007 4.74609C18.9149 4.74609 19.2507 5.08188 19.2507 5.49609L19.2507 18.497C19.2507 18.9112 18.9149 19.247 18.5007 19.247H15.1007ZM3.25073 11.9984C3.25073 12.2144 3.34204 12.4091 3.48817 12.546L8.09483 17.1556C8.38763 17.4485 8.86251 17.4487 9.15549 17.1559C9.44848 16.8631 9.44863 16.3882 9.15583 16.0952L5.81116 12.7484L16.0007 12.7484C16.4149 12.7484 16.7507 12.4127 16.7507 11.9984C16.7507 11.5842 16.4149 11.2484 16.0007 11.2484L5.81528 11.2484L9.15585 7.90554C9.44864 7.61255 9.44847 7.13767 9.15547 6.84488C8.86248 6.55209 8.3876 6.55226 8.09481 6.84525L3.52309 11.4202C3.35673 11.5577 3.25073 11.7657 3.25073 11.9984Z" fill="currentColor"/>
+              </svg>
+              <span class="menu-item-text" :class="sidebarToggle ? 'xl:hidden' : ''">Log Out</span>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+    </nav>
+    <!-- Sidebar Menu -->
+
+    <!-- Promo Box -->
+    <div :class="sidebarToggle ? 'xl:hidden' : ''" class="mx-auto mb-10 w-full max-w-60 rounded-2xl bg-gray-50 px-4 py-5 text-center dark:bg-white/[0.03]">
+      <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">
+        Crime Bank 
+      </h3>
+      <p class="text-theme-sm mb-4 text-gray-500 dark:text-gray-400">
+        Africa's First Public Crime Dataset For Offensive Security With Collaborative Policing 
+      </p>
+      <a href="https://tailadmin.com/pricing" target="_blank" rel="nofollow" class="bg-brand-500 text-theme-sm hover:bg-brand-600 flex items-center justify-center rounded-lg p-3 font-medium text-white">
+        Donations 
+      </a>
+    </div>
+    <!-- Promo Box -->
+  </div>
+</aside>
+
+
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- Small Device Overlay Start -->
+        <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-gray-900/50"></div>
+<!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <header x-data="{menuToggle: false}" class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
+  <div class="flex grow flex-col items-center justify-between xl:flex-row xl:px-6">
+    <div class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:py-4 xl:justify-normal xl:border-b-0 xl:px-0 dark:border-gray-800">
+      <!-- Hamburger Toggle BTN -->
+      <button :class="sidebarToggle ? 'xl:bg-transparent dark:xl:bg-transparent bg-gray-100 dark:bg-gray-800' : ''" class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400" @click.stop="sidebarToggle = !sidebarToggle">
+        <svg class="hidden fill-current xl:block" width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 10.5858 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z" fill=""></path>
+        </svg>
+
+        <svg :class="sidebarToggle ? 'hidden' : 'block xl:hidden'" class="fill-current xl:hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 6C3.25 5.58579 3.58579 5.25 4 5.25L20 5.25C20.4142 5.25 20.75 5.58579 20.75 6C20.75 6.41421 20.4142 6.75 20 6.75L4 6.75C3.58579 6.75 3.25 6.41422 3.25 6ZM3.25 18C3.25 17.5858 3.58579 17.25 4 17.25L20 17.25C20.4142 17.25 20.75 17.5858 20.75 18C20.75 18.4142 20.4142 18.75 20 18.75L4 18.75C3.58579 18.75 3.25 18.4142 3.25 18ZM4 11.25C3.58579 11.25 3.25 11.5858 3.25 12C3.25 12.4142 3.58579 12.75 4 12.75L12 12.75C12.4142 12.75 12.75 12.4142 12.75 12C12.75 11.5858 12.4142 11.25 12 11.25L4 11.25Z" fill=""></path>
+        </svg>
+
+        <!-- cross icon -->
+        <svg :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z" fill=""></path>
+        </svg>
+      </button>
+      <!-- Hamburger Toggle BTN -->
+
+      <a href="index.html" class="xl:hidden">
+        <img class="dark:hidden" src="../static/img/logo.svg" alt="Logo">
+        <img class="hidden dark:block" src="../static/img/logo-dark.svg" alt="Logo">
+      </a>
+
+      <!-- Application nav menu button -->
+      <button class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-gray-800" :class="menuToggle ? 'bg-gray-100 dark:bg-gray-800' : ''" @click.stop="menuToggle = !menuToggle">
+        <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99902 10.4951C6.82745 10.4951 7.49902 11.1667 7.49902 11.9951V12.0051C7.49902 12.8335 6.82745 13.5051 5.99902 13.5051C5.1706 13.5051 4.49902 12.8335 4.49902 12.0051V11.9951C4.49902 11.1667 5.1706 10.4951 5.99902 10.4951ZM17.999 10.4951C18.8275 10.4951 19.499 11.1667 19.499 11.9951V12.0051C19.499 12.8335 18.8275 13.5051 17.999 13.5051C17.1706 13.5051 16.499 12.8335 16.499 12.0051V11.9951C16.499 11.1667 17.1706 10.4951 17.999 10.4951ZM13.499 11.9951C13.499 11.1667 12.8275 10.4951 11.999 10.4951C11.1706 10.4951 10.499 11.1667 10.499 11.9951V12.0051C10.499 12.8335 11.1706 13.5051 11.999 13.5051C12.8275 13.5051 13.499 12.8335 13.499 12.0051V11.9951Z" fill=""></path>
+        </svg>
+      </button>
+      <!-- Application nav menu button -->
+
+      <div class="hidden xl:block">
+        <form>
+          <div class="relative">
+            <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+              <svg class="fill-gray-500 dark:fill-gray-400" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z" fill=""></path>
+              </svg>
+            </span>
+            <input id="search-input" type="text" placeholder="Search or Paste Crime ID " class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30">
+
+            <button id="search-button" class="absolute top-1/2 right-2.5 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
+              <span> ⌘ </span>
+              <span> K </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div :class="menuToggle ? 'flex' : 'hidden'" class="shadow-theme-md w-full items-center justify-between gap-4 px-5 py-4 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
+      <div class="2xsm:gap-3 flex items-center gap-2">
+        <!-- Dark Mode Toggler -->
+        <button class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white" @click.prevent="darkMode = !darkMode">
+          <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.99998 1.5415C10.4142 1.5415 10.75 1.87729 10.75 2.2915V3.5415C10.75 3.95572 10.4142 4.2915 9.99998 4.2915C9.58577 4.2915 9.24998 3.95572 9.24998 3.5415V2.2915C9.24998 1.87729 9.58577 1.5415 9.99998 1.5415ZM10.0009 6.79327C8.22978 6.79327 6.79402 8.22904 6.79402 10.0001C6.79402 11.7712 8.22978 13.207 10.0009 13.207C11.772 13.207 13.2078 11.7712 13.2078 10.0001C13.2078 8.22904 11.772 6.79327 10.0009 6.79327ZM5.29402 10.0001C5.29402 7.40061 7.40135 5.29327 10.0009 5.29327C12.6004 5.29327 14.7078 7.40061 14.7078 10.0001C14.7078 12.5997 12.6004 14.707 10.0009 14.707C7.40135 14.707 5.29402 12.5997 5.29402 10.0001ZM15.9813 5.08035C16.2742 4.78746 16.2742 4.31258 15.9813 4.01969C15.6884 3.7268 15.2135 3.7268 14.9207 4.01969L14.0368 4.90357C13.7439 5.19647 13.7439 5.67134 14.0368 5.96423C14.3297 6.25713 14.8045 6.25713 15.0974 5.96423L15.9813 5.08035ZM18.4577 10.0001C18.4577 10.4143 18.1219 10.7501 17.7077 10.7501H16.4577C16.0435 10.7501 15.7077 10.4143 15.7077 10.0001C15.7077 9.58592 16.0435 9.25013 16.4577 9.25013H17.7077C18.1219 9.25013 18.4577 9.58592 18.4577 10.0001ZM14.9207 15.9806C15.2135 16.2735 15.6884 16.2735 15.9813 15.9806C16.2742 15.6877 16.2742 15.2128 15.9813 14.9199L15.0974 14.036C14.8045 13.7431 14.3297 13.7431 14.0368 14.036C13.7439 14.3289 13.7439 14.8038 14.0368 15.0967L14.9207 15.9806ZM9.99998 15.7088C10.4142 15.7088 10.75 16.0445 10.75 16.4588V17.7088C10.75 18.123 10.4142 18.4588 9.99998 18.4588C9.58577 18.4588 9.24998 18.123 9.24998 17.7088V16.4588C9.24998 16.0445 9.58577 15.7088 9.99998 15.7088ZM5.96356 15.0972C6.25646 14.8043 6.25646 14.3295 5.96356 14.0366C5.67067 13.7437 5.1958 13.7437 4.9029 14.0366L4.01902 14.9204C3.72613 15.2133 3.72613 15.6882 4.01902 15.9811C4.31191 16.274 4.78679 16.274 5.07968 15.9811L5.96356 15.0972ZM4.29224 10.0001C4.29224 10.4143 3.95645 10.7501 3.54224 10.7501H2.29224C1.87802 10.7501 1.54224 10.4143 1.54224 10.0001C1.54224 9.58592 1.87802 9.25013 2.29224 9.25013H3.54224C3.95645 9.25013 4.29224 9.58592 4.29224 10.0001ZM4.9029 5.9637C5.1958 6.25659 5.67067 6.25659 5.96356 5.9637C6.25646 5.6708 6.25646 5.19593 5.96356 4.90303L5.07968 4.01915C4.78679 3.72626 4.31191 3.72626 4.01902 4.01915C3.72613 4.31204 3.72613 4.78692 4.01902 5.07981L4.9029 5.9637Z" fill="currentColor"></path>
+          </svg>
+          <svg class="dark:hidden" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.4547 11.97L18.1799 12.1611C18.265 11.8383 18.1265 11.4982 17.8401 11.3266C17.5538 11.1551 17.1885 11.1934 16.944 11.4207L17.4547 11.97ZM8.0306 2.5459L8.57989 3.05657C8.80718 2.81209 8.84554 2.44682 8.67398 2.16046C8.50243 1.8741 8.16227 1.73559 7.83948 1.82066L8.0306 2.5459ZM12.9154 13.0035C9.64678 13.0035 6.99707 10.3538 6.99707 7.08524H5.49707C5.49707 11.1823 8.81835 14.5035 12.9154 14.5035V13.0035ZM16.944 11.4207C15.8869 12.4035 14.4721 13.0035 12.9154 13.0035V14.5035C14.8657 14.5035 16.6418 13.7499 17.9654 12.5193L16.944 11.4207ZM16.7295 11.7789C15.9437 14.7607 13.2277 16.9586 10.0003 16.9586V18.4586C13.9257 18.4586 17.2249 15.7853 18.1799 12.1611L16.7295 11.7789ZM10.0003 16.9586C6.15734 16.9586 3.04199 13.8433 3.04199 10.0003H1.54199C1.54199 14.6717 5.32892 18.4586 10.0003 18.4586V16.9586ZM3.04199 10.0003C3.04199 6.77289 5.23988 4.05695 8.22173 3.27114L7.83948 1.82066C4.21532 2.77574 1.54199 6.07486 1.54199 10.0003H3.04199ZM6.99707 7.08524C6.99707 5.52854 7.5971 4.11366 8.57989 3.05657L7.48132 2.03522C6.25073 3.35885 5.49707 5.13487 5.49707 7.08524H6.99707Z" fill="currentColor"></path>
+          </svg>
+        </button>
+        <!-- Dark Mode Toggler -->
+
+        <!-- Notification Menu Area -->
+        <div class="relative" x-data="{ dropdownOpen: false, notifying: true }" @click.outside="dropdownOpen = false">
+          <!-- Bell button with unread badge -->
+          <button class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                  @click.prevent="dropdownOpen = !dropdownOpen; notifying = false; if(dropdownOpen) ddLoadNotifications()">
+            <!-- animated ping for new notifications -->
+            <span :class="!notifying ? 'hidden' : 'flex'" class="absolute top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-orange-400">
+              <span class="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
+            </span>
+            <!-- unread count badge -->
+            <span id="dd-unread-badge" class="hidden absolute -top-1 -right-1 z-10 h-4 min-w-4 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-bold text-white"></span>
+            <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 2.29248C10.75 1.87827 10.4143 1.54248 10 1.54248C9.58583 1.54248 9.25004 1.87827 9.25004 2.29248V2.83613C6.08266 3.20733 3.62504 5.9004 3.62504 9.16748V14.4591H3.33337C2.91916 14.4591 2.58337 14.7949 2.58337 15.2091C2.58337 15.6234 2.91916 15.9591 3.33337 15.9591H4.37504H15.625H16.6667C17.0809 15.9591 17.4167 15.6234 17.4167 15.2091C17.4167 14.7949 17.0809 14.4591 16.6667 14.4591H16.375V9.16748C16.375 5.9004 13.9174 3.20733 10.75 2.83613V2.29248ZM14.875 14.4591V9.16748C14.875 6.47509 12.6924 4.29248 10 4.29248C7.30765 4.29248 5.12504 6.47509 5.12504 9.16748V14.4591H14.875ZM8.00004 17.7085C8.00004 18.1228 8.33583 18.4585 8.75004 18.4585H11.25C11.6643 18.4585 12 18.1228 12 17.7085C12 17.2943 11.6643 16.9585 11.25 16.9585H8.75004C8.33583 16.9585 8.00004 17.2943 8.00004 17.7085Z" fill=""></path>
+            </svg>
+          </button>
+
+          <!-- Dropdown Start -->
+          <div x-show="dropdownOpen"
+               x-transition:enter="transition ease-out duration-150"
+               x-transition:enter-start="opacity-0 translate-y-1"
+               x-transition:enter-end="opacity-100 translate-y-0"
+               class="shadow-theme-lg absolute -right-[240px] mt-[17px] w-[370px] rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 sm:w-[390px] lg:right-0"
+               style="display:none;">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+              <div class="flex items-center gap-2.5">
+                <h5 class="text-sm font-semibold text-gray-800 dark:text-white/90">Notifications</h5>
+                <span id="dd-header-badge" class="hidden items-center rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="ddMarkAllRead()" class="text-xs font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400 transition-colors">Mark all read</button>
+                <button @click="dropdownOpen = false" class="ml-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z" fill=""></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Notification list (max 5, scrollable) -->
+            <div id="dd-notif-list" class="custom-scrollbar overflow-y-auto" style="max-height:420px;">
+              <!-- Loading -->
+              <div id="dd-loading" class="flex flex-col items-center justify-center gap-2 py-12 text-gray-400 dark:text-gray-500">
+                <svg class="h-8 w-8 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-xs">Loading…</p>
+              </div>
+              <!-- Empty -->
+              <div id="dd-empty" class="hidden flex-col items-center justify-center gap-2 py-12 text-center">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
+                  <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">All caught up</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">No notifications yet</p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t border-gray-100 px-4 py-3 dark:border-gray-800">
+              <a href="/notifications" class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
+                View all notifications
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+          <!-- Dropdown End -->
+        </div>
+        <!-- Notification Menu Area -->
+      </div>
+
+      <!-- User Area -->
+      <div class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false">
+        <a class="flex items-center text-gray-700 dark:text-gray-400" href="#" @click.prevent="dropdownOpen = ! dropdownOpen">
+          <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
+           <img src="../static/img/avatar.avif" alt="User">
+          </span>
+
+          <span class="text-theme-sm mr-1 block font-medium">   {{ email }} </span>
+
+          <svg :class="dropdownOpen && 'rotate-180'" class="stroke-gray-500 dark:stroke-gray-400" width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.3125 8.65625L9 13.3437L13.6875 8.65625" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </a>
+
+        <!-- Dropdown Start -->
+        <div x-show="dropdownOpen" class="shadow-theme-lg dark:bg-gray-dark absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800">
+          <div>
+            <span class="text-theme-sm block font-medium text-gray-700 dark:text-gray-400">
+                {{ email }}  
+            </span>
+            <span class="text-theme-xs mt-0.5 block text-gray-500 dark:text-gray-400">
+              <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="aedccfc0cac1c3dbddcbdceedec7c3c4c180cdc1c3">[email�protected]</a>
+            </span>
+          </div>
+
+          <ul class="flex flex-col gap-1 border-b border-gray-200 pt-4 pb-3 dark:border-gray-800">
+            <li>
+              <a href="/evidence/my" class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                <svg class="fill-current" width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.05 3.9L8.45 4.35L9.05 3.9ZM2.25 2.25H6.5V0.75H2.25V2.25ZM1.5 15V3H0V15H1.5ZM17.75 15.75H2.25V17.25H17.75V15.75ZM18.5 6V15H20V6H18.5ZM17.75 3.75H10.25V5.25H17.75V3.75ZM9.65 3.45L8.3 1.65L7.1 2.55L8.45 4.35L9.65 3.45ZM10.25 3.75C10.0139 3.75 9.79164 3.63885 9.65 3.45L8.45 4.35C8.87492 4.91656 9.5418 5.25 10.25 5.25V3.75ZM20 6C20 4.75736 18.9926 3.75 17.75 3.75V5.25C18.1642 5.25 18.5 5.58579 18.5 6H20ZM17.75 17.25C18.9926 17.25 20 16.2426 20 15H18.5C18.5 15.4142 18.1642 15.75 17.75 15.75V17.25ZM0 15C0 16.2426 1.00736 17.25 2.25 17.25V15.75C1.83579 15.75 1.5 15.4142 1.5 15H0ZM6.5 2.25C6.73607 2.25 6.95836 2.36115 7.1 2.55L8.3 1.65C7.87508 1.08344 7.2082 0.75 6.5 0.75V2.25ZM2.25 0.75C1.00736 0.75 0 1.75736 0 3H1.5C1.5 2.58579 1.83579 2.25 2.25 2.25V0.75Z" fill=""></path>
+            </svg>
+                My Crime Scenes 
+              </a>
+            </li>
+            <li>
+              <a href="" class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                <svg class="stroke-current fill-white dark:fill-gray-800" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.29004 5.90393H17.7067" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M17.7075 14.0961H2.29085" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M12.0826 3.33331C13.5024 3.33331 14.6534 4.48431 14.6534 5.90414C14.6534 7.32398 13.5024 8.47498 12.0826 8.47498C10.6627 8.47498 9.51172 7.32398 9.51172 5.90415C9.51172 4.48432 10.6627 3.33331 12.0826 3.33331Z" fill="" stroke="" stroke-width="1.5"></path>
+          <path d="M7.91745 11.525C6.49762 11.525 5.34662 12.676 5.34662 14.0959C5.34661 15.5157 6.49762 16.6667 7.91745 16.6667C9.33728 16.6667 10.4883 15.5157 10.4883 14.0959C10.4883 12.676 9.33728 11.525 7.91745 11.525Z" fill="" stroke="" stroke-width="1.5"></path>
+        </svg>
+                Linked Crimes 
+              </a>
+            </li>
+              <li>
+              <a href="/targets" class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+               <svg :class="(selected === 'AI') || (page === 'AI' || page === 'textGenerator') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-active menu-item-icon-inactive">
+                <path d="M18.75 2.42969V7.70424M9.42261 13.673C10.0259 14.4307 10.9562 14.9164 12 14.9164C13.0438 14.9164 13.9742 14.4307 14.5775 13.673M20 12V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M18.75 2.42969V2.43969M9.50391 9.875L9.50391 9.885M14.4961 9.875V9.885" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+                Target Profiles
+              </a>
+            </li>
+
+            <li>
+              <a href="/user/profile" class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                <svg class="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM17.0246 18.8566V18.8455C17.0246 16.7744 15.3457 15.0955 13.2746 15.0955H10.7246C8.65354 15.0955 6.97461 16.7744 6.97461 18.8455V18.856C8.38223 19.8895 10.1198 20.5 12 20.5C13.8798 20.5 15.6171 19.8898 17.0246 18.8566ZM2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM11.9991 7.25C10.8847 7.25 9.98126 8.15342 9.98126 9.26784C9.98126 10.3823 10.8847 11.2857 11.9991 11.2857C13.1135 11.2857 14.0169 10.3823 14.0169 9.26784C14.0169 8.15342 13.1135 7.25 11.9991 7.25ZM8.48126 9.26784C8.48126 7.32499 10.0563 5.75 11.9991 5.75C13.9419 5.75 15.5169 7.32499 15.5169 9.26784C15.5169 11.2107 13.9419 12.7857 11.9991 12.7857C10.0563 12.7857 8.48126 11.2107 8.48126 9.26784Z" fill=""></path>
+                </svg>
+                My Account  
+              </a>
+            </li>
+          </ul>
+          <a href="/logout" class="group text-theme-sm mt-3 flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+            <svg class="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M15.1007 19.247C14.6865 19.247 14.3507 18.9112 14.3507 18.497L14.3507 14.245H12.8507V18.497C12.8507 19.7396 13.8581 20.747 15.1007 20.747H18.5007C19.7434 20.747 20.7507 19.7396 20.7507 18.497L20.7507 5.49609C20.7507 4.25345 19.7433 3.24609 18.5007 3.24609H15.1007C13.8581 3.24609 12.8507 4.25345 12.8507 5.49609V9.74501L14.3507 9.74501V5.49609C14.3507 5.08188 14.6865 4.74609 15.1007 4.74609L18.5007 4.74609C18.9149 4.74609 19.2507 5.08188 19.2507 5.49609L19.2507 18.497C19.2507 18.9112 18.9149 19.247 18.5007 19.247H15.1007ZM3.25073 11.9984C3.25073 12.2144 3.34204 12.4091 3.48817 12.546L8.09483 17.1556C8.38763 17.4485 8.86251 17.4487 9.15549 17.1559C9.44848 16.8631 9.44863 16.3882 9.15583 16.0952L5.81116 12.7484L16.0007 12.7484C16.4149 12.7484 16.7507 12.4127 16.7507 11.9984C16.7507 11.5842 16.4149 11.2484 16.0007 11.2484L5.81528 11.2484L9.15585 7.90554C9.44864 7.61255 9.44847 7.13767 9.15547 6.84488C8.86248 6.55209 8.3876 6.55226 8.09481 6.84525L3.52309 11.4202C3.35673 11.5577 3.25073 11.7657 3.25073 11.9984Z" fill="currentColor"/></path>
+            </svg>
+
+            Sign out
+          </a>
+        </div>
+        <!-- Dropdown End -->
+      </div>
+      <!-- User Area -->
+    </div>
+  </div>
+</header>
+<!-- ===== Header End ===== -->
+        <!-- ===== Main Content Start ===== -->
+        <main class="h-full overflow-y-auto">
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 pb-20 md:p-6 md:pb-6">
+
+            <!-- Page Header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-6">
+              <div>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">Activity Feed</h2>
+                <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">All evidence events and system alerts</p>
+              </div>
+              <nav>
+                <ol class="flex items-center gap-1.5">
+                  <li>
+                    <a class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400" href="index.html">
+                      Home
+                      <svg class="stroke-current" width="17" height="16" viewBox="0 0 17 16" fill="none">
+                        <path d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366" stroke="" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </a>
+                  </li>
+                  <li class="text-sm text-gray-800 dark:text-white/90">Notifications</li>
+                </ol>
+              </nav>
+            </div>
+
+            <!-- Two-col layout: Feed + Stats sidebar -->
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+
+              <!-- ── Left: Feed ──────────────────────────────────────────── -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+
+                <!-- Feed Header -->
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+                  <div class="flex items-center gap-3">
+                    <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Activity Feed</h3>
+                    <span id="unread-badge" class="hidden items-center justify-center rounded-full bg-brand-500 px-2 py-0.5 text-xs font-medium text-white min-w-[22px]"></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <!-- Filter Pills -->
+                    <div class="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-white/[0.04]">
+                      <button onclick="setFilter('all')" id="filter-all"
+                        class="rounded-md px-3 py-1.5 text-xs font-medium transition-all bg-white text-gray-800 shadow-sm dark:bg-white/10 dark:text-white/90">All</button>
+                      <button onclick="setFilter('unread')" id="filter-unread"
+                        class="rounded-md px-3 py-1.5 text-xs font-medium transition-all text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">Unread</button>
+                      <button onclick="setFilter('evidence')" id="filter-evidence"
+                        class="rounded-md px-3 py-1.5 text-xs font-medium transition-all text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">Evidence</button>
+                      <button onclick="setFilter('system')" id="filter-system"
+                        class="rounded-md px-3 py-1.5 text-xs font-medium transition-all text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">System</button>
+                    </div>
+                    <!-- Mark all read -->
+                    <button onclick="markAllRead()"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 shadow-sm hover:bg-gray-50 hover:text-gray-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-400 dark:hover:bg-white/[0.07] dark:hover:text-white/80 transition-colors">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C6.615 2.25 2.25 6.615 2.25 12S6.615 21.75 12 21.75 21.75 17.385 21.75 12 17.385 2.25 12 2.25zm4.28 9.53a.75.75 0 0 0-1.06-1.06L11.25 14.69l-2.22-2.22a.75.75 0 1 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.06 0l4.5-4.5z"/>
+                      </svg>
+                      Mark all read
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Feed List -->
+                <div id="notifications-list" class="divide-y divide-gray-50 dark:divide-gray-800/80 px-4 py-3 sm:px-6 sm:py-4 space-y-0">
+                  <!-- Loading -->
+                  <div id="loading-state" class="flex flex-col items-center justify-center gap-3 py-16">
+                    <div class="h-9 w-9 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"></div>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">Loading your activity…</p>
+                  </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex-col items-center justify-center py-20 px-6 text-center">
+                  <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.06]">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="text-gray-400 dark:text-gray-600">
+                      <path d="M18.1336 11C18.7155 16.3755 21 18 21 18H3C3 18 6 16 6 9.6C6 7.29 7.256 5.254 9.086 4.168" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M13.73 21a1.999 1.999 0 01-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M3.26 3L21 20.74" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <h4 class="mb-1 text-base font-semibold text-gray-800 dark:text-white/90">All caught up!</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">No notifications to show right now.</p>
+                </div>
+
+              </div>
+              <!-- /Feed -->
+
+              <!-- ── Right: Stats Sidebar ─────────────────────────────────── -->
+              <div class="flex flex-col gap-5">
+
+                <!-- Summary Card -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+                  <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-white/80">Summary</h4>
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
+                      <span id="stat-total" class="text-sm font-semibold text-gray-800 dark:text-white/90">—</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-gray-400">Unread</span>
+                      <span id="stat-unread" class="text-sm font-semibold text-brand-600 dark:text-brand-400">—</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-gray-400">Evidence events</span>
+                      <span id="stat-evidence" class="text-sm font-semibold text-gray-800 dark:text-white/90">—</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-gray-400">System alerts</span>
+                      <span id="stat-system" class="text-sm font-semibold text-gray-800 dark:text-white/90">—</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Type Breakdown -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+                  <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-white/80">By Type</h4>
+                  <div id="type-breakdown" class="space-y-2.5">
+                    <!-- populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+                  <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-white/80">Quick Actions</h4>
+                  <div class="space-y-2">
+                    <a href="/evidence" class="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.07] transition-colors">
+                      <svg class="shrink-0 text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                      View all evidence
+                    </a>
+                    <a href="/profile" class="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.07] transition-colors">
+                      <svg class="shrink-0 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+                      </svg>
+                      Notification settings
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <!-- /Two-col layout -->
+
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  <script data-cfasync="false" src="js/email-decode.min.js"></script>
+  <script defer src="js/bundle.js"></script>
+  <script>
+  // ─── State ──────────────────────────────────────────────────────────────────
+  let allNotifications = [];
+  let currentFilter = 'all';
+  const EVIDENCE_TYPES = ['evidence_submitted','evidence_reported','evidence_signed',
+    'evidence_linked','under_review','media_upload','police_report',
+    'evidence_rejected','evidence_archived','evidence_draft'];
+
+  // ─── Type config: icon svg (inline), accent colours ─────────────────────────
+  const TYPE_CONFIG = {
+    evidence_submitted: {
+      label: 'Evidence Submitted',
+      iconBg: 'bg-blue-100 dark:bg-blue-500/15',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      accentText: 'text-blue-600 dark:text-blue-400',
+      pill: 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+    },
+    evidence_reported: {
+      label: 'Evidence Reported',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-500/15',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      accentText: 'text-emerald-600 dark:text-emerald-400',
+      pill: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    },
+    evidence_signed: {
+      label: 'Evidence Signed',
+      iconBg: 'bg-violet-100 dark:bg-violet-500/15',
+      iconColor: 'text-violet-600 dark:text-violet-400',
+      accentText: 'text-violet-600 dark:text-violet-400',
+      pill: 'bg-violet-50 text-violet-700 ring-violet-600/20 dark:bg-violet-500/15 dark:text-violet-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    },
+    evidence_linked: {
+      label: 'Cases Linked',
+      iconBg: 'bg-amber-100 dark:bg-amber-500/15',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      accentText: 'text-amber-600 dark:text-amber-400',
+      pill: 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`,
+    },
+    under_review: {
+      label: 'Under Review',
+      iconBg: 'bg-orange-100 dark:bg-orange-500/15',
+      iconColor: 'text-orange-600 dark:text-orange-400',
+      accentText: 'text-orange-600 dark:text-orange-400',
+      pill: 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-500/15 dark:text-orange-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    },
+    media_upload: {
+      label: 'Media Uploaded',
+      iconBg: 'bg-indigo-100 dark:bg-indigo-500/15',
+      iconColor: 'text-indigo-600 dark:text-indigo-400',
+      accentText: 'text-indigo-600 dark:text-indigo-400',
+      pill: 'bg-indigo-50 text-indigo-700 ring-indigo-600/20 dark:bg-indigo-500/15 dark:text-indigo-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+    },
+    police_report: {
+      label: 'Reported to Police',
+      iconBg: 'bg-sky-100 dark:bg-sky-500/15',
+      iconColor: 'text-sky-600 dark:text-sky-400',
+      accentText: 'text-sky-600 dark:text-sky-400',
+      pill: 'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-500/15 dark:text-sky-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+    },
+    evidence_rejected: {
+      label: 'Evidence Rejected',
+      iconBg: 'bg-red-100 dark:bg-red-500/15',
+      iconColor: 'text-red-600 dark:text-red-400',
+      accentText: 'text-red-600 dark:text-red-400',
+      pill: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/15 dark:text-red-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    },
+    evidence_archived: {
+      label: 'Evidence Archived',
+      iconBg: 'bg-purple-100 dark:bg-purple-500/15',
+      iconColor: 'text-purple-600 dark:text-purple-400',
+      accentText: 'text-purple-600 dark:text-purple-400',
+      pill: 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-500/15 dark:text-purple-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`,
+    },
+    evidence_draft: {
+      label: 'Draft Created',
+      iconBg: 'bg-gray-100 dark:bg-white/10',
+      iconColor: 'text-gray-500 dark:text-gray-400',
+      accentText: 'text-gray-500 dark:text-gray-400',
+      pill: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-white/10 dark:text-gray-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    },
+    system: {
+      label: 'System',
+      iconBg: 'bg-gray-100 dark:bg-white/10',
+      iconColor: 'text-gray-500 dark:text-gray-400',
+      accentText: 'text-gray-500 dark:text-gray-400',
+      pill: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-white/10 dark:text-gray-400',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    },
+  };
+
+  // ─── Relative time ───────────────────────────────────────────────────────────
+  function relativeTime(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const d   = new Date(dateStr);
+    const sec = Math.floor((now - d) / 1000);
+    if (sec < 60)    return 'just now';
+    if (sec < 3600)  return `${Math.floor(sec/60)}m ago`;
+    if (sec < 86400) return `${Math.floor(sec/3600)}h ago`;
+    if (sec < 604800) return `${Math.floor(sec/86400)}d ago`;
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  function fullTime(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  // ─── Status badge colours ────────────────────────────────────────────────────
+  const STATUS_PILLS = {
+    Draft:       'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-400',
+    Submitted:   'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400',
+    Reported:    'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
+    UnderReview: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
+    Archived:    'bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400',
+    Rejected:    'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400',
+  };
+
+  const EMERGENCY_PILLS = {
+    Red:    'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400',
+    Orange: 'bg-orange-50 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400',
+    Yellow: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300',
+    Blue:   'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400',
+  };
+
+  // ─── Render embedded evidence card ──────────────────────────────────────────
+  function renderEvidenceEmbed(ev, type) {
+    if (!ev) return '';
+    const statusCls   = STATUS_PILLS[ev.status]   || STATUS_PILLS.Draft;
+    const emergCls    = EMERGENCY_PILLS[ev.emergency_level] || '';
+    const hasMediaIcon = ev.has_media
+      ? `<span class="inline-flex items-center gap-1 text-xs text-indigo-500 dark:text-indigo-400">
+           <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg>
+           Media
+         </span>`
+      : `<span class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+           <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+           No media
+         </span>`;
+
+    // For media_upload type: show a file-style card
+    if (type === 'media_upload') {
+      return `
+        <div class="mt-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/[0.07]">
+          <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90">${ev.title}</p>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">${ev.evidence_number} &middot; ${ev.incident_type}</p>
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusCls}">${ev.status}</span>
+                ${ev.emergency_level ? `<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${emergCls}"><span class="h-1.5 w-1.5 rounded-full bg-current opacity-70"></span>${ev.emergency_level}</span>` : ''}
+              </div>
+            </div>
+            <a href="${ev.view_url}" class="ml-1 shrink-0 rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-500/30 dark:bg-transparent dark:text-indigo-400 dark:hover:bg-indigo-500/10 transition-colors">
+              View
+            </a>
+          </div>
+        </div>`;
+    }
+
+    // For police report: show a star-badge card
+    if (type === 'police_report') {
+      return `
+        <div class="mt-3 rounded-xl border border-sky-100 bg-sky-50 p-4 dark:border-sky-500/20 dark:bg-sky-500/[0.07]">
+          <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-500 dark:bg-sky-500/20 dark:text-sky-400">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90">${ev.title}</p>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">${ev.evidence_number} &middot; ${ev.county || 'Unknown location'}</p>
+              <p class="mt-1.5 text-xs font-medium text-sky-600 dark:text-sky-400">✓ Filed with law enforcement</p>
+            </div>
+            <a href="${ev.view_url}" class="ml-1 shrink-0 rounded-lg border border-sky-200 bg-white px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-50 dark:border-sky-500/30 dark:bg-transparent dark:text-sky-400 dark:hover:bg-sky-500/10 transition-colors">
+              View
+            </a>
+          </div>
+        </div>`;
+    }
+
+    // Default evidence embed card
+    return `
+      <div class="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.04]">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-400 shadow-sm dark:bg-white/10 dark:text-gray-400">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90">${ev.title}</p>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">${ev.evidence_number} &middot; ${ev.incident_type} &middot; ${ev.incident_time}</p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusCls}">${ev.status}</span>
+              ${ev.emergency_level ? `<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${emergCls}"><span class="h-1.5 w-1.5 rounded-full bg-current opacity-70"></span>${ev.emergency_level}</span>` : ''}
+              ${hasMediaIcon}
+            </div>
+          </div>
+          <a href="${ev.view_url}" class="ml-1 shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:bg-transparent dark:text-gray-400 dark:hover:bg-white/10 transition-colors">
+            View
+          </a>
+        </div>
+      </div>`;
+  }
+
+  // ─── Build a single notification row ────────────────────────────────────────
+  function buildRow(n) {
+    const isUnread = !n.read;
+    const type     = n.notification_type || 'system';
+    const cfg      = TYPE_CONFIG[type] || TYPE_CONFIG.system;
+    const time     = relativeTime(n.created_at);
+    const fullT    = fullTime(n.created_at);
+    const title    = n.title || cfg.label;
+    const msg      = n.message || n.body || '';
+    const ev       = n.related_evidence || null;
+
+    const unreadDot = isUnread
+      ? `<span class="absolute top-5 left-0 h-2 w-2 rounded-full bg-brand-500 shadow-sm shadow-brand-500/50"></span>`
+      : '';
+
+    const unreadBorder = isUnread
+      ? 'border-l-2 border-l-brand-400 dark:border-l-brand-500'
+      : 'border-l-2 border-l-transparent';
+
+    const bg = isUnread
+      ? 'bg-brand-50/40 dark:bg-red-500/[0.04] hover:bg-brand-50/70 dark:hover:bg-red-500/[0.07]'
+      : 'bg-white dark:bg-transparent hover:bg-gray-50/80 dark:hover:bg-white/[0.025]';
+
+    const embedHtml = ev ? renderEvidenceEmbed(ev, type) : '';
+
+    return `
+      <div id="notif-${n.id}"
+           class="relative pl-4 ${unreadBorder} ${bg} rounded-r-xl my-1 py-4 pr-4 transition-all group"
+           data-type="${type}" data-read="${n.read ? 'true' : 'false'}">
+        ${unreadDot}
+
+        <div class="flex items-start gap-4">
+          <!-- Type icon bubble -->
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${cfg.iconBg} ${cfg.iconColor}">
+            ${cfg.icon}
+          </div>
+
+          <!-- Content -->
+          <div class="min-w-0 flex-1">
+            <!-- Top row: type pill + time + dismiss -->
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${cfg.pill}">
+                  ${cfg.label}
+                </span>
+                ${isUnread ? '<span class="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse"></span>' : ''}
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <time class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap" title="${fullT}">${time}</time>
+                <button onclick="dismissNotification('${n.id}')"
+                  class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-300 transition-all">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M6.04289 16.5418C5.65237 16.9323 5.65237 17.5655 6.04289 17.956C6.43342 18.3465 7.06658 18.3465 7.45711 17.956L11.9987 13.4144L16.5408 17.9565C16.9313 18.347 17.5645 18.347 17.955 17.9565C18.3455 17.566 18.3455 16.9328 17.955 16.5423L13.4129 12.0002L17.955 7.45808C18.3455 7.06756 18.3455 6.43439 17.955 6.04387C17.5645 5.65335 16.9313 5.65335 16.5408 6.04387L11.9987 10.586L7.45711 6.04439C7.06658 5.65386 6.43342 5.65386 6.04289 6.04439C5.65237 6.43491 5.65237 7.06808 6.04289 7.4586L10.5845 12.0002L6.04289 16.5418Z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <p class="text-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">${title}</p>
+
+            <!-- Message -->
+            ${msg ? `<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">${msg}</p>` : ''}
+
+            <!-- Embedded evidence/object card -->
+            ${embedHtml}
+
+            <!-- Actions row -->
+            ${isUnread ? `
+            <div class="mt-3 flex items-center gap-2">
+              <button onclick="markAsRead('${n.id}')"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-brand-600 transition-colors">
+                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C6.615 2.25 2.25 6.615 2.25 12S6.615 21.75 12 21.75 21.75 17.385 21.75 12 17.385 2.25 12 2.25zm4.28 9.53a.75.75 0 0 0-1.06-1.06L11.25 14.69l-2.22-2.22a.75.75 0 1 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.06 0l4.5-4.5z"/></svg>
+                Mark read
+              </button>
+              ${ev ? `<a href="${ev.view_url}" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-400 dark:hover:bg-white/[0.07] transition-colors">
+                Open case
+                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>` : ''}
+            </div>` : `
+            <div class="mt-2 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-600">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C6.615 2.25 2.25 6.615 2.25 12S6.615 21.75 12 21.75 21.75 17.385 21.75 12 17.385 2.25 12 2.25zm4.28 9.53a.75.75 0 0 0-1.06-1.06L11.25 14.69l-2.22-2.22a.75.75 0 1 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.06 0l4.5-4.5z"/></svg>
+              Read
+            </div>`}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ─── Load ────────────────────────────────────────────────────────────────────
+  async function loadNotifications() {
+    try {
+      const res  = await fetch('/api/notifications/all');
+      const data = await res.json();
+      allNotifications = data.data?.notifications || data.data || data || [];
+      updateStats();
+      renderNotifications();
+    } catch (e) {
+      document.getElementById('loading-state').innerHTML =
+        '<p class="text-sm text-red-500 py-8 text-center">Failed to load notifications.</p>';
+    }
+  }
+
+  // ─── Stats ───────────────────────────────────────────────────────────────────
+  function updateStats() {
+    const total    = allNotifications.length;
+    const unread   = allNotifications.filter(n => !n.read).length;
+    const evidence = allNotifications.filter(n => EVIDENCE_TYPES.includes(n.notification_type)).length;
+    const system   = total - evidence;
+
+    document.getElementById('stat-total').textContent    = total;
+    document.getElementById('stat-unread').textContent   = unread;
+    document.getElementById('stat-evidence').textContent = evidence;
+    document.getElementById('stat-system').textContent   = system;
+
+    // Type breakdown
+    const counts = {};
+    allNotifications.forEach(n => {
+      const t = n.notification_type || 'system';
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    const breakdown = document.getElementById('type-breakdown');
+    breakdown.innerHTML = Object.entries(counts)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0, 6)
+      .map(([type, count]) => {
+        const cfg = TYPE_CONFIG[type] || TYPE_CONFIG.system;
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs text-gray-500 dark:text-gray-400">${cfg.label}</span>
+              <span class="text-xs font-medium text-gray-700 dark:text-gray-300">${count}</span>
+            </div>
+            <div class="h-1.5 w-full rounded-full bg-gray-100 dark:bg-white/[0.06]">
+              <div class="h-1.5 rounded-full bg-brand-500 transition-all" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
+  function renderNotifications() {
+    const list       = document.getElementById('notifications-list');
+    const emptyState = document.getElementById('empty-state');
+    const loadState  = document.getElementById('loading-state');
+
+    if (loadState) loadState.remove();
+
+    let filtered = allNotifications;
+    if (currentFilter === 'unread')   filtered = allNotifications.filter(n => !n.read);
+    if (currentFilter === 'evidence') filtered = allNotifications.filter(n => EVIDENCE_TYPES.includes(n.notification_type));
+    if (currentFilter === 'system')   filtered = allNotifications.filter(n => !EVIDENCE_TYPES.includes(n.notification_type));
+
+    // Unread badge
+    const unread = allNotifications.filter(n => !n.read).length;
+    const badge  = document.getElementById('unread-badge');
+    if (unread > 0) {
+      badge.textContent = unread > 99 ? '99+' : unread;
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+    } else {
+      badge.classList.add('hidden');
+    }
+
+    if (filtered.length === 0) {
+      list.innerHTML = '';
+      emptyState.classList.remove('hidden');
+      emptyState.classList.add('flex');
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    emptyState.classList.remove('flex');
+    list.innerHTML = filtered.map(buildRow).join('');
+  }
+
+  // ─── Filter ──────────────────────────────────────────────────────────────────
+  function setFilter(f) {
+    currentFilter = f;
+    ['all','unread','evidence','system'].forEach(id => {
+      const el = document.getElementById(`filter-${id}`);
+      if (!el) return;
+      el.className = f === id
+        ? 'rounded-md px-3 py-1.5 text-xs font-medium transition-all bg-white text-gray-800 shadow-sm dark:bg-white/10 dark:text-white/90'
+        : 'rounded-md px-3 py-1.5 text-xs font-medium transition-all text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/80';
+    });
+    renderNotifications();
+  }
+
+  // ─── Actions ─────────────────────────────────────────────────────────────────
+  async function markAsRead(id) {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+      const n = allNotifications.find(n => n.id === id);
+      if (n) n.read = true;
+      updateStats();
+      renderNotifications();
+    } catch(e) { console.error('markAsRead failed', e); }
+  }
+
+  async function markAllRead() {
+    const unread = allNotifications.filter(n => !n.read);
+    await Promise.all(unread.map(n =>
+      fetch(`/api/notifications/${n.id}/read`, { method: 'POST' }).catch(() => {})
+    ));
+    allNotifications.forEach(n => n.read = true);
+    updateStats();
+    renderNotifications();
+  }
+
+  function dismissNotification(id) {
+    allNotifications = allNotifications.filter(n => n.id !== id);
+    updateStats();
+    renderNotifications();
+  }
+
+  // Refresh relative times every minute
+  setInterval(() => {
+    document.querySelectorAll('time[title]').forEach(el => {
+      const fullStr = el.getAttribute('title');
+      const d = new Date(fullStr);
+      if (!isNaN(d)) el.textContent = relativeTime(d.toISOString());
+    });
+  }, 60000);
+
+  document.addEventListener('DOMContentLoaded', loadNotifications);
+  </script>
+  <script defer src="../static/js/bundle.js"></script>
+  <script defer src="../static/js/chart.js"></script>
+
+<script>
+// ==================== NOTIFICATION DROPDOWN (new UI – max 5) ====================
+(function () {
+  const DD_MAX = 5;
+
+  // ── Type config (ported from notifications.html) ────────────────────────────
+  const TYPE_CONFIG = {
+    evidence_submitted: {
+      label:'Evidence Submitted', iconBg:'bg-blue-100 dark:bg-blue-500/15', iconColor:'text-blue-600 dark:text-blue-400',
+      pill:'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+    },
+    evidence_reported: {
+      label:'Evidence Reported', iconBg:'bg-emerald-100 dark:bg-emerald-500/15', iconColor:'text-emerald-600 dark:text-emerald-400',
+      pill:'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><polyline points="20 6 9 17 4 12"/></svg>`,
+    },
+    evidence_signed: {
+      label:'Evidence Signed', iconBg:'bg-violet-100 dark:bg-violet-500/15', iconColor:'text-violet-600 dark:text-violet-400',
+      pill:'bg-violet-50 text-violet-700 ring-violet-600/20 dark:bg-violet-500/15 dark:text-violet-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    },
+    evidence_linked: {
+      label:'Cases Linked', iconBg:'bg-amber-100 dark:bg-amber-500/15', iconColor:'text-amber-600 dark:text-amber-400',
+      pill:'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`,
+    },
+    under_review: {
+      label:'Under Review', iconBg:'bg-orange-100 dark:bg-orange-500/15', iconColor:'text-orange-600 dark:text-orange-400',
+      pill:'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-500/15 dark:text-orange-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    },
+    target_match: {
+      label:'Target Match', iconBg:'bg-red-100 dark:bg-red-500/15', iconColor:'text-red-600 dark:text-red-400',
+      pill:'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/15 dark:text-red-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+    },
+    police_report: {
+      label:'Reported to Police', iconBg:'bg-sky-100 dark:bg-sky-500/15', iconColor:'text-sky-600 dark:text-sky-400',
+      pill:'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-500/15 dark:text-sky-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+    },
+    system: {
+      label:'System', iconBg:'bg-gray-100 dark:bg-gray-800', iconColor:'text-gray-500 dark:text-gray-400',
+      pill:'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-400',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    },
+  };
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let ddNotifications = [];
+  let ddLoaded = false;
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function ddRelTime(dateStr) {
+    if (!dateStr) return '';
+    const sec = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (sec < 60)    return 'just now';
+    if (sec < 3600)  return `${Math.floor(sec/60)}m ago`;
+    if (sec < 86400) return `${Math.floor(sec/3600)}h ago`;
+    if (sec < 604800) return `${Math.floor(sec/86400)}d ago`;
+    return new Date(dateStr).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  }
+
+  // ── Build a single row ─────────────────────────────────────────────────────
+  function ddBuildRow(n) {
+    const isUnread = !n.is_read && !n.read;
+    const type  = n.notification_type || 'system';
+    const cfg   = TYPE_CONFIG[type] || TYPE_CONFIG.system;
+    const time  = ddRelTime(n.created_at);
+    const title = n.title || cfg.label;
+    const msg   = n.message || n.body || '';
+    const link  = n.evidence_id ? `/evidence/view/${n.evidence_id}` : '#';
+
+    const unreadBorder = isUnread ? 'border-l-2 border-l-brand-400 dark:border-l-brand-500' : 'border-l-2 border-l-transparent';
+    const bg = isUnread
+      ? 'bg-brand-50/40 dark:bg-brand-500/[0.03] hover:bg-brand-50/70 dark:hover:bg-brand-500/[0.06]'
+      : 'hover:bg-gray-50/80 dark:hover:bg-gray-800/40';
+
+    return `
+      <div class="relative pl-3 pr-4 py-3.5 ${unreadBorder} ${bg} transition-all group cursor-pointer"
+           onclick="ddMarkRead('${n.id}', '${link}')">
+        ${isUnread ? `<span class="absolute top-4 left-0 h-1.5 w-1.5 rounded-full bg-brand-500"></span>` : ''}
+        <div class="flex items-start gap-3">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${cfg.iconBg} ${cfg.iconColor}">
+            ${cfg.icon}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ${cfg.pill}">${cfg.label}</span>
+              <time class="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">${time}</time>
+            </div>
+            <p class="text-xs font-semibold text-gray-800 dark:text-white/90 leading-snug truncate">${title}</p>
+            ${msg ? `<p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">${msg}</p>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Render into dropdown ───────────────────────────────────────────────────
+  function ddRender() {
+    const list    = document.getElementById('dd-notif-list');
+    const loading = document.getElementById('dd-loading');
+    const empty   = document.getElementById('dd-empty');
+    if (!list) return;
+
+    if (loading) loading.remove();
+
+    const top5   = ddNotifications.slice(0, DD_MAX);
+    const unread = ddNotifications.filter(n => !n.is_read && !n.read).length;
+
+    // Update badges
+    const badge  = document.getElementById('dd-unread-badge');
+    const hBadge = document.getElementById('dd-header-badge');
+    if (badge) {
+      if (unread > 0) { badge.textContent = unread > 99 ? '99+' : unread; badge.classList.remove('hidden'); badge.classList.add('flex'); }
+      else { badge.classList.add('hidden'); }
+    }
+    if (hBadge) {
+      if (unread > 0) { hBadge.textContent = `${unread} unread`; hBadge.classList.remove('hidden'); hBadge.classList.add('flex'); }
+      else { hBadge.classList.add('hidden'); }
+    }
+
+    if (top5.length === 0) {
+      list.innerHTML = '';
+      if (empty) { empty.classList.remove('hidden'); empty.classList.add('flex'); }
+      return;
+    }
+    if (empty) { empty.classList.add('hidden'); empty.classList.remove('flex'); }
+    list.innerHTML = top5.map(ddBuildRow).join('');
+  }
+
+  // ── Load (called when dropdown opens) ─────────────────────────────────────
+  window.ddLoadNotifications = async function () {
+    if (ddLoaded) { ddRender(); return; }
+    try {
+      const res  = await fetch('/api/notifications');
+      const data = await res.json();
+      ddNotifications = data.data?.notifications || data.data || data || [];
+      ddLoaded = true;
+      ddRender();
+    } catch(e) {
+      const list = document.getElementById('dd-notif-list');
+      if (list) list.innerHTML = `<p class="py-8 text-center text-xs text-red-500">Failed to load. <button onclick="ddLoaded=false;ddLoadNotifications()" class="underline">Retry</button></p>`;
+    }
+  };
+
+  // ── Mark one read & navigate ───────────────────────────────────────────────
+  window.ddMarkRead = async function (id, url) {
+    try { await fetch(`/api/notifications/${id}/read`, { method:'POST' }); } catch(_) {}
+    const n = ddNotifications.find(n => n.id === id);
+    if (n) { n.is_read = true; n.read = true; }
+    ddRender();
+    if (url && url !== '#') window.location.href = url;
+  };
+
+  // ── Mark all read ──────────────────────────────────────────────────────────
+  window.ddMarkAllRead = async function () {
+    const unread = ddNotifications.filter(n => !n.is_read && !n.read);
+    await Promise.all(unread.map(n => fetch(`/api/notifications/${n.id}/read`, { method:'POST' }).catch(()=>{})));
+    ddNotifications.forEach(n => { n.is_read = true; n.read = true; });
+    ddRender();
+  };
+
+  // ── Poll count every 30s to keep badge fresh ──────────────────────────────
+  async function ddPollCount() {
+    try {
+      const res  = await fetch('/api/notifications/count');
+      const data = await res.json();
+      const count = data.data?.count ?? data.count ?? 0;
+      const badge = document.getElementById('dd-unread-badge');
+      if (badge) {
+        if (count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.classList.remove('hidden'); badge.classList.add('flex'); }
+        else badge.classList.add('hidden');
+      }
+      // If count changed, force re-fetch on next open
+      if (count !== ddNotifications.filter(n => !n.is_read && !n.read).length) ddLoaded = false;
+    } catch(_) {}
+  }
+
+  // Start polling
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { ddPollCount(); setInterval(ddPollCount, 30000); });
+  } else {
+    ddPollCount(); setInterval(ddPollCount, 30000);
+  }
+})();
+</script>
+</body></html>

@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Evidence — FLUG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --accent: #111827; --red: #dc2626; }
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; }
+        .font-serif-display { font-family: 'DM Serif Display', serif; }
+
+        /* ── Step panels ── */
+        .step-panel { display: none; animation: fadeUp 0.4s ease; }
+        .step-panel.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Progress dots ── */
+        .dot-done    { background: #111827; }
+        .dot-current { background: #374151; box-shadow: 0 0 0 3px #fff, 0 0 0 5px #374151; }
+        .dot-future  { background: #d1d5db; }
+
+        /* ── Mode selector cards (Live / Upload) ── */
+        .mode-card {
+            border: 2px solid #e5e7eb; border-radius: 1rem;
+            padding: 1rem 1.25rem; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            background: #f9fafb; flex: 1;
+        }
+        .mode-card:hover { border-color: #9ca3af; background: #f3f4f6; }
+        .mode-card.selected { border-color: #111827; background: #fff; box-shadow: 0 0 0 3px rgba(17,24,39,0.08); }
+        .mode-card .check-ring {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid #d1d5db; display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .mode-card.selected .check-ring { background: #111827; border-color: #111827; }
+        .mode-card.selected .check-ring::after { content: ''; width: 7px; height: 7px; background: white; border-radius: 50%; }
+
+        /* ── Inputs ── */
+        .flug-input {
+            width: 100%; border-radius: 0.75rem; border: 1.5px solid #e5e7eb;
+            background: #f9fafb; padding: 0.75rem 1rem 0.75rem 2.75rem;
+            color: #111827; outline: none; font-family: 'DM Sans', sans-serif;
+            font-size: 0.9375rem;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .flug-input:focus { border-color: #111827; background: #fff; box-shadow: 0 0 0 3px rgba(17,24,39,0.07); }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed #e5e7eb; border-radius: 1rem;
+            background: #f9fafb; transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #9ca3af; background: #f3f4f6;
+        }
+
+        /* ── File item ── */
+        .file-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.75rem 1rem; background: #f9fafb;
+            border: 1.5px solid #e5e7eb; border-radius: 0.75rem;
+            transition: background 0.15s;
+        }
+        .file-item:hover { background: #f3f4f6; }
+
+        /* ── Status pills ── */
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            border-radius: 9999px; padding: 0.3rem 0.8rem;
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .status-pill.uploading { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; }
+        .status-pill.uploading .dot { background: #38bdf8; animation: blink 1.2s infinite; }
+        .status-pill.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+        .status-pill.success .dot { background: #22c55e; }
+        .status-pill.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+        .status-pill.error .dot { background: #ef4444; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        /* ── Camera preview ── */
+        .camera-shell {
+            position: relative; background: #0f1117;
+            border-radius: 1rem; overflow: hidden;
+            border: 1.5px solid #e5e7eb; aspect-ratio: 16/9;
+        }
+
+        /* ── Progress bar ── */
+        .progress-rail { height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #111827; border-radius: 2px; transition: width 0.4s ease; }
+
+        /* ── Target frame thumbs ── */
+        .target-thumb {
+            width: 3.5rem; height: 3.5rem; object-fit: cover;
+            border-radius: 0.5rem; border: 2px solid #d1d5db;
+            transition: border-color 0.15s;
+        }
+        .target-thumb:hover { border-color: #111827; }
+
+        /* ── Info banner ── */
+        .info-banner {
+            border-radius: 0.875rem; border: 1px solid #dbeafe;
+            background: #eff6ff; padding: 0.875rem 1rem;
+        }
+
+        /* ── Right panel ── */
+        .r-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s; pointer-events: none; }
+        .r-slide.active { opacity: 1; pointer-events: auto; }
+        .r-panel { display: none; }
+        .r-panel.active { display: block; }
+
+        /* ── Scanline overlay for right panel ── */
+        .scanlines::before {
+            content: '';
+            position: absolute; inset: 0; z-index: 1;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.04) 2px,
+                rgba(0,0,0,0.04) 4px
+            );
+            pointer-events: none;
+        }
+
+        /* ── Status message inject ── */
+        .status-msg {
+            display: flex; align-items: flex-start; gap: 0.625rem;
+            padding: 0.75rem 1rem; border-radius: 0.75rem; border-width: 1px;
+            font-size: 0.875rem; animation: fadeUp 0.3s ease;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        /* ── Frame extractor container on step 2 ── */
+        #fe-step2-container { min-height: 200px; }
+
+        /* ── Target placeholder ── */
+        .target-placeholder {
+            border: 2px dashed #e5e7eb; border-radius: 1rem;
+            background: #fafafa; padding: 2.5rem 1rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.75rem; text-align: center;
+        }
+
+        /* ══ INLINE FRAME EXTRACTOR (auto-grid) ══════════════════════ */
+        .ife-shell {
+            border: 1.5px solid #e5e7eb; border-radius: 1rem;
+            overflow: hidden; background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            animation: fadeUp 0.35s ease;
+        }
+
+        /* Extraction progress header */
+        .ife-extract-header {
+            padding: 1rem 1rem 0.75rem;
+            border-bottom: 1.5px solid #f3f4f6;
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .ife-extract-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: #111827; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Extraction progress bar */
+        .ife-extract-bar-wrap {
+            flex: 1;
+        }
+        .ife-extract-label {
+            font-size: 0.75rem; font-weight: 600; color: #111827; margin-bottom: 0.3rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .ife-extract-sub {
+            font-size: 0.7rem; color: #9ca3af; font-weight: 400;
+        }
+        .ife-extract-rail {
+            height: 4px; background: #f3f4f6; border-radius: 2px; overflow: hidden;
+        }
+        .ife-extract-fill {
+            height: 100%; background: #111827; border-radius: 2px;
+            transition: width 0.2s ease; width: 0%;
+        }
+
+        /* Scanning animation (pulsing dots) */
+        .ife-scanning-dots span {
+            display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+            background: #9ca3af; margin: 0 1.5px;
+            animation: ifePulse 1.2s infinite ease-in-out;
+        }
+        .ife-scanning-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .ife-scanning-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes ifePulse { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+
+        /* Frame grid */
+        .ife-grid-wrap {
+            padding: 0.875rem 1rem;
+            max-height: 340px; overflow-y: auto;
+        }
+        .ife-grid-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .ife-grid-label {
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #9ca3af;
+        }
+        .ife-sel-count {
+            font-size: 0.7rem; color: #16a34a; font-weight: 600;
+            background: #f0fdf4; border: 1px solid #bbf7d0;
+            border-radius: 9999px; padding: 0.2rem 0.6rem;
+            display: none;
+        }
+        .ife-sel-count.visible { display: inline-block; }
+
+        /* Responsive grid — 4 columns */
+        .ife-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        @media (max-width: 480px) {
+            .ife-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Individual frame tile */
+        .ife-thumb-item {
+            position: relative; aspect-ratio: 16/9;
+            border-radius: 0.5rem; overflow: hidden;
+            border: 2px solid #e5e7eb; cursor: pointer;
+            transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+            background: #0f1117;
+        }
+        .ife-thumb-item:hover {
+            border-color: #6b7280;
+            transform: scale(1.04);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            z-index: 1;
+        }
+        .ife-thumb-item.selected {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22,163,74,0.25);
+        }
+        .ife-thumb-item img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+
+        /* Timestamp badge */
+        .ife-ts {
+            position: absolute; bottom: 3px; left: 4px;
+            font-size: 0.6rem; font-weight: 600; font-variant-numeric: tabular-nums;
+            color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.55);
+            border-radius: 3px; padding: 1px 4px;
+            pointer-events: none; backdrop-filter: blur(2px);
+        }
+
+        /* Green check overlay */
+        .ife-check {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(22, 163, 74, 0.45);
+            opacity: 0; transition: opacity 0.15s;
+            pointer-events: none;
+        }
+        .ife-thumb-item.selected .ife-check { opacity: 1; }
+        .ife-check-ring {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #16a34a; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .ife-check svg { width: 13px; height: 13px; stroke: #fff; stroke-width: 3; fill: none; }
+
+        /* Skeleton loader tiles */
+        .ife-skeleton {
+            aspect-ratio: 16/9; border-radius: 0.5rem;
+            background: linear-gradient(90deg, #f3f4f6 25%, #e9eaeb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Footer bar with clear + hint */
+        .ife-footer {
+            padding: 0.625rem 1rem 0.875rem;
+            border-top: 1.5px solid #f3f4f6;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .ife-hint { font-size: 0.7rem; color: #9ca3af; }
+        .ife-clear-btn {
+            margin-left: auto; font-size: 0.7rem; color: #ef4444;
+            background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+            font-weight: 500; text-decoration: underline; text-underline-offset: 2px;
+            display: none;
+        }
+        .ife-clear-btn.visible { display: block; }
+
+        /* Face confidence — border colour + opacity only, no text badges */
+        /* During scan: tiles pulse subtly */
+        .ife-thumb-item.ife-scanning {
+            animation: ifeScanPulse 1.6s infinite ease-in-out;
+        }
+        @keyframes ifeScanPulse {
+            0%,100% { border-color: #d1d5db; }
+            50%      { border-color: #a5b4fc; }
+        }
+        /* No-face tiles are dimmed — user can still tap them */
+        .ife-thumb-item.ife-no-face { opacity: 0.3; }
+        .ife-thumb-item.ife-no-face:hover { opacity: 0.85; transition: opacity 0.15s; }
+        .ife-thumb-item.ife-no-face.selected { opacity: 1; }
+
+        /* Confidence % label — bottom-right of tile */
+        .ife-face-score {
+            position: absolute; bottom: 3px; right: 4px;
+            font-size: 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums;
+            background: rgba(0,0,0,0.52); border-radius: 3px; padding: 1px 4px;
+            pointer-events: none; backdrop-filter: blur(2px);
+        }
+
+        /* ══ FRAME PREVIEW MODAL ══════════════════════════════════════ */
+        .fpm-backdrop {
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(9, 11, 17, 0.82);
+            backdrop-filter: blur(8px) saturate(0.7);
+            -webkit-backdrop-filter: blur(8px) saturate(0.7);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+        .fpm-backdrop.open {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .fpm-card {
+            background: #fff; border-radius: 1.25rem;
+            width: 100%; max-width: 640px;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+            transform: translateY(18px) scale(0.97);
+            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease;
+            opacity: 0; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .fpm-backdrop.open .fpm-card {
+            transform: translateY(0) scale(1); opacity: 1;
+        }
+
+        /* Header */
+        .fpm-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.875rem 1.125rem 0.75rem;
+            border-bottom: 1.5px solid #f3f4f6;
+        }
+        .fpm-title {
+            font-size: 0.8125rem; font-weight: 600; color: #111827;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .fpm-counter {
+            font-size: 0.7rem; color: #9ca3af; font-weight: 500;
+            background: #f9fafb; border: 1px solid #e5e7eb;
+            border-radius: 9999px; padding: 0.15rem 0.6rem;
+        }
+        .fpm-close {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1.5px solid #e5e7eb; background: #f9fafb;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+            color: #6b7280;
+        }
+        .fpm-close:hover { background: #f3f4f6; border-color: #d1d5db; color: #111827; }
+
+        /* Image area */
+        .fpm-img-wrap {
+            position: relative; background: #0a0c10;
+            overflow: hidden;
+        }
+        .fpm-img-wrap img {
+            width: 100%; display: block; max-height: 380px;
+            object-fit: contain;
+        }
+
+        /* Timestamp chip on image */
+        .fpm-ts-chip {
+            position: absolute; bottom: 10px; left: 12px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.9); font-size: 0.7rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            border-radius: 6px; padding: 3px 8px;
+        }
+
+        /* Selected badge on image */
+        .fpm-selected-badge {
+            position: absolute; top: 10px; right: 12px;
+            background: #16a34a; color: #fff;
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; border-radius: 9999px;
+            padding: 3px 10px; display: none;
+            align-items: center; gap: 0.35rem;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.4);
+        }
+        .fpm-selected-badge.visible { display: flex; }
+
+        /* Prev / Next nav arrows on image */
+        .fpm-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s;
+            color: #fff;
+        }
+        .fpm-nav:hover { background: rgba(255,255,255,0.22); }
+        .fpm-nav:disabled { opacity: 0.25; cursor: default; }
+        .fpm-nav.prev { left: 10px; }
+        .fpm-nav.next { right: 10px; }
+
+        /* Strip of mini thumbnails */
+        .fpm-strip-wrap {
+            padding: 0.75rem 1.125rem 0;
+            display: flex; gap: 0.375rem; overflow-x: auto; scrollbar-width: none;
+        }
+        .fpm-strip-wrap::-webkit-scrollbar { display: none; }
+        .fpm-strip-thumb {
+            width: 44px; height: 28px; object-fit: cover; border-radius: 5px;
+            border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
+            transition: border-color 0.15s, transform 0.12s;
+            opacity: 0.55;
+        }
+        .fpm-strip-thumb:hover { opacity: 0.85; transform: scale(1.06); }
+        .fpm-strip-thumb.active { border-color: #111827; opacity: 1; transform: scale(1.08); }
+        .fpm-strip-thumb.sel-marked { border-color: #16a34a; opacity: 1; }
+        .fpm-strip-thumb.active.sel-marked { border-color: #16a34a; }
+
+        /* Footer */
+        .fpm-footer {
+            padding: 0.875rem 1.125rem;
+            border-top: 1.5px solid #f3f4f6;
+            display: flex; align-items: center; gap: 0.625rem;
+            flex-wrap: wrap;
+        }
+        .fpm-hint {
+            font-size: 0.7rem; color: #9ca3af;
+            flex: 1; min-width: 0;
+        }
+        .fpm-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.55rem 1.1rem; border-radius: 0.625rem;
+            font-size: 0.8125rem; font-weight: 600; font-family: 'DM Sans', sans-serif;
+            border: none; cursor: pointer; transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .fpm-btn.select {
+            background: #111827; color: #fff;
+        }
+        .fpm-btn.select:hover { background: #374151; }
+        .fpm-btn.deselect {
+            background: #f0fdf4; color: #15803d;
+            border: 1.5px solid #bbf7d0;
+        }
+        .fpm-btn.deselect:hover { background: #dcfce7; }
+        .fpm-btn.skip {
+            background: #f9fafb; color: #6b7280;
+            border: 1.5px solid #e5e7eb;
+        }
+        .fpm-btn.skip:hover { background: #f3f4f6; }
+
+        /* Keyboard hint pill */
+        .fpm-key {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.65rem; color: #9ca3af;
+        }
+        .fpm-key kbd {
+            font-family: 'DM Sans', sans-serif; font-size: 0.6rem;
+            background: #f3f4f6; border: 1px solid #e5e7eb;
+            border-radius: 3px; padding: 1px 5px; color: #6b7280;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+<div class="flex w-screen min-h-screen flex-wrap text-slate-800 items-stretch">
+
+<!-- ═══════════════════════════════════════════════
+     LEFT PANEL
+═══════════════════════════════════════════════ -->
+<div class="flex w-full flex-col md:w-1/2">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-8 pt-8 pb-4">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center">
+                <i class="fas fa-camera-retro text-white text-xs"></i>
+            </div>
+            <span class="text-lg font-semibold tracking-tight text-gray-900">FLUG<span class="text-red-600">.</span></span>
+        </a>
+        <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Evidence Capture</span>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+    <div class="mx-auto w-full max-w-md px-8 pb-16 pt-6">
+
+        <!-- ── Progress ── -->
+        <div class="mb-10">
+            <div class="relative">
+                <div class="absolute left-0 top-2.5 h-0.5 w-full bg-gray-200">
+                    <div id="progress-track" class="absolute h-full bg-gray-900 transition-all duration-500" style="width:0%"></div>
+                </div>
+                <ul class="relative flex w-full justify-between">
+                    <li><button id="dot-1" class="dot-current flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white">1</button></li>
+                    <li><button id="dot-2" class="dot-future  flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white">2</button></li>
+                </ul>
+            </div>
+            <div class="mt-3 flex justify-between text-xs text-gray-400 font-medium">
+                <span>Capture files</span><span>Identify targets</span>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             STEP 1 — CAPTURE
+        ════════════════════════════════════════ -->
+        <div id="step1" class="step-panel active">
+
+            <div class="mb-7">
+                <h2 class="font-serif-display text-2xl text-gray-900 mb-1">Capture your evidence.</h2>
+                <p class="text-sm text-gray-500">Record live video or upload existing files. Up to 3 files, 100 MB each.</p>
+            </div>
+
+            <!-- Error banner -->
+            <div id="step1-error" class="hidden mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                <span id="step1-error-text">Please add at least one evidence file.</span>
+            </div>
+
+            <form id="evidenceCaptureForm" onsubmit="uploadStep1(event)">
+                <input type="hidden" name="sign_with_wallet" id="signWithWallet" value="{{ has_wallet }}">
+
+                <!-- ── Mode selector ── -->
+                <div class="flex gap-3 mb-5">
+                    <div class="mode-card selected" id="card-live" onclick="switchMode('live')">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-video text-gray-600 text-sm"></i>
+                                <span class="font-semibold text-sm text-gray-900">Live Record</span>
+                            </div>
+                            <div class="check-ring" id="ring-live"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">Record directly from camera</p>
+                    </div>
+                    <div class="mode-card" id="card-upload" onclick="switchMode('upload')">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-cloud-upload-alt text-gray-600 text-sm"></i>
+                                <span class="font-semibold text-sm text-gray-900">File Upload</span>
+                            </div>
+                            <div class="check-ring" id="ring-upload"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">Photos, videos, documents</p>
+                    </div>
+                </div>
+
+                <!-- ── LIVE TAB CONTENT ── -->
+                <div id="liveTabContent" class="mb-5">
+
+                    <!-- Launch button (idle state) -->
+                    <div id="camera-launch" class="type-card-like flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-gray-900 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-video text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Camera Recording</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Full HD · Audio + Video</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="toggleLiveRecording()"
+                            class="flex items-center gap-1.5 rounded-xl bg-gray-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-gray-700 transition-all active:scale-[.97]">
+                            <i class="fas fa-camera text-xs"></i> Launch
+                        </button>
+                    </div>
+
+                    <!-- Camera UI (hidden until launched) -->
+                    <div id="liveRecordingUI" class="hidden mt-4 space-y-3">
+
+                        <!-- Camera shell -->
+                        <div class="camera-shell">
+                            <video id="videoPreview" autoplay playsinline muted class="w-full h-full object-cover"></video>
+
+                            <!-- REC indicator -->
+                            <div id="recordingIndicator" class="hidden absolute top-3 left-3 flex items-center gap-2 bg-red-600/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                                <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                <span class="text-xs font-bold text-white tracking-widest">REC</span>
+                                <span id="recordingTimer" class="text-xs text-white font-mono">00:00</span>
+                            </div>
+
+                            <!-- No camera fallback -->
+                            <div id="noCamera" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gray-900">
+                                <i class="fas fa-video-slash text-3xl text-gray-600 mb-2"></i>
+                                <p class="text-gray-400 text-xs font-medium">No camera available</p>
+                            </div>
+                        </div>
+
+                        <!-- Recording controls -->
+                        <div class="flex gap-2">
+                            <button type="button" id="startRecordingBtn" onclick="startRecording()"
+                                class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-600 py-2.5 text-xs font-semibold text-white hover:bg-red-700 transition-all active:scale-[.97]">
+                                <i class="fas fa-record-vinyl"></i> Start Recording
+                            </button>
+                            <button type="button" id="stopRecordingBtn" onclick="stopRecording()"
+                                class="hidden flex-1 flex items-center justify-center gap-2 rounded-xl bg-gray-900 py-2.5 text-xs font-semibold text-white hover:bg-gray-700 transition-all active:scale-[.97]">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                            <button type="button" onclick="cancelRecording()"
+                                class="flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-times text-xs"></i> Cancel
+                            </button>
+                        </div>
+
+                        <!-- Recording preview -->
+                        <div id="recordingPreview" class="hidden rounded-xl border border-gray-200 bg-white overflow-hidden">
+                            <div class="px-4 pt-4 pb-2">
+                                <p class="text-xs font-semibold text-gray-700 flex items-center gap-1.5 mb-3">
+                                    <i class="fas fa-eye text-gray-400"></i> Preview Recording
+                                </p>
+                                <video id="recordedVideo" controls class="w-full rounded-lg bg-black aspect-video mb-3"></video>
+                            </div>
+                            <div class="flex border-t border-gray-100">
+                                <button type="button" onclick="saveRecording()"
+                                    class="flex-1 flex items-center justify-center gap-2 py-3 text-xs font-semibold text-gray-900 hover:bg-gray-50 transition-colors border-r border-gray-100">
+                                    <i class="fas fa-check text-green-500"></i> Save to Evidence
+                                </button>
+                                <button type="button" onclick="discardRecording()"
+                                    class="flex-1 flex items-center justify-center gap-2 py-3 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-trash text-red-400 text-xs"></i> Discard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── UPLOAD TAB CONTENT ── -->
+                <div id="uploadTabContent" class="hidden mb-5">
+                    <div id="dropZone" class="drop-zone p-8 text-center" onclick="document.getElementById('fileInput').click()">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Drop files here</p>
+                                <p class="text-xs text-gray-400 mt-0.5">or click to browse · photos, video, audio, PDF, docs</p>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-folder-open text-gray-400 text-xs"></i> Select Files
+                            </span>
+                        </div>
+                        <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" class="hidden">
+                    </div>
+                </div>
+
+                <!-- ── File list (shared between modes) ── -->
+                <div id="filePreview" class="hidden mb-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <i class="fas fa-paperclip text-gray-400"></i> Attached Files
+                        </p>
+                        <span class="text-xs text-gray-400 font-medium" id="fileCount">0 / 3</span>
+                    </div>
+                    <div id="fileList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+
+                    <!-- Upload progress -->
+                    <div id="uploadProgressContainer" class="hidden mt-4">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-medium text-gray-600">Uploading to Storj…</span>
+                            <span id="progressText" class="text-xs font-semibold text-gray-900">0%</span>
+                        </div>
+                        <div class="progress-rail">
+                            <div id="uploadProgress" class="progress-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Status area ── -->
+                <div id="captureStatus" class="space-y-2 mb-5"></div>
+
+                <!-- ── Submit ── -->
+                <button type="submit" id="captureBtn"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 text-sm font-semibold text-white transition-all hover:bg-red-700 active:scale-[.98]">
+                    <i class="fas fa-lock text-xs"></i>
+                    <span>Capture Evidence</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+
+                <p class="mt-4 text-center text-xs text-gray-400 leading-relaxed">
+                    <i class="fas fa-shield-alt mr-1"></i>Files encrypted on Storj · GPS tagged · Blockchain timestamped
+                </p>
+            </form>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             STEP 2 — IDENTIFY TARGETS
+        ════════════════════════════════════════ -->
+        <div id="step2" class="step-panel">
+
+            <div class="mb-5 flex items-start gap-4">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-purple-100">
+                    <i class="fas fa-crosshairs text-purple-600 text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="font-serif-display text-2xl text-gray-900 leading-tight">Identify targets.</h2>
+                    <p class="text-sm text-gray-500 mt-0.5">Select frames showing persons of interest. Uploaded securely alongside your evidence.</p>
+                </div>
+            </div>
+
+            <!-- Status pill for step 2 -->
+            <div id="step2-upload-status" class="mb-4">
+                <div class="status-pill success">
+                    <span class="dot"></span>
+                    <span id="step2-status-text">Evidence captured · now identify persons of interest</span>
+                </div>
+            </div>
+
+            <!-- Error banner -->
+            <div id="step2-error" class="hidden mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                <span id="step2-error-text">Something went wrong.</span>
+            </div>
+
+            <!-- Evidence summary pill -->
+            <div class="rounded-xl border border-gray-200 bg-white p-4 mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-green-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-900 truncate" id="s2-evidence-number">Evidence captured</p>
+                        <p class="text-xs text-gray-400 mt-0.5" id="s2-file-count">Files secured on Storj</p>
+                    </div>
+                    <span class="text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">DRAFT</span>
+                </div>
+            </div>
+
+            <!-- ════ INLINE FRAME EXTRACTOR (auto-grid) ════ -->
+            <div id="fe-step2-container" class="mb-5">
+
+                <!-- No-video placeholder -->
+                <div id="fe-placeholder" class="target-placeholder">
+                    <div class="h-12 w-12 rounded-2xl bg-purple-100 flex items-center justify-center">
+                        <i class="fas fa-crosshairs text-purple-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">No video detected</p>
+                        <p class="text-xs text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">Target extraction works with video files. For image-only evidence, continue to add details.</p>
+                    </div>
+                    <button type="button" onclick="ifeInit()"
+                        class="flex items-center gap-1.5 rounded-xl border border-gray-300 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-film text-gray-400 text-xs"></i> Extract Frames Manually
+                    </button>
+                </div>
+
+                <!-- Extractor shell -->
+                <div id="ife-shell" class="ife-shell hidden">
+
+                    <!-- Extraction progress header -->
+                    <div class="ife-extract-header">
+                        <div class="ife-extract-icon">
+                            <i class="fas fa-film text-white text-xs"></i>
+                        </div>
+                        <div class="ife-extract-bar-wrap">
+                            <div class="ife-extract-label">
+                                <span id="ife-extract-label-text">Extracting frames…</span>
+                                <span class="ife-extract-sub ife-scanning-dots" id="ife-scanning-dots">
+                                    <span></span><span></span><span></span>
+                                </span>
+                                <span class="ife-extract-sub" id="ife-extract-count" style="display:none"></span>
+                            </div>
+                            <div class="ife-extract-rail">
+                                <div class="ife-extract-fill" id="ife-extract-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frame grid -->
+                    <div class="ife-grid-wrap">
+                        <div class="ife-grid-header">
+                            <span class="ife-grid-label" id="ife-grid-label">All Frames · tap to select targets</span>
+                            <span class="ife-sel-count" id="ife-sel-count">0 selected</span>
+                        </div>
+                        <div class="ife-grid" id="ife-grid"></div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="ife-footer">
+                        <i class="fas fa-hand-pointer text-gray-300 text-xs flex-shrink-0"></i>
+                        <span class="ife-hint">Tap any frame to mark as target · tap again to deselect</span>
+                        <button type="button" class="ife-clear-btn" id="ife-clear-btn" onclick="ifeDeselectAll()">
+                            Deselect all
+                        </button>
+                    </div>
+                </div>
+
+                <!-- hidden video + canvas for frame extraction -->
+                <video id="ife-video" preload="metadata" playsinline style="display:none"></video>
+                <canvas id="ife-canvas" style="display:none"></canvas>
+
+            </div>
+
+            <!-- Target confirmation progress -->
+            <div id="target-upload-progress" class="hidden mb-5">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-medium text-gray-600">Uploading target frames…</span>
+                    <span id="target-progress-text" class="text-xs font-semibold text-gray-900">0%</span>
+                </div>
+                <div class="progress-rail">
+                    <div id="target-progress-fill" class="progress-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- Info banner -->
+            <div class="info-banner flex items-start gap-3 mb-5">
+                <i class="fas fa-info-circle text-blue-400 mt-0.5 flex-shrink-0 text-sm"></i>
+                <p class="text-xs text-blue-700 leading-relaxed">Target photos are stored on Storj separately from evidence media. They help identify persons of interest and <strong>cannot be added after submission.</strong></p>
+            </div>
+
+            <!-- Confirm CTA -->
+            <div class="flex gap-3">
+                <button type="button" onclick="goStep(1)"
+                    class="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
+                </button>
+                <button type="button" id="confirmTargetsBtn" onclick="confirmTargets()"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-700 active:scale-[.98]">
+                    <span>Confirm &amp; Continue</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+
+            <button type="button" onclick="skipTargets()"
+                class="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-600 transition-colors py-1 underline underline-offset-2">
+                Skip target identification — add details only
+            </button>
+        </div>
+
+    </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     RIGHT PANEL
+═══════════════════════════════════════════════ -->
+<div class="relative hidden overflow-hidden select-none md:block md:w-1/2 md:sticky md:top-0 md:h-screen md:self-start">
+
+    <!-- ── Panel 1: Capture ── -->
+    <div id="r-panel-1" class="r-panel active absolute inset-0 scanlines" style="background:#0f1117;">
+
+        <!-- Slide A — civic urgency -->
+        <div id="r1-1" class="r-slide active absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&w=1200&q=80"
+                 class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-12 z-10">
+                <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                    Immutable Evidence
+                </span>
+                <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">
+                    Every frame.<br><em class="text-red-400 not-italic">On the record.</em>
+                </h3>
+                <p class="text-sm text-gray-300 leading-relaxed max-w-sm">
+                    Files go straight to Storj — encrypted, geo-tagged, and cryptographically timestamped the moment you capture them.
+                </p>
+                <div class="mt-6 flex gap-3">
+                    <div class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5">
+                        <i class="fas fa-lock text-red-400 text-xs"></i>
+                        <span class="text-xs text-gray-300 font-medium">End-to-end encrypted</span>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5">
+                        <i class="fas fa-satellite-dish text-green-400 text-xs"></i>
+                        <span class="text-xs text-gray-300 font-medium">GPS tagged</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide B — live recording -->
+        <div id="r1-2" class="r-slide absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"
+                 class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-12 z-10">
+                <span class="inline-block mb-4 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-300 backdrop-blur-sm">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mr-1"></span>
+                    Live Recording
+                </span>
+                <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">
+                    Record now.<br><em class="text-red-400 not-italic">Nothing lost.</em>
+                </h3>
+                <p class="text-sm text-gray-300 leading-relaxed max-w-sm">
+                    FLUG captures live video directly from your device. No third parties. No cloud middlemen. Straight to secure storage.
+                </p>
+            </div>
+        </div>
+
+        <!-- Carousel dots -->
+        <div class="absolute bottom-6 right-10 flex gap-2 z-20" id="r1-dots">
+            <div class="h-1.5 w-6 rounded-full bg-white transition-all"></div>
+            <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all"></div>
+        </div>
+    </div>
+
+    <!-- ── Panel 2: Target Identification ── -->
+    <div id="r-panel-2" class="r-panel absolute inset-0 scanlines" style="background:#0a1628;">
+        <img src="https://images.unsplash.com/photo-1580121441575-41bcb5c6b47c?auto=format&fit=crop&w=1200&q=80"
+             class="absolute inset-0 h-full w-full object-cover opacity-10" alt="">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
+
+        <div class="absolute inset-0 flex flex-col justify-center p-12 z-10">
+            <div class="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                <i class="fas fa-crosshairs text-purple-400 text-3xl"></i>
+            </div>
+            <span class="inline-block mb-5 w-fit rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs font-medium text-purple-300 backdrop-blur-sm">
+                Target Identification
+            </span>
+            <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">
+                Every face.<br><em class="text-purple-400 not-italic">Accounted for.</em>
+            </h3>
+            <p class="text-sm text-gray-300 leading-relaxed max-w-sm mb-8">
+                Frame-by-frame extraction surfaces persons of interest from your video. Selected frames are uploaded separately — permanently linked to this case.
+            </p>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                    <i class="fas fa-film text-purple-400 text-sm flex-shrink-0"></i>
+                    <span class="text-sm text-gray-200">Frame-by-frame video scrubbing</span>
+                </div>
+                <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                    <i class="fas fa-user-tag text-purple-400 text-sm flex-shrink-0"></i>
+                    <span class="text-sm text-gray-200">Face detection assistance</span>
+                </div>
+                <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                    <i class="fas fa-lock text-purple-400 text-sm flex-shrink-0"></i>
+                    <span class="text-sm text-gray-200">Stored separately on Storj</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end layout -->
+
+<!-- ── Frame extractor (must load first) ── -->
+<script>{{ frame_extractor_js }}</script>
+
+<!-- ── Core upload JS ── -->
+<script>{{ upload_js }}</script>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  INLINE FRAME EXTRACTOR  — auto-grid edition
+//  Seeks through video at even intervals, extracts every
+//  frame as a JPEG blob, renders a selectable grid.
+// ══════════════════════════════════════════════════════════
+const IFE = (() => {
+    const MAX_FRAMES = 24;   // max tiles in grid
+    const MIN_INTERVAL = 0.5; // seconds between frames (floor)
+
+    let _frames  = [];  // { blob, url, timestamp, selected, faceQuality? }
+    let _aborted = false;
+
+    // ── internal helpers ────────────────────────────────────
+    function _fmt(s) {
+        s = Math.round(s || 0);
+        return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    }
+
+    function _el(id) { return document.getElementById(id); }
+
+    // ── seek-based frame capture (reliable cross-browser) ──
+    function _captureAt(video, canvas, time) {
+        return new Promise((resolve, reject) => {
+            const onSeeked = () => {
+                try {
+                    canvas.width  = video.videoWidth  || 640;
+                    canvas.height = video.videoHeight || 360;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    canvas.toBlob(blob => {
+                        if (!blob) { reject(new Error('toBlob failed')); return; }
+                        resolve(blob);
+                    }, 'image/jpeg', 0.85);
+                } catch(e) { reject(e); }
+            };
+            video.addEventListener('seeked', onSeeked, { once: true });
+            video.currentTime = time;
+        });
+    }
+
+    // ── main extraction pipeline ────────────────────────────
+    async function _extract(file) {
+        _aborted = false;
+        _frames  = [];
+
+        const video  = _el('ife-video');
+        const canvas = _el('ife-canvas');
+        const grid   = _el('ife-grid');
+        const fill   = _el('ife-extract-fill');
+        const label  = _el('ife-extract-label-text');
+        const dots   = _el('ife-scanning-dots');
+        const cnt    = _el('ife-extract-count');
+
+        // show shell, hide placeholder
+        _el('ife-shell').classList.remove('hidden');
+        _el('fe-placeholder').classList.add('hidden');
+
+        // render skeleton tiles while extracting
+        const skCount = Math.min(MAX_FRAMES, 12);
+        grid.innerHTML = Array.from({ length: skCount }, () =>
+            `<div class="ife-skeleton"></div>`).join('');
+
+        // load video metadata
+        await new Promise((res, rej) => {
+            video.onloadedmetadata = res;
+            video.onerror = rej;
+            video.src = URL.createObjectURL(file);
+            video.load();
+        });
+
+        const duration = video.duration;
+        const count    = Math.min(MAX_FRAMES, Math.max(1, Math.floor(duration / MIN_INTERVAL)));
+        const interval = duration / count;
+
+        label.textContent = `Analysing ${count} frames…`;
+        fill.style.width  = '5%';
+
+        // update skeleton count
+        grid.innerHTML = Array.from({ length: count }, () =>
+            `<div class="ife-skeleton"></div>`).join('');
+
+        for (let i = 0; i < count; i++) {
+            if (_aborted) break;
+            const t = i * interval + interval * 0.5; // mid-interval
+
+            try {
+                const blob = await _captureAt(video, canvas, t);
+                const url  = URL.createObjectURL(blob);
+                const frame = { blob, url, timestamp: t, selected: false };
+                _frames.push(frame);
+
+                // replace corresponding skeleton with real tile
+                const tiles = grid.querySelectorAll('.ife-skeleton, .ife-thumb-item');
+                const tile  = tiles[i];
+                if (tile) {
+                    tile.outerHTML = _tileHTML(i, frame);
+                } else {
+                    grid.insertAdjacentHTML('beforeend', _tileHTML(_frames.length - 1, frame));
+                }
+
+                // update progress
+                const pct = Math.round(((i + 1) / count) * 100);
+                fill.style.width = pct + '%';
+                cnt.textContent  = `${i + 1} / ${count}`;
+            } catch(_) { /* skip bad seek */ }
+        }
+
+        // ── Phase 2: Face quality scan ─────────────────────────
+        // Run TinyFaceDetector on every extracted frame.
+        // Results are shown as border colour + opacity — no text badges.
+        // Auto-selects suitable frames. Does NOT dispatch until scan is fully done.
+        const faceDetector = (typeof faceapi !== 'undefined')
+            ? new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+            : null;
+
+        if (faceDetector) {
+            label.textContent  = 'Scanning for faces…';
+            cnt.style.display  = '';
+            cnt.textContent    = '';
+            dots.style.display = '';
+            fill.style.width   = '0%';
+            fill.style.transition = 'none'; // instant reset
+            fill.style.background = '#111827'; // keep black — no purple
+            fill.style.transition = '';
+
+            // Mark all tiles as "scanning" (subtle pulse)
+            _el('ife-grid').querySelectorAll('.ife-thumb-item')
+                .forEach(t => t.classList.add('ife-scanning'));
+
+            for (let i = 0; i < _frames.length; i++) {
+                if (_aborted) break;
+                const frame = _frames[i];
+                try {
+                    // Grab the img already rendered in the tile — it's already decoded,
+                    // no need to create a new Image and risk onload never firing.
+                    const allTiles = _el('ife-grid').querySelectorAll('.ife-thumb-item');
+                    const tile = allTiles[i];
+                    const imgEl = tile ? tile.querySelector('img') : null;
+
+                    if (!imgEl) throw new Error('no img element');
+
+                    // Wait for decode if somehow not yet complete
+                    if (!imgEl.complete) await imgEl.decode().catch(() => {});
+
+                    const det = await faceapi.detectSingleFace(imgEl, faceDetector);
+                    if (det) {
+                        const faceArea = (det.box.width * det.box.height)
+                                       / ((imgEl.naturalWidth || 640) * (imgEl.naturalHeight || 360));
+                        frame.faceQuality = {
+                            detected:   true,
+                            confidence: det.score,
+                            faceArea,
+                            suitable:   det.score >= 0.70 && faceArea >= 0.04
+                        };
+                    } else {
+                        frame.faceQuality = { detected: false, confidence: 0, suitable: false };
+                    }
+                } catch(_e) {
+                    frame.faceQuality = { detected: false, confidence: 0, suitable: false };
+                }
+
+                // Auto-select suitable frames
+                if (frame.faceQuality.suitable) frame.selected = true;
+
+                // Update tile border in-place — no full re-render, no flicker
+                const allTiles2 = _el('ife-grid').querySelectorAll('.ife-thumb-item');
+                const tile2 = allTiles2[i];
+                if (tile2) {
+                    tile2.classList.remove('ife-scanning');
+                    if (frame.faceQuality.suitable) {
+                        tile2.classList.add('selected');
+                    }
+                    _applyFaceStyle(tile2, frame);
+                }
+
+                // Progress (header bar only — no dispatch yet)
+                const pct2 = Math.round(((i + 1) / _frames.length) * 100);
+                fill.style.width = pct2 + '%';
+                cnt.textContent  = `${i + 1} / ${_frames.length}`;
+            }
+
+            // Scan complete — update badge count + grid label, THEN dispatch once
+            _updateBadge();
+
+            const suitableCount = _frames.filter(f => f.faceQuality?.suitable).length;
+            const gridLabel = _el('ife-grid-label');
+            if (gridLabel) {
+                gridLabel.textContent = suitableCount > 0
+                    ? `${suitableCount} face-ready frame${suitableCount !== 1 ? 's' : ''} auto-selected · tap to adjust`
+                    : 'No clear faces found · tap frames manually';
+            }
+        }
+
+        // All done — update header, reset bar to green, dispatch once
+        const faceCount = _frames.filter(f => f.faceQuality?.suitable).length;
+        label.textContent = faceCount > 0
+            ? `${faceCount} face-ready frame${faceCount !== 1 ? 's' : ''} found`
+            : `${_frames.length} frames ready — no faces detected`;
+        dots.style.display = 'none';
+        cnt.style.display  = '';
+        cnt.textContent    = 'Tap frames to select targets';
+        fill.style.width   = '100%';
+        fill.style.background = '#16a34a';
+
+        _dispatchConfirmed(); // ← single dispatch, only after everything is done
+    }
+
+    // Apply border colour + opacity to a tile based on face quality.
+    // Confidence drives colour intensity: bright green → amber → gray.
+    function _applyFaceStyle(tile, frame) {
+        const fq = frame.faceQuality;
+        if (!fq) return;
+
+        // Update or insert the confidence score label
+        let scoreEl = tile.querySelector('.ife-face-score');
+        if (!scoreEl) {
+            scoreEl = document.createElement('span');
+            scoreEl.className = 'ife-face-score';
+            tile.appendChild(scoreEl);
+        }
+
+        if (!fq.detected) {
+            tile.classList.add('ife-no-face');
+            tile.style.borderColor = '';
+            tile.style.boxShadow   = '';
+            scoreEl.textContent    = 'no face';
+            scoreEl.style.color    = 'rgba(255,255,255,0.45)';
+            return;
+        }
+
+        const score = fq.confidence;
+        const pct   = Math.round(score * 100);
+
+        if (fq.suitable) {
+            // Green — intensity scales with confidence (0.70→1.0 maps to softer→vivid)
+            const lightness = Math.round(38 - (score - 0.70) / 0.30 * 10); // 38%→28%
+            tile.style.borderColor = `hsl(142, 68%, ${lightness}%)`;
+            tile.style.boxShadow   = `0 0 0 2px hsla(142, 68%, 40%, ${0.12 + score * 0.28})`;
+            scoreEl.textContent    = `${pct}%`;
+            scoreEl.style.color    = 'rgba(255,255,255,0.9)';
+        } else {
+            // Amber — fading with confidence
+            const alpha = 0.4 + score * 0.45;
+            tile.style.borderColor = `rgba(217, 119, 6, ${alpha})`;
+            tile.style.boxShadow   = `0 0 0 1px rgba(217, 119, 6, ${alpha * 0.5})`;
+            tile.style.opacity     = String(0.55 + score * 0.3);
+            scoreEl.textContent    = `${pct}%`;
+            scoreEl.style.color    = 'rgba(255,255,255,0.75)';
+        }
+    }
+
+    function _tileHTML(idx, frame) {
+        const noFaceCls = (frame.faceQuality && !frame.faceQuality.detected) ? ' ife-no-face' : '';
+        return `
+        <div class="ife-thumb-item${frame.selected ? ' selected' : ''}${noFaceCls}"
+             onclick="FPM.open(${idx}, IFE.getFrames, IFE.toggle.bind(IFE))"
+             title="Preview frame at ${_fmt(frame.timestamp)}">
+            <img src="${frame.url}" loading="lazy" alt="Frame at ${_fmt(frame.timestamp)}">
+            <span class="ife-ts">${_fmt(frame.timestamp)}</span>
+            <div class="ife-check">
+                <div class="ife-check-ring">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ── toggle frame selection ──────────────────────────────
+    function toggle(idx) {
+        if (!_frames[idx]) return;
+        _frames[idx].selected = !_frames[idx].selected;
+
+        // Update grid tile DOM directly
+        const tiles = _el('ife-grid').querySelectorAll('.ife-thumb-item');
+        tiles[idx]?.classList.toggle('selected', _frames[idx].selected);
+
+        _updateBadge();
+        _dispatchConfirmed();
+    }
+
+    // ── expose frames array to FPM ──────────────────────────
+    function getFrames() { return _frames; }
+
+    function _updateBadge() {
+        const sel   = _frames.filter(f => f.selected).length;
+        const badge = _el('ife-sel-count');
+        const clrBtn= _el('ife-clear-btn');
+        if (!badge) return;
+        if (sel > 0) {
+            badge.textContent = sel === 1 ? '1 selected' : `${sel} selected`;
+            badge.classList.add('visible');
+            clrBtn?.classList.add('visible');
+        } else {
+            badge.classList.remove('visible');
+            clrBtn?.classList.remove('visible');
+        }
+    }
+
+    function _dispatchConfirmed() {
+        window.dispatchEvent(new CustomEvent('fe:confirmed', {
+            detail: { blobs: getSelectedBlobs() }
+        }));
+    }
+
+    // ── public API ──────────────────────────────────────────
+    function openForFile(file) {
+        if (!file) return;
+        _extract(file).catch(err => console.warn('[IFE] extraction error:', err));
+    }
+
+    function deselectAll() {
+        _frames.forEach(f => f.selected = false);
+        _el('ife-grid').querySelectorAll('.ife-thumb-item')
+            .forEach(t => t.classList.remove('selected'));
+        _updateBadge();
+        _dispatchConfirmed();
+    }
+
+    function getSelectedBlobs() {
+        return _frames
+            .filter(f => f.selected)
+            .map((f, i) => ({
+                blob: f.blob,
+                filename: `target_${_fmt(f.timestamp).replace(':','m')}s.jpg`
+            }));
+    }
+
+    function clearSelected() { deselectAll(); }
+
+    return { openForFile, toggle, getFrames, deselectAll, getSelectedBlobs, clearSelected };
+})();
+
+// expose globally (keeps existing orchestration working)
+window.FrameExtractor = IFE;
+
+// convenience wrappers for onclick attributes
+function ifeInit() {
+    const f = (typeof selectedFiles !== 'undefined')
+        ? selectedFiles.find(f => f.type.startsWith('video/'))
+        : null;
+    if (f) IFE.openForFile(f);
+    else showStatus('No video file found. Upload a video first.', 'info');
+}
+function ifeDeselectAll() { IFE.deselectAll(); }
+
+// ══════════════════════════════════════════════════════════
+//  FRAME PREVIEW MODAL  (FPM)
+// ══════════════════════════════════════════════════════════
+const FPM = (() => {
+    let _idx     = 0;
+    let _getFrames = () => [];
+    let _onToggle  = () => {};
+
+    function _fmt(s) {
+        s = Math.round(s || 0);
+        return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    }
+    function _el(id) { return document.getElementById(id); }
+
+    // ── open at a specific frame index ──────────────────────
+    function open(idx, getFrames, onToggle) {
+        _idx       = idx;
+        _getFrames = getFrames;
+        _onToggle  = onToggle;
+        _renderStrip();
+        _renderFrame();
+        _el('fpm-backdrop').classList.add('open');
+        document.addEventListener('keydown', _onKey);
+    }
+
+    function close() {
+        _el('fpm-backdrop').classList.remove('open');
+        document.removeEventListener('keydown', _onKey);
+    }
+
+    function handleBackdrop(e) {
+        if (e.target === _el('fpm-backdrop')) close();
+    }
+
+    // ── navigate prev / next ────────────────────────────────
+    function nav(dir) {
+        const frames = _getFrames();
+        _idx = (_idx + dir + frames.length) % frames.length;
+        _renderFrame();
+        _scrollStripTo(_idx);
+    }
+
+    // ── toggle current frame selection ──────────────────────
+    function toggleCurrent() {
+        _onToggle(_idx);
+        _renderFrame();
+        _updateStrip();
+    }
+
+    // ── render the large image + UI state ──────────────────
+    function _renderFrame() {
+        const frames  = _getFrames();
+        const frame   = frames[_idx];
+        if (!frame) return;
+
+        _el('fpm-img').src     = frame.url;
+        _el('fpm-ts').textContent = _fmt(frame.timestamp);
+        _el('fpm-counter').textContent = `${_idx + 1} / ${frames.length}`;
+
+        // selected badge
+        _el('fpm-selected-badge').classList.toggle('visible', frame.selected);
+
+        // action button
+        const btn   = _el('fpm-action-btn');
+        const label = _el('fpm-action-label');
+        if (frame.selected) {
+            btn.className  = 'fpm-btn deselect';
+            btn.innerHTML  = '<i class="fas fa-times-circle" style="font-size:0.65rem"></i> <span>Remove Target</span>';
+        } else {
+            btn.className  = 'fpm-btn select';
+            btn.innerHTML  = '<i class="fas fa-crosshairs" style="font-size:0.65rem"></i> <span>Mark as Target</span>';
+        }
+
+        // skip button — hide on last frame
+        const skipBtn = _el('fpm-skip-btn');
+        if (skipBtn) skipBtn.style.display = (_idx === frames.length - 1) ? 'none' : '';
+
+        // nav arrows
+        _el('fpm-prev').disabled = frames.length <= 1;
+        _el('fpm-next').disabled = frames.length <= 1;
+
+        // highlight active strip thumb
+        _el('fpm-strip').querySelectorAll('.fpm-strip-thumb')
+            .forEach((t, i) => {
+                t.classList.toggle('active', i === _idx);
+                t.classList.toggle('sel-marked', frames[i]?.selected);
+            });
+    }
+
+    // ── render the thumbnail strip ──────────────────────────
+    function _renderStrip() {
+        const frames = _getFrames();
+        _el('fpm-strip').innerHTML = frames.map((f, i) => `
+            <img class="fpm-strip-thumb${i === _idx ? ' active' : ''}${f.selected ? ' sel-marked' : ''}"
+                 src="${f.url}" loading="lazy"
+                 onclick="FPM.jumpTo(${i})"
+                 title="${_fmt(f.timestamp)}">`
+        ).join('');
+    }
+
+    function _updateStrip() {
+        const frames = _getFrames();
+        _el('fpm-strip').querySelectorAll('.fpm-strip-thumb')
+            .forEach((t, i) => t.classList.toggle('sel-marked', frames[i]?.selected));
+    }
+
+    function _scrollStripTo(idx) {
+        const strip = _el('fpm-strip');
+        const thumb = strip.querySelectorAll('.fpm-strip-thumb')[idx];
+        thumb?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    function jumpTo(idx) {
+        _idx = idx;
+        _renderFrame();
+        _scrollStripTo(idx);
+    }
+
+    // ── keyboard ────────────────────────────────────────────
+    function _onKey(e) {
+        if (e.key === 'Escape')      { close(); return; }
+        if (e.key === 'ArrowLeft')   { nav(-1); return; }
+        if (e.key === 'ArrowRight' || e.key === 'Tab') { e.preventDefault(); nav(1); return; }
+        if (e.key === ' ')           { e.preventDefault(); toggleCurrent(); return; }
+    }
+
+    return { open, close, nav, jumpTo, toggleCurrent, handleBackdrop };
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     FLOW ORCHESTRATION — overrides captureEvidence
+     and adds 2-step navigation
+═══════════════════════════════════════════════ -->
+<script>
+// ── Global flow state ──────────────────────────────────────────────────────
+let _evidenceId     = null;
+let _evidenceNumber = null;
+let _mediaFileCount = 0;
+let _currentMode    = 'live'; // 'live' | 'upload'
+
+// ── Mode selector (replaces old switchTab) ─────────────────────────────────
+function switchMode(mode) {
+    _currentMode = mode;
+
+    ['live', 'upload'].forEach(m => {
+        document.getElementById('card-' + m).classList.toggle('selected', m === mode);
+    });
+
+    document.getElementById('liveTabContent').classList.toggle('hidden', mode !== 'live');
+    document.getElementById('uploadTabContent').classList.toggle('hidden', mode !== 'upload');
+
+    document.getElementById('step1-error').classList.add('hidden');
+}
+
+// Keep legacy switchTab alias (upload_js may call it on DOMContentLoaded)
+function switchTab(tabName) { switchMode(tabName === 'upload' ? 'upload' : 'live'); }
+
+// ── Step navigation ────────────────────────────────────────────────────────
+function goStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    document.getElementById('progress-track').style.width = ((n - 1) * 100) + '%';
+
+    for (let i = 1; i <= 2; i++) {
+        const d = document.getElementById('dot-' + i);
+        d.classList.remove('dot-done', 'dot-current', 'dot-future');
+        if (i < n)       { d.classList.add('dot-done');    d.innerHTML = '<i class="fas fa-check" style="font-size:9px"></i>'; }
+        else if (i === n){ d.classList.add('dot-current'); d.textContent = i; }
+        else             { d.classList.add('dot-future');  d.textContent = i; }
+    }
+
+    // Swap right panels
+    document.querySelectorAll('.r-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('r-panel-' + n)?.classList.add('active');
+
+    // On step 2 — update evidence summary + auto-open inline extractor
+    if (n === 2) {
+        _hydrateStep2();
+        const videoFile = (typeof selectedFiles !== 'undefined')
+            ? selectedFiles.find(f => f.type.startsWith('video/'))
+            : null;
+        if (videoFile) {
+            setTimeout(() => {
+                IFE.openForFile(videoFile);
+            }, 350);
+        } else {
+            document.getElementById('fe-placeholder').classList.remove('hidden');
+            document.getElementById('ife-shell').classList.add('hidden');
+        }
+    }
+
+    window.scrollTo(0, 0);
+}
+
+function _hydrateStep2() {
+    if (_evidenceNumber) {
+        document.getElementById('s2-evidence-number').textContent = 'Evidence #' + _evidenceNumber;
+    }
+    document.getElementById('s2-file-count').textContent =
+        _mediaFileCount + ' file(s) secured on Storj';
+}
+
+// ── Step 1 submit — upload files only ─────────────────────────────────────
+async function uploadStep1(event) {
+    event.preventDefault();
+
+    if (selectedFiles.length === 0) {
+        document.getElementById('step1-error-text').textContent = 'Please add at least one evidence file.';
+        document.getElementById('step1-error').classList.remove('hidden');
+        return;
+    }
+    document.getElementById('step1-error').classList.add('hidden');
+
+    const captureBtn      = document.getElementById('captureBtn');
+    const progressCont    = document.getElementById('uploadProgressContainer');
+    const progressBar     = document.getElementById('uploadProgress');
+    const progressText    = document.getElementById('progressText');
+
+    captureBtn.disabled  = true;
+    captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 text-xs"></i><span>Capturing…</span>';
+
+    progressCont?.classList.remove('hidden');
+    if (progressBar) progressBar.style.width = '10%';
+    if (progressText) progressText.textContent = 'Getting location…';
+
+    // ── Geolocation ────────────────────────────────────────────────
+    let locationData = null;
+    try {
+        showStatus('Detecting your location…', 'info');
+        locationData = await new RobustGeolocation().getLocation();
+        if (locationData.accuracy === 'high')
+            showStatus('GPS location acquired', 'success');
+        else
+            showStatus('Location detected · ' + (locationData.city || 'approximate'), 'success');
+    } catch (err) {
+        showStatus('Location unavailable — evidence saved without coordinates', 'warning');
+        locationData = { latitude: null, longitude: null, county: 'Unknown',
+                         accuracy: 'none', source: 'failed' };
+    }
+
+    if (progressBar) progressBar.style.width = '35%';
+    if (progressText) progressText.textContent = 'Uploading files…';
+
+    // ── Build FormData ─────────────────────────────────────────────
+    const formData = new FormData();
+    selectedFiles.forEach(f => formData.append('files', f, f.name));
+
+    const now = new Date();
+    formData.append('title',               'DRAFT - Evidence Pending Details');
+    formData.append('description',         'Evidence captured. Details pending completion.');
+    formData.append('emergency_level',     'blue');
+    formData.append('incident_type',       'Other');
+    formData.append('incident_date',       now.toISOString().split('T')[0]);
+    formData.append('incident_time',       now.toTimeString().substring(0, 5));
+    formData.append('latitude',            locationData.latitude  ? String(locationData.latitude)  : '');
+    formData.append('longitude',           locationData.longitude ? String(locationData.longitude) : '');
+    formData.append('county',              locationData.county   || 'Unknown');
+    formData.append('city',               locationData.city     || '');
+    formData.append('region',             locationData.region   || '');
+    formData.append('country',            locationData.country  || '');
+    formData.append('location_accuracy',  locationData.accuracy || 'none');
+    formData.append('location_source',    locationData.source   || 'failed');
+    if (locationData.proxyDetection?.possibleProxy) formData.append('proxy_detected', 'true');
+    formData.append('is_anonymous',        'false');
+    formData.append('reported_to_police',  'false');
+    const walletEl = document.getElementById('signWithWallet');
+    formData.append('sign_with_wallet',    walletEl ? walletEl.value : 'false');
+
+    // ── POST to /api/evidence/upload ───────────────────────────────
+    try {
+        const res = await fetch('/api/evidence/upload', { method: 'POST', body: formData });
+
+        if (!res.ok) {
+            const txt = await res.text();
+            let msg = `Server error ${res.status}`;
+            try { msg = JSON.parse(txt).message || msg; } catch (_) {}
+            throw new Error(msg);
+        }
+
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || 'Upload failed');
+
+        _evidenceId     = json.data.id;
+        _evidenceNumber = json.data.evidence_number;
+        _mediaFileCount = json.data.media_files || selectedFiles.length;
+
+    } catch (err) {
+        showStatus('Capture failed: ' + err.message, 'error');
+        captureBtn.disabled = false;
+        captureBtn.innerHTML = '<i class="fas fa-lock text-xs"></i><span>Capture Evidence</span><i class="fas fa-arrow-right text-xs"></i>';
+        if (progressBar) progressBar.style.width = '0%';
+        setTimeout(() => progressCont?.classList.add('hidden'), 3000);
+        return;
+    }
+
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressText) progressText.textContent = 'Captured!';
+
+    // Reset button, advance step
+    captureBtn.disabled = false;
+    captureBtn.innerHTML = '<i class="fas fa-lock text-xs"></i><span>Capture Evidence</span><i class="fas fa-arrow-right text-xs"></i>';
+
+    setTimeout(() => {
+        progressCont?.classList.add('hidden');
+        goStep(2);
+    }, 600);
+}
+
+// Override the legacy captureEvidence so any stale call goes to step 1 handler
+window.captureEvidence = uploadStep1;
+
+// ── Step 2 confirm targets ─────────────────────────────────────────────────
+async function confirmTargets() {
+    if (!_evidenceId) {
+        document.getElementById('step2-error-text').textContent = 'Evidence ID missing. Please go back and re-capture.';
+        document.getElementById('step2-error').classList.remove('hidden');
+        return;
+    }
+
+    const targetBlobs = IFE.getSelectedBlobs();
+
+    const btn = document.getElementById('confirmTargetsBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 text-xs"></i><span>Uploading targets…</span>';
+
+    const progCont = document.getElementById('target-upload-progress');
+    const progFill = document.getElementById('target-progress-fill');
+    const progText = document.getElementById('target-progress-text');
+
+    if (targetBlobs.length > 0) {
+        progCont.classList.remove('hidden');
+        progFill.style.width = '20%';
+        progText.textContent = 'Preparing…';
+
+        try {
+            await uploadTargetsToStorj(_evidenceId, targetBlobs);
+            progFill.style.width = '100%';
+            progText.textContent = 'Done!';
+            IFE.clearSelected();
+        } catch (err) {
+            document.getElementById('step2-error-text').textContent = 'Target upload failed: ' + err.message;
+            document.getElementById('step2-error').classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Confirm &amp; Continue</span><i class="fas fa-arrow-right text-xs"></i>';
+            return;
+        }
+    }
+
+    // Redirect to complete details page
+    window.location.href = '/evidence/complete/' + _evidenceId;
+}
+
+// ── Skip targets ───────────────────────────────────────────────────────────
+function skipTargets() {
+    if (!_evidenceId) { goStep(1); return; }
+    window.location.href = '/evidence/complete/' + _evidenceId;
+}
+
+// ── Listen for frame extractor confirmation ────────────────────────────────
+window.addEventListener('fe:confirmed', function(e) {
+    const blobs = e.detail?.blobs || [];
+    document.getElementById('step2-status-text').textContent =
+        blobs.length > 0
+            ? `${blobs.length} target frame(s) selected · ready to confirm`
+            : 'Evidence captured · no target frames selected';
+});
+
+// ── Carousel ──────────────────────────────────────────────────────────────
+function carousel() {
+    let idx = 0;
+    setInterval(() => {
+        idx = (idx + 1) % 2;
+        ['r1-1', 'r1-2'].forEach((id, i) =>
+            document.getElementById(id)?.classList.toggle('active', i === idx)
+        );
+        document.querySelectorAll('#r1-dots > div').forEach((d, i) => {
+            d.className = i === idx
+                ? 'h-1.5 w-6 rounded-full bg-white transition-all'
+                : 'h-1.5 w-2 rounded-full bg-white/30 transition-all';
+        });
+    }, 4500);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    goStep(1);
+    switchMode('live');
+    carousel();
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// HTML OVERRIDES
+// upload_js injects dark-themed markup (bg-gray-900, dark borders, etc).
+// These override every function that injects HTML so everything matches
+// the FLUG light theme. Defined here — after upload_js loads — so they win.
+// ══════════════════════════════════════════════════════════════════════════
+
+window.updateFilePreview = function () {
+    const fileList  = document.getElementById('fileList');
+    const fileCount = document.getElementById('fileCount');
+    const preview   = document.getElementById('filePreview');
+    if (!fileList) return;
+
+    fileList.innerHTML = '';
+
+    if (typeof selectedFiles === 'undefined' || !selectedFiles.length) {
+        preview?.classList.add('hidden');
+        return;
+    }
+
+    preview?.classList.remove('hidden');
+    if (fileCount) fileCount.textContent = selectedFiles.length + ' / 3';
+
+    selectedFiles.forEach((file, index) => {
+        const isVideo = file.type.startsWith('video/');
+        const isImage = file.type.startsWith('image/');
+        const isAudio = file.type.startsWith('audio/');
+        const icon    = isVideo ? 'fa-film'
+                      : isImage ? 'fa-image'
+                      : isAudio ? 'fa-music'
+                      : 'fa-file-alt';
+        const size    = _fmtBytes(file.size);
+
+        const el = document.createElement('div');
+        el.className = 'file-item';
+        el.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="h-9 w-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas ${icon} text-gray-500 text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate" title="${file.name}">${file.name}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">${size}${isVideo
+                        ? ' · <span class="font-medium text-gray-500">Video</span>' : ''}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0 ml-3">
+                ${isVideo ? `
+                <button type="button" onclick="ifeInit()" title="Extract target frames"
+                    class="flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-crosshairs text-xs"></i> Targets
+                </button>` : ''}
+                <button type="button" onclick="removeFile(${index})"
+                    class="h-7 w-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Remove">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>`;
+        fileList.appendChild(el);
+    });
+};
+
+window.showStatus = function (message, type = 'info') {
+    const container = document.getElementById('captureStatus');
+    if (!container) return;
+
+    const themes = {
+        success: { wrap: 'bg-green-50 border-green-200 text-green-800',  icon: 'fa-check-circle text-green-500'        },
+        error:   { wrap: 'bg-red-50 border-red-200 text-red-700',         icon: 'fa-exclamation-circle text-red-500'    },
+        warning: { wrap: 'bg-amber-50 border-amber-200 text-amber-800',   icon: 'fa-exclamation-triangle text-amber-500' },
+        info:    { wrap: 'bg-gray-50 border-gray-200 text-gray-600',      icon: 'fa-info-circle text-gray-400'           },
+    };
+    const t = themes[type] || themes.info;
+
+    const el = document.createElement('div');
+    el.style.animation = 'fadeUp 0.3s ease';
+    el.className = `flex items-start gap-2.5 px-4 py-3 rounded-xl border text-sm leading-relaxed ${t.wrap}`;
+    el.innerHTML = `
+        <i class="fas ${t.icon} mt-0.5 flex-shrink-0 text-sm"></i>
+        <span class="flex-1">${message}</span>
+        <button onclick="this.parentElement.remove()"
+            class="flex-shrink-0 opacity-40 hover:opacity-70 transition-opacity ml-1 mt-0.5">
+            <i class="fas fa-times text-xs"></i>
+        </button>`;
+
+    container.insertAdjacentElement('afterbegin', el);
+    setTimeout(() => el.remove(), 6000);
+};
+
+window.showSuccessMessage = function (data) {
+    const container = document.getElementById('captureStatus');
+    if (!container) return;
+
+    const targetsRow = (data.targets_uploaded > 0)
+        ? `<div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+               <span class="text-gray-500 text-xs">Targets on Storj</span>
+               <span class="text-xs font-semibold text-gray-900">${data.targets_uploaded} frame(s)</span>
+           </div>`
+        : `<div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+               <span class="text-gray-500 text-xs">Target frames</span>
+               <span class="text-xs text-gray-400">None selected</span>
+           </div>`;
+
+    container.insertAdjacentHTML('afterbegin', `
+        <div class="rounded-xl border border-gray-200 bg-white overflow-hidden">
+            <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-gray-100">
+                <div class="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-check text-green-600 text-sm"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-sm text-gray-900">Evidence Captured</p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        ${data.evidence_number} &nbsp;·&nbsp;
+                        <span class="text-amber-500 font-medium">Draft</span>
+                        — complete details to publish
+                    </p>
+                </div>
+            </div>
+            <div class="px-5 py-3">
+                <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                    <span class="text-gray-500 text-xs">Files on Storj</span>
+                    <span class="text-xs font-semibold text-gray-900">${data.media_files} file(s)</span>
+                </div>
+                ${targetsRow}
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-gray-500 text-xs">Captured at</span>
+                    <span class="text-xs font-semibold text-gray-900">${new Date().toLocaleTimeString()}</span>
+                </div>
+            </div>
+            <div class="flex border-t border-gray-100">
+                <a href="/evidence/complete/${data.id}"
+                   class="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 transition-colors border-r border-gray-800">
+                    <i class="fas fa-edit text-xs"></i> Complete Details
+                </a>
+                <a href="/evidence/dashboard"
+                   class="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-th-large text-xs text-gray-400"></i> Dashboard
+                </a>
+            </div>
+        </div>`);
+};
+
+// Local byte formatter — no dependency on upload_js formatBytes
+function _fmtBytes(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024, u = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + u[i];
+}
+</script>
+<!-- ═══════════════════════════════════════════════
+     FRAME PREVIEW MODAL
+═══════════════════════════════════════════════ -->
+<div id="fpm-backdrop" class="fpm-backdrop" onclick="FPM.handleBackdrop(event)">
+    <div class="fpm-card" role="dialog" aria-modal="true" aria-label="Frame preview">
+
+        <!-- Header -->
+        <div class="fpm-header">
+            <div class="fpm-title">
+                <i class="fas fa-crosshairs text-gray-400" style="font-size:0.75rem"></i>
+                Frame Preview
+                <span class="fpm-counter" id="fpm-counter">1 / 1</span>
+            </div>
+            <button class="fpm-close" onclick="FPM.close()" aria-label="Close">
+                <i class="fas fa-times" style="font-size:0.65rem"></i>
+            </button>
+        </div>
+
+        <!-- Image -->
+        <div class="fpm-img-wrap">
+            <img id="fpm-img" src="" alt="Frame preview">
+
+            <!-- Selected badge -->
+            <div class="fpm-selected-badge" id="fpm-selected-badge">
+                <i class="fas fa-check" style="font-size:0.55rem"></i> Target Selected
+            </div>
+
+            <!-- Timestamp -->
+            <span class="fpm-ts-chip" id="fpm-ts"></span>
+
+            <!-- Nav arrows -->
+            <button class="fpm-nav prev" id="fpm-prev" onclick="FPM.nav(-1)" aria-label="Previous frame">
+                <i class="fas fa-chevron-left" style="font-size:0.7rem"></i>
+            </button>
+            <button class="fpm-nav next" id="fpm-next" onclick="FPM.nav(1)" aria-label="Next frame">
+                <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+            </button>
+        </div>
+
+        <!-- Thumbnail strip -->
+        <div class="fpm-strip-wrap" id="fpm-strip"></div>
+
+        <!-- Footer -->
+        <div class="fpm-footer">
+            <span class="fpm-hint">
+                <span class="fpm-key"><kbd>←</kbd><kbd>→</kbd> navigate</span>
+                &nbsp;·&nbsp;
+                <span class="fpm-key"><kbd>Space</kbd> select</span>
+                &nbsp;·&nbsp;
+                <span class="fpm-key"><kbd>Esc</kbd> close</span>
+            </span>
+            <button class="fpm-btn skip" onclick="FPM.nav(1)" id="fpm-skip-btn">
+                <i class="fas fa-forward" style="font-size:0.65rem"></i> Skip
+            </button>
+            <button class="fpm-btn select" id="fpm-action-btn" onclick="FPM.toggleCurrent()">
+                <i class="fas fa-crosshairs" style="font-size:0.65rem"></i>
+                <span id="fpm-action-label">Mark as Target</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

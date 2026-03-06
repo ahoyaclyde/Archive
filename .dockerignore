@@ -1,0 +1,11 @@
+target/
+**/*.rs.bk
+.env
+.env.local
+*.log
+data/
+.git/
+.gitignore
+README.md
+.vscode/
+.idea/

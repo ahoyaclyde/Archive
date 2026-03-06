@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+
+# Target folders (common for Rust, Java, etc)
+target/
+**/target/
+*.target
+
+# Specific to your case - ignore node_modules in any subdirectory
+**/node_modules/
+
+# Also ignore the large TensorFlow file that caused the error
+**/libtensorflow.so*
+**/*.so
+**/*.dll
+**/*.dylib
+
+# Common Node.js ignores
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

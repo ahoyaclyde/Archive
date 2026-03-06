@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Profile — FLUG Evidence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+    <style>
+        :root { --accent: #111827; --red: #dc2626; }
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; }
+        .font-serif-display { font-family: 'DM Serif Display', serif; }
+
+        .step-panel { display: none; animation: fadeUp 0.4s ease; }
+        .step-panel.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .dot-done    { background: #111827; }
+        .dot-current { background: #374151; box-shadow: 0 0 0 3px #fff, 0 0 0 5px #374151; }
+        .dot-future  { background: #d1d5db; }
+
+        .type-card {
+            border: 2px solid #e5e7eb; border-radius: 1rem;
+            padding: 1.25rem 1.5rem; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            background: #f9fafb;
+        }
+        .type-card:hover { border-color: #9ca3af; background: #f3f4f6; }
+        .type-card.selected { border-color: #111827; background: #fff; box-shadow: 0 0 0 3px rgba(17,24,39,0.08); }
+        .check-ring {
+            width: 20px; height: 20px; border-radius: 50%;
+            border: 2px solid #d1d5db; display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .type-card.selected .check-ring { background: #111827; border-color: #111827; }
+        .type-card.selected .check-ring::after { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; }
+
+        .flug-input {
+            width: 100%; border-radius: 0.75rem; border: 1.5px solid #e5e7eb;
+            background: #f9fafb; padding: 0.75rem 1rem 0.75rem 2.75rem;
+            color: #111827; outline: none; font-family: 'DM Sans', sans-serif;
+            font-size: 0.9375rem;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .flug-input:focus { border-color: #111827; background: #fff; box-shadow: 0 0 0 3px rgba(17,24,39,0.07); }
+
+        #location-map { height: 300px; border-radius: 1rem; overflow: hidden; border: 1.5px solid #e5e7eb; }
+
+        .map-skeleton {
+            height: 300px; border-radius: 1rem;
+            background: linear-gradient(90deg, #f3f4f6 25%, #e9ebee 50%, #f3f4f6 75%);
+            background-size: 200% 100%; animation: shimmer 1.6s infinite;
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid #e5e7eb;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        .loc-pill {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: #f3f4f6; border: 1px solid #e5e7eb;
+            border-radius: 9999px; padding: 0.3rem 0.8rem;
+            font-size: 0.75rem; color: #374151; font-weight: 500;
+        }
+        .loc-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #9ca3af; flex-shrink:0; }
+        .loc-pill.live  .dot { background: #22c55e; animation: blink 2s infinite; }
+        .loc-pill.error .dot { background: #ef4444; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .stat-pill { border-radius: 0.875rem; background: #f9fafb; border: 1.5px solid #e5e7eb; padding: 0.75rem; }
+        .stat-pill .label { font-size: 0.68rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+        .stat-pill .value { font-size: 0.82rem; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; }
+        .stat-pill.loading .value { color: #d1d5db; }
+
+        .r-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s; pointer-events: none; }
+        .r-slide.active { opacity: 1; pointer-events: auto; }
+        .r-panel { display: none; }
+        .r-panel.active { display: block; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+<div class="flex w-screen min-h-screen flex-wrap text-slate-800 items-stretch">
+
+    <!-- LEFT PANEL -->
+    <div class="flex w-full flex-col md:w-1/2">
+
+        <div class="flex items-center justify-between px-8 pt-8 pb-4">
+            <a href="/" class="flex items-center gap-2.5">
+                <div class="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center">
+                    <i class="fas fa-camera-retro text-white text-xs"></i>
+                </div>
+                <span class="text-lg font-semibold tracking-tight text-gray-900">FLUG<span class="text-red-600">.</span></span>
+            </a>
+            <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Profile Setup</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+        <div class="mx-auto w-full max-w-md px-8 pb-16 pt-6">
+
+            <!-- Progress -->
+            <div class="mb-10">
+                <div class="relative">
+                    <div class="absolute left-0 top-2.5 h-0.5 w-full bg-gray-200">
+                        <div id="progress-track" class="absolute h-full bg-gray-900 transition-all duration-500" style="width:0%"></div>
+                    </div>
+                    <ul class="relative flex w-full justify-between">
+                        <li><button id="dot-1" class="dot-current flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white">1</button></li>
+                        <li><button id="dot-2" class="dot-future  flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white">2</button></li>
+                    </ul>
+                </div>
+                <div class="mt-3 flex justify-between text-xs text-gray-400 font-medium">
+                    <span>Account type</span><span>Your location</span>
+                </div>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="step1" class="step-panel active">
+                <div class="mb-7">
+                    <h2 class="font-serif-display text-2xl text-gray-900 mb-1">How will you use FLUG?</h2>
+                    <p class="text-sm text-gray-500">Choose the account type that best describes you.</p>
+                </div>
+
+                <div id="step1-error" class="hidden mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                    <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                    <span id="step1-error-text">Please select an account type to continue.</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="type-card" id="card-citizen" onclick="selectType('citizen')">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                                <i class="fas fa-user text-gray-700"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="font-semibold text-gray-900">Citizen Account</p>
+                                    <div class="check-ring" id="ring-citizen"></div>
+                                </div>
+                                <p class="text-sm text-gray-500 leading-relaxed">For individuals reporting incidents in their communities. Submit evidence, track cases, and contribute to public safety records.</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-camera-retro text-gray-400 text-xs"></i> Evidence reports</span>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-shield-alt text-gray-400 text-xs"></i> Anonymous mode</span>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-map-marker-alt text-gray-400 text-xs"></i> GPS tagging</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="type-card" id="card-business" onclick="selectType('business')">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                                <i class="fas fa-building text-gray-700"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="font-semibold text-gray-900">Business / Organisation</p>
+                                    <div class="check-ring" id="ring-business"></div>
+                                </div>
+                                <p class="text-sm text-gray-500 leading-relaxed">For companies, NGOs, law firms, and security agencies. Multi-user reporting, bulk uploads, and case management tools.</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-users text-gray-400 text-xs"></i> Team accounts</span>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-chart-bar text-gray-400 text-xs"></i> Analytics</span>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"><i class="fas fa-folder-open text-gray-400 text-xs"></i> Case management</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="biz-name-wrap" class="hidden">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">Organisation Name <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-building text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="text" id="biz-name" class="flug-input" placeholder="e.g. Acme Security Ltd">
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-400 mt-0.5 flex-shrink-0 text-sm"></i>
+                            <p class="text-xs text-blue-700 leading-relaxed">You can change your account type at any time from profile settings. Business accounts unlock team management, bulk uploads, and advanced case analytics.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="goStep2()"
+                        class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 py-3.5 text-sm font-semibold text-white transition-all hover:bg-gray-700 active:scale-[.98]">
+                        <span>Continue</span><i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step2" class="step-panel">
+                <div class="mb-5 flex items-start gap-4">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-100">
+                        <i class="fas fa-satellite-dish text-emerald-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-serif-display text-2xl text-gray-900 leading-tight">Your location</h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Auto-detected from your device. Drag the pin to fine-tune.</p>
+                    </div>
+                </div>
+
+                <div id="step2-error" class="hidden mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 flex items-start gap-2">
+                    <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                    <span id="step2-error-text"></span>
+                </div>
+
+                <!-- Status row -->
+                <div class="mb-3 flex items-center gap-2 flex-wrap">
+                    <div class="loc-pill" id="loc-pill">
+                        <span class="dot"></span>
+                        <span id="loc-text">Acquiring GPS…</span>
+                    </div>
+                    <button onclick="refreshGPS()"
+                        class="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-all">
+                        <i id="refresh-icon" class="fas fa-sync-alt text-xs"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Map (skeleton until GPS fires) -->
+                <div id="map-skeleton" class="map-skeleton mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-satellite-dish text-gray-300 text-2xl mb-2 block"></i>
+                        <p class="text-xs text-gray-400">Waiting for GPS fix…</p>
+                    </div>
+                </div>
+                <div id="location-map" class="mb-4" style="display:none;"></div>
+
+                <!-- 6-pill grid — all auto-populated -->
+                <div class="grid grid-cols-3 gap-2 mb-5">
+                    <div class="stat-pill loading" id="p-lat">
+                        <p class="label">Latitude</p><p class="value" id="d-lat">—</p>
+                    </div>
+                    <div class="stat-pill loading" id="p-lng">
+                        <p class="label">Longitude</p><p class="value" id="d-lng">—</p>
+                    </div>
+                    <div class="stat-pill loading" id="p-acc">
+                        <p class="label">Accuracy</p><p class="value" id="d-acc">—</p>
+                    </div>
+                    <div class="stat-pill loading" id="p-city">
+                        <p class="label">City / Town</p><p class="value" id="d-city">—</p>
+                    </div>
+                    <div class="stat-pill loading" id="p-region">
+                        <p class="label">Region</p><p class="value" id="d-region">—</p>
+                    </div>
+                    <div class="stat-pill loading" id="p-country">
+                        <p class="label">Country</p><p class="value" id="d-country">—</p>
+                    </div>
+                </div>
+
+                <!-- Editable overrides (pre-filled by geocode) -->
+                <div class="space-y-3 mb-5">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">Region / County <span class="text-xs text-gray-400 font-normal ml-1">— edit if needed</span></label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-map text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="text" id="region-input" class="flug-input" placeholder="Auto-detecting…">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700">Country <span class="text-xs text-gray-400 font-normal ml-1">— edit if needed</span></label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                                <i class="fas fa-globe text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="text" id="country-input" class="flug-input" placeholder="Auto-detecting…">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="goStep1()"
+                        class="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left text-xs"></i> Back
+                    </button>
+                    <button onclick="submitProfile()" id="submit-btn"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white transition-all hover:bg-red-700 active:scale-[.98]">
+                        <span>Complete Profile</span><i class="fas fa-check-circle text-xs"></i>
+                    </button>
+                </div>
+
+                <p class="mt-4 text-center text-xs text-gray-400 leading-relaxed">
+                    <i class="fas fa-lock mr-1"></i>Pure device GPS · Reverse geocoding via OpenStreetMap · No Google · No tracking
+                </p>
+            </div>
+
+        </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="relative hidden overflow-hidden select-none md:block md:w-1/2 md:sticky md:top-0 md:h-screen md:self-start">
+
+        <div id="r-panel-1" class="r-panel active absolute inset-0" style="background:#0f1117;">
+            <div id="r1-1" class="r-slide active absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1569012871812-f38ee64cd54c?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Citizen Reporting</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Your voice <br/><em class="text-red-400 not-italic">on the record.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Every citizen report strengthens the public record. FLUG creates immutable, timestamped evidence — protected by cryptography.</p>
+                </div>
+            </div>
+            <div id="r1-2" class="r-slide absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
+                     class="absolute inset-0 h-full w-full object-cover opacity-20" alt="">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-12">
+                    <span class="inline-block mb-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Business Tools</span>
+                    <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Enterprise-grade <br/><em class="text-red-400 not-italic">reporting tools.</em></h3>
+                    <p class="text-sm text-gray-300 leading-relaxed max-w-sm">Built for security firms, law practices, and NGOs. Bulk uploads, case linking, and team management — all in one place.</p>
+                </div>
+            </div>
+            <div class="absolute bottom-6 right-10 flex gap-2" id="r1-dots">
+                <div class="h-1.5 w-6 rounded-full bg-white transition-all"></div>
+                <div class="h-1.5 w-2 rounded-full bg-white/30 transition-all"></div>
+            </div>
+        </div>
+
+        <div id="r-panel-2" class="r-panel absolute inset-0" style="background:#0a1628;">
+            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80"
+                 class="absolute inset-0 h-full w-full object-cover opacity-15" alt="">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+            <div class="absolute inset-0 flex flex-col justify-center p-12">
+                <div class="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                    <i class="fas fa-satellite-dish text-emerald-400 text-3xl"></i>
+                </div>
+                <span class="inline-block mb-5 w-fit rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">Zero Google Required</span>
+                <h3 class="font-serif-display text-4xl text-white leading-tight mb-4">Device GPS. <br/><em class="text-emerald-400 not-italic">No tracking.</em></h3>
+                <p class="text-sm text-gray-300 leading-relaxed max-w-sm mb-8">Location comes straight from your device's GPS chip. Reverse geocoding via OpenStreetMap — no Google, no ads, no data sold. Works anywhere on Earth.</p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                        <i class="fas fa-mobile-alt text-emerald-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">Raw device GPS coordinates</span>
+                    </div>
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                        <i class="fas fa-map text-emerald-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">OpenStreetMap reverse geocoding</span>
+                    </div>
+                    <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                        <i class="fas fa-globe text-emerald-400 text-sm flex-shrink-0"></i>
+                        <span class="text-sm text-gray-200">Works anywhere in the world</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let accountType = '';
+let geoLat = null, geoLng = null, geoAccuracy = null;
+let mapObj = null, mapMarker = null, accCircle = null;
+let mapReady = false, gpsResolved = false, watchId = null;
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    goStep(1);
+    carousel();
+    // Pre-fill account type if user is returning
+    fetch('/api/profile/status').then(r => r.json())
+        .then(d => { if (d.current_account_type) selectType(d.current_account_type); })
+        .catch(() => {});
+    // GPS starts NOW — not when the user clicks Continue
+    startGPS();
+});
+
+// ─── GPS ──────────────────────────────────────────────────────────────────────
+function startGPS() {
+    if (!navigator.geolocation) {
+        setStatus('GPS not supported by this browser', 'error');
+        showMap(0, 20, null);   // world view fallback
+        return;
+    }
+    setStatus('Acquiring GPS signal…', '');
+
+    watchId = navigator.geolocation.watchPosition(
+        async pos => {
+            const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+            geoLat = lat; geoLng = lng; geoAccuracy = accuracy;
+            fillPills(lat, lng, accuracy);
+
+            if (!gpsResolved) {
+                gpsResolved = true;
+                showMap(lat, lng, accuracy);
+                setStatus(`Live GPS · ${accLabel(accuracy)} accuracy`, 'live');
+                await geocode(lat, lng);
+            } else {
+                // Refine marker smoothly
+                if (mapMarker) mapMarker.setLatLng([lat, lng]);
+                if (accCircle) { accCircle.setLatLng([lat, lng]); accCircle.setRadius(accuracy); }
+                if (accuracy < (geoAccuracy || Infinity)) {
+                    geoAccuracy = accuracy;
+                    setStatus(`GPS refined · ${accLabel(accuracy)} accuracy`, 'live');
+                    fillPills(lat, lng, accuracy);
+                }
+            }
+        },
+        err => {
+            if (!gpsResolved) {
+                const m = { 1:'Location permission denied — fill in fields manually.', 2:'GPS signal unavailable.', 3:'GPS timed out — tap Refresh.' };
+                setStatus(m[err.code] || 'Location unavailable', 'error');
+                showMap(0, 20, null);
+            }
+        },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+}
+
+async function refreshGPS() {
+    const icon = document.getElementById('refresh-icon');
+    icon.classList.add('fa-spin');
+    if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    gpsResolved = false;
+    if (mapMarker) { mapObj.removeLayer(mapMarker); mapMarker = null; }
+    if (accCircle) { mapObj.removeLayer(accCircle); accCircle = null; }
+    resetPills();
+    setStatus('Refreshing GPS…', '');
+    startGPS();
+    setTimeout(() => icon.classList.remove('fa-spin'), 2500);
+}
+
+// ─── Map ──────────────────────────────────────────────────────────────────────
+function showMap(lat, lng, accuracy) {
+    document.getElementById('map-skeleton').style.display = 'none';
+    const el = document.getElementById('location-map');
+    el.style.display = 'block';
+
+    if (!mapReady) {
+        mapObj = L.map('location-map', { zoomControl: true, scrollWheelZoom: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(mapObj);
+        mapReady = true;
+    }
+
+    placePin(lat, lng, accuracy);
+    const zoom = accuracy && accuracy < 5000 ? 14 : 4;
+    mapObj.setView([lat, lng], zoom);
+}
+
+function placePin(lat, lng, accuracy) {
+    if (mapMarker) { mapObj.removeLayer(mapMarker); mapMarker = null; }
+    if (accCircle) { mapObj.removeLayer(accCircle); accCircle = null; }
+
+    if (accuracy && accuracy < 200000) {
+        accCircle = L.circle([lat, lng], {
+            radius: accuracy, color: '#3b82f6',
+            fillColor: '#3b82f6', fillOpacity: 0.06, weight: 1,
+        }).addTo(mapObj);
+    }
+
+    const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:34px;height:34px;background:#111827;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 10px rgba(0,0,0,0.4);">
+                 <div style="transform:rotate(45deg);display:flex;align-items:center;justify-content:center;width:100%;height:100%">
+                   <i class="fas fa-crosshairs" style="color:white;font-size:11px;"></i>
+                 </div></div>`,
+        iconSize: [34, 34], iconAnchor: [17, 34],
+    });
+
+    mapMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(mapObj);
+    mapMarker.on('dragend', async e => {
+        const p = e.target.getLatLng();
+        geoLat = p.lat; geoLng = p.lng;
+        fillPills(p.lat, p.lng, geoAccuracy);
+        setStatus('Position adjusted manually', 'live');
+        await geocode(p.lat, p.lng);
+    });
+}
+
+// ─── Nominatim reverse geocode (OSM only, zero Google) ───────────────────────
+async function geocode(lat, lng) {
+    try {
+        const url  = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=10`;
+        const res  = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'FLUG-Evidence/1.0' } });
+        const data = await res.json();
+        if (!data?.address) return;
+
+        const a = data.address;
+
+        // Most specific city-level name available
+        const city = a.city || a.town || a.municipality || a.village || a.hamlet || a.suburb || '';
+
+        // Regional admin — county, state_district, state, province, region
+        const region = a.county || a.state_district || a.province || a.state || a.region || '';
+
+        const country = a.country || '';
+
+        // Pills
+        setVal('d-city',    city    || '—', 'p-city');
+        setVal('d-region',  region  || '—', 'p-region');
+        setVal('d-country', country || '—', 'p-country');
+
+        // Pre-fill editable fields
+        if (region)  document.getElementById('region-input').value  = region;
+        if (country) document.getElementById('country-input').value = country;
+
+        // Refine status pill with place name
+        const place = [city, country].filter(Boolean).join(', ');
+        if (place) setStatus('📍 ' + place, 'live');
+
+    } catch (e) {
+        console.warn('Nominatim error:', e);
+        // Fail silently — user fills manually
+    }
+}
+
+// ─── Pills ────────────────────────────────────────────────────────────────────
+function fillPills(lat, lng, acc) {
+    setVal('d-lat', lat.toFixed(6), 'p-lat');
+    setVal('d-lng', lng.toFixed(6), 'p-lng');
+
+    if (acc !== null && acc !== undefined) {
+        const m   = Math.round(acc);
+        const txt = m < 1000 ? m + ' m' : (m / 1000).toFixed(1) + ' km';
+        const el  = document.getElementById('d-acc');
+        el.textContent = txt;
+        el.style.color = m < 100 ? '#22c55e' : m < 1000 ? '#f59e0b' : '#ef4444';
+        document.getElementById('p-acc').classList.remove('loading');
+    }
+}
+
+function setVal(id, text, pillId) {
+    document.getElementById(id).textContent = text;
+    if (pillId) document.getElementById(pillId).classList.remove('loading');
+}
+
+function resetPills() {
+    ['d-lat','d-lng','d-acc','d-city','d-region','d-country'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = '—'; el.style.color = '';
+    });
+    ['p-lat','p-lng','p-acc','p-city','p-region','p-country'].forEach(id =>
+        document.getElementById(id).classList.add('loading'));
+    document.getElementById('region-input').value  = '';
+    document.getElementById('country-input').value = '';
+}
+
+function accLabel(acc) {
+    if (!acc)    return 'unknown';
+    if (acc < 20)   return 'very high';
+    if (acc < 100)  return 'high';
+    if (acc < 500)  return 'medium';
+    if (acc < 2000) return 'low';
+    return 'very low';
+}
+
+function setStatus(text, mode) {
+    document.getElementById('loc-text').textContent = text;
+    const pill = document.getElementById('loc-pill');
+    pill.classList.remove('live', 'error');
+    if (mode === 'live')  pill.classList.add('live');
+    if (mode === 'error') pill.classList.add('error');
+}
+
+// ─── Step nav ─────────────────────────────────────────────────────────────────
+function goStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    document.getElementById('progress-track').style.width = ((n - 1) * 100) + '%';
+
+    for (let i = 1; i <= 2; i++) {
+        const d = document.getElementById('dot-' + i);
+        d.classList.remove('dot-done','dot-current','dot-future');
+        if (i < n)      { d.classList.add('dot-done');    d.innerHTML = '<i class="fas fa-check" style="font-size:9px"></i>'; }
+        else if (i ===n){ d.classList.add('dot-current'); d.textContent = i; }
+        else            { d.classList.add('dot-future');  d.textContent = i; }
+    }
+
+    document.querySelectorAll('.r-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('r-panel-' + n)?.classList.add('active');
+
+    // Leaflet needs invalidateSize whenever its container becomes visible
+    if (n === 2 && mapReady) setTimeout(() => mapObj.invalidateSize(), 60);
+
+    window.scrollTo(0, 0);
+}
+
+function goStep1() { goStep(1); }
+
+function goStep2() {
+    if (!accountType) {
+        document.getElementById('step1-error').classList.remove('hidden'); return;
+    }
+    if (accountType === 'business') {
+        const bn = document.getElementById('biz-name').value.trim();
+        if (!bn) {
+            document.getElementById('step1-error-text').textContent = 'Please enter your organisation name.';
+            document.getElementById('step1-error').classList.remove('hidden'); return;
+        }
+    }
+    document.getElementById('step1-error').classList.add('hidden');
+    goStep(2);
+}
+
+// ─── Account type ─────────────────────────────────────────────────────────────
+function selectType(type) {
+    accountType = type;
+    ['citizen','business'].forEach(t => {
+        document.getElementById('card-' + t).classList.toggle('selected', t === type);
+    });
+    document.getElementById('biz-name-wrap').classList.toggle('hidden', type !== 'business');
+    document.getElementById('step1-error').classList.add('hidden');
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+async function submitProfile() {
+    const region  = document.getElementById('region-input').value.trim();
+    const country = document.getElementById('country-input').value.trim();
+
+    if (!region && !country) {
+        document.getElementById('step2-error-text').textContent = 'Please wait for detection or fill in your region and country manually.';
+        document.getElementById('step2-error').classList.remove('hidden'); return;
+    }
+    document.getElementById('step2-error').classList.add('hidden');
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving…';
+
+    const body = new URLSearchParams({
+        account_type:  accountType,
+        business_name: accountType === 'business' ? document.getElementById('biz-name').value.trim() : '',
+        county:        region  || country,
+        geo_latitude:  geoLat  !== null ? String(geoLat)  : '',
+        geo_longitude: geoLng  !== null ? String(geoLng)  : '',
+    });
+
+    try {
+        const res  = await fetch('/api/profile/complete-kenya', { method: 'POST', body });
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = data.redirect_to || '/evidence/dashboard';
+        } else {
+            document.getElementById('step2-error-text').textContent = data.message || 'Failed to save profile.';
+            document.getElementById('step2-error').classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Complete Profile</span><i class="fas fa-check-circle text-xs ml-2"></i>';
+        }
+    } catch (_) {
+        document.getElementById('step2-error-text').textContent = 'Network error — please check your connection.';
+        document.getElementById('step2-error').classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Complete Profile</span><i class="fas fa-check-circle text-xs ml-2"></i>';
+    }
+}
+
+// ─── Carousel ─────────────────────────────────────────────────────────────────
+function carousel() {
+    let idx = 0;
+    setInterval(() => {
+        idx = (idx + 1) % 2;
+        ['r1-1','r1-2'].forEach((id, i) => document.getElementById(id)?.classList.toggle('active', i === idx));
+        document.querySelectorAll('#r1-dots > div').forEach((d, i) => {
+            d.className = i === idx ? 'h-1.5 w-6 rounded-full bg-white transition-all' : 'h-1.5 w-2 rounded-full bg-white/30 transition-all';
+        });
+    }, 4500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+[package]
+name = "archive"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4.0"
+actix-session = { version = "0.8", features = ["cookie-session"] }
+actix-multipart = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+bcrypt = "0.15"
+web3 = { version = "0.18", features = ["signing"] }
+tiny-keccak = { version = "2.0", features = ["sha3"] }
+hex = "0.4"
+anyhow = "1.0"
+futures-util = "0.3"
+tokio = { version = "1.0", features = ["full"] }
+tempfile = "3.3"
+env_logger = "0.10"
+reqwest = { version = "0.11", features = ["json"] }
+aws-sdk-s3 = { version = "1.8", features = ["behavior-version-latest"] }  # Add feature flag
+aws-config = { version = "1.8", features = ["behavior-version-latest"] }
+thiserror = "1.0"
+tokio-stream = "0.1"
+
+dotenv = "0.15"
+log = "0.4.29"
+
+bs58 = "0.5"
+urlencoding = "2.1"
+rusqlite = { version = "0.37.0", features = ["bundled"] }
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.31.0"  # This requires rusqlite 0.37
+rand = "0.9.2"
+sha2 = "0.10"
+
+base64 = "0.21"  
+# Stellar support (use latest available version)
+
+
+
+actix-files = "0.6"
+handlebars = "4.5"
+
+parking_lot = "0.12"
+regex = "1.12.3"
+
+
+
+# soroban-sdk = "23.0"  # For Stellar - only if you need full SDK
+# stellar-rpc-client = "0.1"
+
+

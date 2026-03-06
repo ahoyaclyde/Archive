@@ -1,0 +1,55 @@
+2026-03-03 12:43:32: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-03 12:43:33: 📂 Loading models from: /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-03 12:43:33: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-03 12:43:33:    Models path : /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-03 12:43:33:    Threshold   : 0.55
+2026-03-03 12:43:33:    Max image dim: 640px
+2026-03-03 12:43:33: ✅ Face-api.js models loaded and ready
+2026-03-03 12:49:01: 📸 Analyzed image: 2 face(s) found | pHash: fa0407fe1861fe14 | 1138ms
+2026-03-03 12:49:02: 📸 Analyzed image: 0 face(s) found | pHash: 85ecea0215ddeae0 | 389ms
+2026-03-03 12:49:28: 📸 Analyzed image: 2 face(s) found | pHash: fa0407fe1861fe14 | 746ms
+2026-03-03 13:02:39: 📸 Analyzed image: 0 face(s) found | pHash: 85ecea0215ddeae0 | 424ms
+2026-03-03 13:02:40: 📸 Analyzed image: 0 face(s) found | pHash: 0dc0de9e34f9ca42 | 404ms
+2026-03-03 13:05:16: 📸 Analyzed image: 1 face(s) found | pHash: 8a4c7db78651891e | 551ms
+2026-03-03 13:05:17: 📸 Analyzed image: 1 face(s) found | pHash: 8f4e71b18e53891c | 629ms
+2026-03-03 13:05:18: 📸 Analyzed image: 1 face(s) found | pHash: 81c27dbd86f3810e | 582ms
+2026-03-03 13:05:19: 📸 Analyzed image: 1 face(s) found | pHash: 834e7db18ed78308 | 467ms
+2026-03-03 13:50:47: 📸 Analyzed image: 1 face(s) found | pHash: 834e7db1925d8b06 | 557ms
+2026-03-03 13:50:48: 📸 Analyzed image: 1 face(s) found | pHash: 8a4c7db78651891e | 486ms
+2026-03-03 13:50:50: 📸 Analyzed image: 1 face(s) found | pHash: 81407fbfc0e1871e | 501ms
+2026-03-03 13:50:51: 📸 Analyzed image: 1 face(s) found | pHash: 8f4e71b18e53891c | 518ms
+2026-03-03 13:50:52: 📸 Analyzed image: 1 face(s) found | pHash: 3328ccd616b96b62 | 500ms
+2026-03-03 13:50:53: 📸 Analyzed image: 1 face(s) found | pHash: 8f4e71b19e47811c | 484ms
+2026-03-03 13:50:54: 📸 Analyzed image: 1 face(s) found | pHash: 834e7db18ed78308 | 543ms
+2026-03-03 13:50:55: 📸 Analyzed image: 1 face(s) found | pHash: 80967fe9a875c382 | 478ms
+2026-03-03 17:09:34: 📸 Analyzed image: 1 face(s) found | pHash: f161600ff7b61286 | 1938ms
+2026-03-03 17:09:35: 📸 Analyzed image: 1 face(s) found | pHash: f9616407f7a60386 | 681ms
+2026-03-03 17:09:37: 📸 Analyzed image: 1 face(s) found | pHash: f163c40fe7262706 | 762ms
+2026-03-03 21:40:40: 🛑 SIGINT received — shutting down
+2026-03-04 06:25:31: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-04 06:25:32: 📂 Loading models from: /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-04 06:25:32: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-04 06:25:32:    Models path : /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-04 06:25:32:    Threshold   : 0.55
+2026-03-04 06:25:32:    Max image dim: 640px
+2026-03-04 06:25:32: ✅ Face-api.js models loaded and ready
+2026-03-04 08:16:28: 🛑 SIGINT received — shutting down
+2026-03-04 11:09:27: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-04 11:09:28: 📂 Loading models from: /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-04 11:09:28: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-04 11:09:28:    Models path : /media/denso/9fab6735-657f-4583-a14b-321dee685e66/denso/MasterX/WORK/Barrell/Flug/Edition2-NFL/CrimeBank/services/face-service/models
+2026-03-04 11:09:28:    Threshold   : 0.55
+2026-03-04 11:09:28:    Max image dim: 640px
+2026-03-04 11:09:29: ✅ Face-api.js models loaded and ready
+2026-03-04 11:23:16: 📸 Analyzed image: 1 face(s) found | pHash: 989d0ee332e57858 | 1287ms
+2026-03-04 11:23:18: 📸 Analyzed image: 1 face(s) found | pHash: 989d0ee332e57858 | 668ms
+2026-03-04 11:23:19: 📸 Analyzed image: 1 face(s) found | pHash: 989d0ee232e77858 | 575ms
+2026-03-04 11:23:20: 📸 Analyzed image: 1 face(s) found | pHash: 989d0ee326e57858 | 527ms
+2026-03-04 11:37:25: 📸 Analyzed image: 1 face(s) found | pHash: 38d6e760c68f7700 | 715ms
+2026-03-04 11:37:26: 📸 Analyzed image: 1 face(s) found | pHash: 38c2cf68c6277da0 | 545ms
+2026-03-04 11:37:27: 📸 Analyzed image: 1 face(s) found | pHash: 38c3c768c20f7da8 | 659ms
+2026-03-04 11:48:50: 📸 Analyzed image: 1 face(s) found | pHash: 35b0cacfde48492c | 770ms
+2026-03-04 11:48:52: 📸 Analyzed image: 1 face(s) found | pHash: 37b0d8cfc6484d2c | 749ms
+2026-03-04 11:48:53: 📸 Analyzed image: 1 face(s) found | pHash: 37b0d8cfc6484d2c | 594ms
+2026-03-04 11:48:55: 📸 Analyzed image: 1 face(s) found | pHash: 35b0dacfcc4a492c | 605ms
+2026-03-04 16:21:23: 🛑 SIGINT received — shutting down

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corine - Sign Up</title>
+    <script src="../static/css/tailwind.css"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="mx-auto flex h-screen max-w-lg flex-col md:max-w-none md:flex-row md:pr-10">
+        <!-- Left Panel - Hero Section -->
+        <div class="max-w-md rounded-3xl bg-gradient-to-t from-blue-700 via-blue-700 to-blue-600 px-4 py-10 text-white sm:px-10 md:m-6 md:mr-8">
+            <div class="flex items-center justify-between mb-20">
+                <p class="font-bold tracking-wider text-xl">CORINE</p>
+                <button id="theme-toggle" class="p-2 rounded-full bg-blue-600 hover:bg-blue-800 transition-colors">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <p class="mb-4 text-3xl font-bold md:text-4xl md:leading-snug">
+                Start your <br />
+                journey with us
+            </p>
+            <p class="mb-12 leading-relaxed text-gray-200">
+                Join thousands of professionals who have transformed their careers with Corine. Get access to exclusive resources and opportunities.
+            </p>
+            
+            <!-- Features List -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                    <span>Access to 1000+ professional projects</span>
+                </div>
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                    <span>Personalized job recommendations</span>
+                </div>
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                    <span>Networking with industry experts</span>
+                </div>
+                <div class="flex items-center mb-8">
+                    <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                    <span>Free career development resources</span>
+                </div>
+            </div>
+
+            <!-- Testimonial Card -->
+            <div class="bg-blue-600/80 rounded-2xl px-6 py-8 backdrop-blur-sm">
+                <p class="mb-3 text-gray-200 italic">"Corine transformed my career. Within months, I landed my dream job at a Fortune 500 company!"</p>
+                <div class="flex items-center">
+                    <img class="h-12 w-12 rounded-full object-cover border-2 border-white" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Simon Lewis" />
+                    <div class="ml-4">
+                        <strong class="block font-medium">Simon Lewis</strong>
+                        <span class="text-sm text-gray-200">Senior Product Manager @Google</span>
+                        <div class="flex mt-1">
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trust Badges -->
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-300 mb-3">Trusted by professionals at</p>
+                <div class="flex justify-center space-x-6">
+                    <span class="text-lg font-semibold opacity-80">Google</span>
+                    <span class="text-lg font-semibold opacity-80">Microsoft</span>
+                    <span class="text-lg font-semibold opacity-80">Amazon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Signup Form -->
+        <div class="px-4 py-20 md:flex-1 md:flex md:flex-col md:justify-center">
+            <h2 class="mb-2 text-3xl font-bold text-gray-800">Create Account</h2>
+            <div class="mb-10">
+                <span class="text-gray-600">Already have an account? </span>
+                <a href="#" class="font-bold text-blue-600 hover:text-blue-800 transition-colors">Sign In</a>
+            </div>
+
+            <!-- User Type Selection -->
+          
+
+            <!-- Progress Indicator -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-600"> [FLUG] Account Setup : Email </span>
+                    <span class="text-sm font-medium text-blue-600" id="progress-text">Step 1 of 3</span>
+                </div>
+                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-500" style="width: 33%"></div>
+                </div>
+            </div>
+
+        
+
+            <!-- Step 3: Final Step & Terms -->
+            <div id="step1" class="form-step hidden">
+                <h3 class="mb-6 text-xl font-semibold text-gray-800">Almost There!</h3>
+
+                <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div class="flex items-start">
+                        <i class="fas fa-bell text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <p class="font-medium text-blue-800">Get the most out of Corine</p>
+                            <p class="text-sm text-blue-600 mt-1">Enable notifications to stay updated on job matches and project opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-gray-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Email Notifications</p>
+                                <p class="text-sm text-gray-500">Receive job recommendations and updates</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="email-notifications" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-bullhorn text-gray-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Marketing Communications</p>
+                                <p class="text-sm text-gray-500">Get tips, offers, and industry news</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="marketing-communications" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex items-start">
+                        <input type="checkbox" id="terms" class="mt-1 h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                        <label for="terms" class="ml-3 text-sm text-gray-600">
+                            I agree to the <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Privacy Policy</a>. I understand that Corine may use my data to personalize my experience and send me relevant opportunities.
+                        </label>
+                    </div>
+                    <span class="hidden text-sm text-red-500 mt-2" id="terms-error"></span>
+                </div>
+
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden text-center py-12">
+                <div class="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-check text-green-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Welcome to Corine!</h3>
+                <p class="text-gray-600 mb-8">Your account has been created successfully. Check your email to verify your account.</p>
+                <div class="space-y-4">
+                 
+         
+          
+                    {{#if action_url}}
+                     <a href="{{action_url}}">
+                    <button  class="w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-blue-600/30">
+                    Opt For Manual Verification 
+                    </button>
+                    </a>
+                      {{/if}}
+                    <button  class="w-full rounded-xl border border-gray-300 px-8 py-4 font-medium text-gray-700 transition-all hover:bg-gray-50">
+                    Resend Link 
+                    </button>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="my-8 flex items-center">
+                <div class="flex-1 border-t border-gray-300"></div>
+                <span class="mx-4 text-gray-500">Or continue with</span>
+                <div class="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            <!-- Social Login -->
+           
+
+                <div class="flex gap-4">
+                    <button onclick="prevStep()" class="flex-1 rounded-xl border border-gray-300 px-8 py-4 font-medium text-gray-700 transition-all hover:bg-gray-50">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back
+                    </button>
+                    <button onclick="submitForm()" id="submit-button" class="flex-1 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-blue-600/30">
+                        Create Account
+                        <i class="fas fa-user-plus ml-2"></i>
+                    </button>
+                </div>
+            <!-- Footer Note -->
+            <p class="text-xs text-gray-500 text-center">
+                By signing up, you agree to our terms. We'll handle your data according to our <a href="#" class="text-blue-600 hover:text-blue-800">privacy policy</a>.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 1;
+
+        // Update progress bar
+        function updateProgress() {
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            document.getElementById('progress-text').textContent = `Step ${currentStep} of ${totalSteps}`;
+            
+            // Update step visibility
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+                step.classList.add('hidden');
+            });
+            document.getElementById(`step${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step${currentStep}`).classList.add('active');
+        }
+
+        // Form validation
+        function validateStep(step) {
+            let isValid = true;
+            
+        
+            if (step === 1) {
+                const termsChecked = document.getElementById('terms').checked;
+                document.getElementById('terms-error').classList.add('hidden');
+                
+                if (!termsChecked) {
+                    document.getElementById('terms-error').textContent = 'You must agree to the terms and conditions';
+                    document.getElementById('terms-error').classList.remove('hidden');
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
+        }
+
+        // Navigation functions
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateProgress();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateProgress();
+            }
+        }
+
+      
+        // Submit form
+        function submitForm() {
+            if (validateStep(currentStep)) {
+                // Show loading state
+                const submitBtn = document.getElementById('submit-button');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                submitBtn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Hide all steps and show success
+                    document.querySelectorAll('.form-step').forEach(step => {
+                        step.classList.add('hidden');
+                    });
+                    document.getElementById('success-message').classList.remove('hidden');
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 200);
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            currentStep = 1;
+            updateProgress();
+            document.getElementById('success-message').classList.add('hidden');
+            
+            // Reset form fields
+          
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-password').value = '';
+            document.getElementById('confirm-password').value = '';
+            document.getElementById('experience-level').value = '';
+            document.getElementById('terms').checked = false;
+            document.getElementById('email-notifications').checked = true;
+            document.getElementById('marketing-communications').checked = false;
+            
+            // Reset radio buttons
+            document.getElementById('radio1').checked = true;
+            
+            // Reset errors
+            document.querySelectorAll('[id$="-error"]').forEach(el => el.classList.add('hidden'));
+        }
+
+        // Go to dashboard
+        function goToDashboard() {
+            alert('Redirecting to dashboard...');
+            // window.location.href = '/dashboard';
+        }
+
+        // Toggle dark mode
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.className.includes('fa-moon')) {
+                icon.className = 'fas fa-sun';
+                document.body.classList.add('bg-gray-900', 'text-white');
+                document.body.classList.remove('bg-gray-50');
+            } else {
+                icon.className = 'fas fa-moon';
+                document.body.classList.remove('bg-gray-900', 'text-white');
+                document.body.classList.add('bg-gray-50');
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            
+            // Add real-time email validation
+            document.getElementById('signup-email').addEventListener('blur', function() {
+                const email = this.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (email && emailRegex.test(email)) {
+                    document.getElementById('email-check').classList.remove('hidden');
+                    document.getElementById('email-error').classList.add('hidden');
+                } else if (email) {
+                    document.getElementById('email-check').classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .form-step {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .form-step.hidden {
+            display: none;
+        }
+        
+        .form-step.active {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Custom checkbox styling */
+        input[type="checkbox"]:checked {
+            background-color: #2563eb;
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</body>
+</html>

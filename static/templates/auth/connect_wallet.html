@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connect Wallet - FLUG Evidence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <style>
+        .chain-logo {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .ethereum { background-color: #627EEA; }
+        .base { background-color: #0052FF; }
+        .avalanche { background-color: #E84142; }
+        .stellar { background-color: #7D3AF2; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="bg-gray-800 rounded-xl shadow-lg p-8 max-w-2xl w-full">
+        <h1 class="text-3xl font-bold text-center mb-2">Connect Your Wallet</h1>
+        <p class="text-gray-400 text-center mb-8">Connect your wallet to sign evidence and verify ownership</p>
+        
+        <div id="walletStatus" class="hidden mb-6 p-4 rounded-lg"></div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <button onclick="connectEthereum()" 
+                    class="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors text-left">
+                <div class="flex items-center">
+                    <div class="chain-logo ethereum rounded-full"></div>
+                    <div>
+                        <div class="font-semibold">Ethereum / EVM</div>
+                        <div class="text-sm text-gray-400">MetaMask, Coinbase, WalletConnect</div>
+                    </div>
+                </div>
+            </button>
+            
+            <button onclick="connectBase()" 
+                    class="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors text-left">
+                <div class="flex items-center">
+                    <div class="chain-logo base rounded-full"></div>
+                    <div>
+                        <div class="font-semibold">Base</div>
+                        <div class="text-sm text-gray-400">Coinbase L2 Network</div>
+                    </div>
+                </div>
+            </button>
+            
+            <button onclick="connectAvalanche()" 
+                    class="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors text-left">
+                <div class="flex items-center">
+                    <div class="chain-logo avalanche rounded-full"></div>
+                    <div>
+                        <div class="font-semibold">Avalanche</div>
+                        <div class="text-sm text-gray-400">AVAX C-Chain</div>
+                    </div>
+                </div>
+            </button>
+            
+            <button onclick="connectStellar()" 
+                    class="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors text-left">
+                <div class="flex items-center">
+                    <div class="chain-logo stellar rounded-full"></div>
+                    <div>
+                        <div class="font-semibold">Stellar</div>
+                        <div class="text-sm text-gray-400">Lobstr, Solar Wallet</div>
+                    </div>
+                </div>
+            </button>
+        </div>
+        
+        <div id="connectionForm" class="hidden">
+            <div class="mb-6 p-4 bg-gray-900 rounded-lg">
+                <h3 class="font-semibold mb-2">Connection Details</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Wallet Address:</span>
+                        <span id="walletAddressDisplay" class="font-mono"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Network:</span>
+                        <span id="networkDisplay"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="signMessageForm" onsubmit="signMessage(event)">
+                <input type="hidden" id="walletAddress" name="wallet_address">
+                <input type="hidden" id="chain" name="chain">
+                <input type="hidden" id="walletType" name="wallet_type">
+                <input type="hidden" id="signature" name="signature">
+                
+                <div class="mb-6 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                        <span class="font-semibold">Sign Message</span>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-3">
+                        To verify wallet ownership, please sign the following message in your wallet:
+                    </p>
+                    <div id="messageToSign" class="text-xs bg-gray-900 p-3 rounded font-mono mb-3"></div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="button" onclick="cancelConnection()" 
+                            class="flex-1 bg-gray-700 py-3 rounded-lg hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button type="submit" id="connectBtn" 
+                            class="flex-1 bg-red-600 py-3 rounded-lg hover:bg-red-700">
+                        <i class="fas fa-wallet mr-2"></i>Connect Wallet
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="/evidence/dashboard" class="text-gray-400 hover:text-white">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        let currentChain = '';
+        let currentWalletAddress = '';
+        let messageToSign = '';
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('walletStatus');
+            const colors = {
+                success: 'bg-green-900/30 border-green-700 text-green-300',
+                error: 'bg-red-900/30 border-red-700 text-red-300',
+                info: 'bg-blue-900/30 border-blue-700 text-blue-300'
+            };
+            
+            statusDiv.className = `mb-6 p-4 rounded-lg border ${colors[type]}`;
+            statusDiv.innerHTML = message;
+            statusDiv.classList.remove('hidden');
+        }
+        
+        async function connectWeb3Wallet(chain, chainName) {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    showStatus(
+                        `No Ethereum wallet found. Please install MetaMask or another Web3 wallet.`,
+                        'error'
+                    );
+                    return;
+                }
+                
+                showStatus(`Connecting to ${chainName}...`, 'info');
+                
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                
+                if (accounts.length === 0) {
+                    showStatus('No accounts found. Please unlock your wallet.', 'error');
+                    return;
+                }
+                
+                const address = accounts[0];
+                
+                currentChain = chain;
+                currentWalletAddress = address;
+                
+                // Get challenge from backend
+                const response = await fetch('/api/wallet/connection-challenge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wallet_address: address,
+                        chain: chain
+                    })
+                });
+                
+                let challenge;
+                if (response.ok) {
+                    const data = await response.json();
+                    challenge = data.challenge;
+                } else {
+                    // Fallback: Create challenge locally
+                    challenge = `Connect wallet to FLUG Evidence\n\nWallet: ${address}\nChain: ${chain}\nTimestamp: ${Date.now()}`;
+                }
+                
+                messageToSign = challenge;
+                setupConnectionForm(chain, address, challenge);
+                
+            } catch (error) {
+                showStatus(`Connection failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+        
+        function setupConnectionForm(chain, address, challenge) {
+            document.getElementById('walletAddress').value = address;
+            document.getElementById('chain').value = chain;
+            document.getElementById('walletType').value = 'web3';
+            
+            // Display connection details
+            document.getElementById('walletAddressDisplay').textContent = 
+                `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            document.getElementById('networkDisplay').textContent = 
+                chain.charAt(0).toUpperCase() + chain.slice(1);
+            
+            // Show the challenge
+            document.getElementById('messageToSign').textContent = challenge;
+            
+            // Show form
+            document.getElementById('connectionForm').classList.remove('hidden');
+            showStatus('Wallet connected! Please sign the message to verify ownership.', 'success');
+        }
+        
+        async function signMessage(event) {
+            event.preventDefault();
+            
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing...';
+            
+            try {
+                // Sign the message with MetaMask
+                const signature = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [messageToSign, currentWalletAddress]
+                });
+                
+                document.getElementById('signature').value = signature;
+                
+                // Submit the form
+                const formData = new FormData(document.getElementById('signMessageForm'));
+                
+                showStatus('Verifying signature with server...', 'info');
+                
+                const response = await fetch('/connect-wallet', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Wallet connected successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/evidence/dashboard';
+                    }, 2000);
+                } else {
+                    showStatus(`❌ Connection failed: ${result.message}`, 'error');
+                    connectBtn.disabled = false;
+                    connectBtn.innerHTML = '<i class="fas fa-wallet mr-2"></i>Connect Wallet';
+                }
+                
+            } catch (error) {
+                showStatus(`❌ Signing failed: ${error.message}`, 'error');
+                console.error('Signing error:', error);
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<i class="fas fa-wallet mr-2"></i>Connect Wallet';
+            }
+        }
+        
+        function connectEthereum() {
+            connectWeb3Wallet('ethereum', 'Ethereum');
+        }
+        
+        function connectBase() {
+            connectWeb3Wallet('base', 'Base');
+        }
+        
+        function connectAvalanche() {
+            connectWeb3Wallet('avalanche', 'Avalanche');
+        }
+        
+        function connectStellar() {
+            showStatus('Stellar wallet connection requires Freighter wallet. Please use EVM wallet for now.', 'info');
+        }
+        
+        function cancelConnection() {
+            document.getElementById('connectionForm').classList.add('hidden');
+            document.getElementById('walletStatus').classList.add('hidden');
+        }
+        
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    showStatus('Wallet disconnected', 'info');
+                    cancelConnection();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
