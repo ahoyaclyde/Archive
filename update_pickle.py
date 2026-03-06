@@ -92,8 +92,11 @@ logging.basicConfig(
 log = logging.getLogger("pickle_updater")
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-PICKLE_DIR     = "./encodings"
-PICKLE_PATH    = "./encodings/encodings.pickle"
+# ENCODINGS_DIR is overridden in production via env var to point at
+# Render's persistent disk (/app/data/encodings) so the pickle survives redeploys.
+# Locally defaults to ./encodings in the project root.
+ENCODINGS_DIR  = os.environ.get("ENCODINGS_DIR", "./encodings")
+PICKLE_PATH    = os.path.join(ENCODINGS_DIR, "encodings.pickle")
 MODEL_NAME     = "Facenet"    # 128-dim, no dlib, pure pip
 DETECTOR       = "opencv"     # fastest detector, no extra deps
 MAX_WORKERS    = 4            # parallel encoding threads
@@ -160,7 +163,7 @@ def load_pickle() -> dict:
 
 def save_pickle(store: dict) -> str:
     """Ensure encodings/ dir exists, write pickle, return path."""
-    Path(PICKLE_DIR).mkdir(parents=True, exist_ok=True)
+    Path(ENCODINGS_DIR).mkdir(parents=True, exist_ok=True)
     with open(PICKLE_PATH, "wb") as fh:
         pickle.dump(store, fh, protocol=pickle.HIGHEST_PROTOCOL)
     size_kb = Path(PICKLE_PATH).stat().st_size / 1024

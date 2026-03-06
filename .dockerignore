@@ -1,11 +1,41 @@
+# Rust build artifacts
 target/
 **/*.rs.bk
+
+# Node dependencies (installed inside Docker)
+node_modules/
+services/*/node_modules/
+services/*/logs/
+
+# Python artifacts
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.deepface/
+
+# Encodings (live on persistent disk, not in image)
+encodings/
+
+# Local data (lives on persistent disk)
+data/
+
+# Environment files (secrets never go in the image)
 .env
 .env.local
+.env.*
+
+# Logs
 *.log
-data/
+
+# Git
 .git/
 .gitignore
-README.md
+
+# Editor
 .vscode/
 .idea/
+
+# Docs
+README.md
+*.md

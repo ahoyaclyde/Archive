@@ -1,30 +1,53 @@
 services:
   - type: web
-    name: flug-evidence-archive
+    name: crimebank
     runtime: docker
     repo: https://github.com/ahoyaclyde/Archive.git
     branch: CrimeBank
     dockerfilePath: ./Dockerfile
+
+    # Render persistent disk — survives redeploys
+    # Stores: SQLite database + encodings.pickle
+    disk:
+      name: crimebank-data
+      mountPath: /app/data
+      sizeGB: 5
+
     envVars:
+      # ── App ────────────────────────────────────────────────────────────────
       - key: RUST_LOG
         value: info
+      - key: PORT
+        value: "8080"
       - key: DATABASE_PATH
         value: /app/data/flug_evidence.db
       - key: SESSION_SECRET
         generateValue: true
+
+      # ── Storj ──────────────────────────────────────────────────────────────
       - key: STORJ_ACCESS_KEY
         sync: false
       - key: STORJ_SECRET_KEY
         sync: false
       - key: STORJ_ENDPOINT
         value: https://gateway.storjshare.io
+      - key: STORJ_SHARING_KEY
+        sync: false                          # set manually in Render dashboard
+
+      # ── Face sidecar ───────────────────────────────────────────────────────
+      - key: FACE_SERVICE_URL
+        value: http://127.0.0.1:3001
+      - key: FACE_THRESHOLD
+        value: "0.55"
+
+      # ── Encodings ──────────────────────────────────────────────────────────
+      - key: ENCODINGS_DIR
+        value: /app/data/encodings            # on persistent disk
+
+      # ── Email ──────────────────────────────────────────────────────────────
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
         value: onboarding@resend.dev
       - key: RESEND_FROM_NAME
         value: FLUG Evidence
-    disk:
-      name: evidence-data
-      mountPath: /app/data
-      sizeGB: 1
