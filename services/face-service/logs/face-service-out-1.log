@@ -53,3 +53,11 @@
 2026-03-04 11:48:53: 📸 Analyzed image: 1 face(s) found | pHash: 37b0d8cfc6484d2c | 594ms
 2026-03-04 11:48:55: 📸 Analyzed image: 1 face(s) found | pHash: 35b0dacfcc4a492c | 605ms
 2026-03-04 16:21:23: 🛑 SIGINT received — shutting down
+2026-03-06 14:55:03: 🔄 Loading TensorFlow.js and face-api.js...
+2026-03-06 14:55:04: 📂 Loading models from: ./models
+2026-03-06 14:55:04: 🚀 Face service listening on http://127.0.0.1:3001
+2026-03-06 14:55:04:    Models path : ./models
+2026-03-06 14:55:04:    Threshold   : 0.55
+2026-03-06 14:55:04:    Max image dim: 640px
+2026-03-06 14:55:05: ✅ Face-api.js models loaded and ready
+2026-03-06 14:57:49: 🛑 SIGINT received — shutting down
