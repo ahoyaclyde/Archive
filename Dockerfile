@@ -1,35 +1,42 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 1 — Rust builder (musl static binary — no GLIBC dependency)
+# Stage 1 — Rust builder
+# Uses nightly on Debian trixie (GLIBC 2.39) so the binary links against the
+# same GLIBC version that the runtime image ships with. No musl needed.
 # ─────────────────────────────────────────────────────────────────────────────
 FROM rustlang/rust:nightly AS builder
 
 WORKDIR /app
 
-# Install musl toolchain for fully static compilation
-RUN apt-get update && apt-get install -y musl-tools && rm -rf /var/lib/apt/lists/*
-RUN rustup target add x86_64-unknown-linux-musl
+# OpenSSL dev headers needed by openssl-sys crate
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
-
-# Build fully static binary — runs on any Linux regardless of GLIBC version
-RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN cargo build --release
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 2 — Runtime
+# Stage 2 — Runtime (trixie = GLIBC 2.39 — matches nightly compiler output)
 # ─────────────────────────────────────────────────────────────────────────────
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 WORKDIR /app
 
 # ── System packages ───────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Rust binary runtime
     ca-certificates \
+    libssl3 \
+    # Python
     python3 \
     python3-pip \
     python3-dev \
+    # Node.js (via NodeSource — trixie compatible)
     curl \
     gnupg \
+    # OpenCV headless runtime deps
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -48,6 +55,7 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     tf-keras
 
 # ── Pre-warm FaceNet model weights (~92MB) ────────────────────────────────────
+# Downloaded once at build time — zero cold-start delay at runtime.
 RUN python3 - << 'PYEOF'
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -60,8 +68,8 @@ except Exception as e:
     print(f"⚠️  Pre-warm failed (will download on first use): {e}")
 PYEOF
 
-# ── Copy static Rust binary (no GLIBC needed) ─────────────────────────────────
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/archive /app/archive
+# ── Copy Rust binary ──────────────────────────────────────────────────────────
+COPY --from=builder /app/target/release/archive /app/archive
 
 # ── Copy application files ────────────────────────────────────────────────────
 COPY --from=builder /app/static           /app/static
@@ -75,9 +83,9 @@ RUN cd /app/services/face-service \
     && node download_models.js \
     && echo "✅ face-api.js models ready"
 
-# ── Persistent disk directories ───────────────────────────────────────────────
+# ── Persistent disk symlink ───────────────────────────────────────────────────
 # /app/data is mounted as Render persistent disk
-# ./encodings symlinks there so update_pickle.py default path works too
+# /app/encodings symlinks there so ./encodings relative path works in code
 RUN mkdir -p /app/data /app/data/encodings \
     && ln -s /app/data/encodings /app/encodings
 
