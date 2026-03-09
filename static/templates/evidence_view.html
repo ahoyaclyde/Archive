@@ -171,7 +171,31 @@
       box-shadow: 0 25px 60px rgba(0,0,0,.2);
     }
     .dark .ev-modal-box {
-      background: #111827; border-color: rgba(255,255,255,.08);
+      background: #07090f;
+      border-color: rgba(255,255,255,.10);
+      box-shadow: 0 32px 80px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.04), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    /* Modal header/footer dividers in dark obsidian */
+    .dark .ev-modal-box [class*="border-b"], .dark .ev-modal-box [class*="border-t"] {
+      border-color: rgba(255,255,255,.07) !important;
+    }
+    /* Modal input fields - obsidian */
+    .dark .ev-modal-box input, .dark .ev-modal-box textarea, .dark .ev-modal-box select {
+      background: rgba(255,255,255,.04) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      color: rgba(255,255,255,.90) !important;
+    }
+    .dark .ev-modal-box input:focus, .dark .ev-modal-box textarea:focus {
+      border-color: rgba(96,165,250,.5) !important;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15) !important;
+    }
+    /* Modal cancel buttons */
+    .dark .ev-modal-box button[onclick*="closeModal"] {
+      border-color: rgba(255,255,255,.10) !important;
+      color: rgba(255,255,255,.55) !important;
+    }
+    .dark .ev-modal-box button[onclick*="closeModal"]:hover {
+      background: rgba(255,255,255,.05) !important;
     }
 
     /* ── Toast ──────────────────────────────────────────── */
@@ -737,6 +761,74 @@
   body.dark .ev-modal-box .flex.h-9.w-9.items-center.justify-center.rounded-lg.bg-red-50    { background:rgba(239,68,68,.28)  !important; }
   body.dark .ev-modal-box .flex.h-11.w-11.rounded-full.bg-red-50    { background:rgba(239,68,68,.22)  !important; }
   body.dark .ev-modal-box .flex.h-11.w-11.rounded-full.bg-orange-50 { background:rgba(249,115,22,.22) !important; }
+
+  /* ══ NEW OVERHAUL FIXES ══════════════════════════════════════ */
+
+  /* 12. SUPPRESS OLD INJECTED police_html CARD */
+  #police-status-detail > div { display: none !important; }
+
+  /* 13. OBSIDIAN MODAL DARK THEME */
+  body.dark .ev-modal-box {
+    background: #07090f !important;
+    border-color: rgba(255,255,255,.10) !important;
+    box-shadow: 0 32px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.04), inset 0 1px 0 rgba(255,255,255,.05) !important;
+  }
+  body.dark .ev-modal-box .border-b,
+  body.dark .ev-modal-box [class*="border-b"] { border-color: rgba(255,255,255,.07) !important; }
+  body.dark .ev-modal-box .border-t,
+  body.dark .ev-modal-box [class*="border-t"] { border-color: rgba(255,255,255,.07) !important; }
+  body.dark .ev-modal-box input,
+  body.dark .ev-modal-box textarea,
+  body.dark .ev-modal-box select {
+    background: rgba(255,255,255,.05) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    color: rgba(255,255,255,.90) !important;
+  }
+  body.dark .ev-modal-box input:focus,
+  body.dark .ev-modal-box textarea:focus {
+    border-color: rgba(96,165,250,.55) !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15) !important;
+    outline: none !important;
+  }
+  body.dark .ev-modal-box input::placeholder,
+  body.dark .ev-modal-box textarea::placeholder { color: rgba(255,255,255,.25) !important; }
+  body.dark .ev-modal-box label { color: rgba(255,255,255,.55) !important; }
+  body.dark .ev-modal-box h3.text-sm.font-bold { color: rgba(255,255,255,.92) !important; }
+  body.dark .ev-modal-box p.text-xs.text-gray-500 { color: rgba(255,255,255,.40) !important; }
+  /* Info alert inside modal */
+  body.dark .ev-modal-box .rounded-lg.bg-blue-50 {
+    background: rgba(59,130,246,.12) !important;
+    color: #93c5fd !important;
+  }
+  /* Settings list dividers */
+  body.dark .ev-modal-box .border-b.border-gray-100,
+  body.dark .ev-modal-box .border-b.border-gray-800 { border-color: rgba(255,255,255,.06) !important; }
+  /* Purple info box in sign modal */
+  body.dark .ev-modal-box .rounded-xl.border.border-purple-200 {
+    background: rgba(139,92,246,.10) !important;
+    border-color: rgba(139,92,246,.30) !important;
+  }
+
+  /* 14. VIVID STRIP ACCENTS — dark mode */
+  body.dark .border-l-4.border-blue-500   { background: rgba(59,130,246,.08) !important; }
+  body.dark .border-l-4.border-violet-500 { background: rgba(139,92,246,.08) !important; }
+  body.dark .bg-blue-100   { background: rgba(59,130,246,.22) !important; }
+  body.dark .bg-violet-100 { background: rgba(139,92,246,.22) !important; }
+
+  /* 15. RICHER METADATA TABLE IN DARK */
+  body.dark .rounded-xl.border.border-gray-100 { border-color: rgba(255,255,255,.07) !important; }
+  body.dark .rounded-xl.border.border-gray-100 .bg-gray-50\/60,
+  body.dark .rounded-xl.border.border-gray-100 .bg-gray-50\/40 { background: rgba(255,255,255,.03) !important; }
+  body.dark .rounded-xl.border.border-gray-100 p.text-sm.font-bold { color: rgba(255,255,255,.90) !important; }
+  body.dark .rounded-xl.border.border-gray-100 .divide-x > div { border-color: rgba(255,255,255,.06) !important; }
+
+  /* 16. ACCORDION CARDS RICHER DARK */
+  body.dark .rounded-2xl.border.border-gray-800 {
+    border-color: rgba(255,255,255,.08) !important;
+  }
+
+  /* 17. POLICE INLINE FIELD TRANSITIONS */
+  #ev-police-status-val, #ev-police-caseref-val, #ev-police-station-val { transition: color .3s, font-weight .3s; }
 
   </style>
 </head>
@@ -1689,8 +1781,8 @@
 
                   <!-- Metadata table -->
                   <div class="rounded-xl border border-gray-100 dark:border-white/[0.06] overflow-hidden">
-                    <!-- Row group: Time & Place -->
-                    <div class="grid grid-cols-2 divide-x divide-gray-100 dark:divide-white/[0.05]">
+                    <!-- Row 1: Time & Place — 3-col -->
+                    <div class="grid grid-cols-3 divide-x divide-gray-100 dark:divide-white/[0.05]">
                       <div class="px-4 py-3 bg-gray-50/60 dark:bg-white/[0.02]">
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Incident Date</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ incident_date }}</p>
@@ -1699,12 +1791,13 @@
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Incident Time</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ incident_time }}</p>
                       </div>
-                    </div>
-                    <div class="grid grid-cols-3 divide-x divide-gray-100 dark:divide-white/[0.05] border-t border-gray-100 dark:border-white/[0.05]">
-                      <div class="px-4 py-3">
+                      <div class="px-4 py-3 bg-gray-50/60 dark:bg-white/[0.02]">
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">County</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ county }}</p>
                       </div>
+                    </div>
+                    <!-- Row 2: Constituency + Ward + Landmark — 3-col -->
+                    <div class="grid grid-cols-3 divide-x divide-gray-100 dark:divide-white/[0.05] border-t border-gray-100 dark:border-white/[0.05]">
                       <div class="px-4 py-3">
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Constituency</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ constituency }}</p>
@@ -1713,10 +1806,10 @@
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Ward</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ ward }}</p>
                       </div>
-                    </div>
-                    <div class="border-t border-gray-100 dark:border-white/[0.05] px-4 py-3 bg-gray-50/40 dark:bg-white/[0.01]">
-                      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Landmark / Location</p>
-                      <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ location }}</p>
+                      <div class="px-4 py-3">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Landmark / Location</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ location }}</p>
+                      </div>
                     </div>
                     <div class="grid grid-cols-2 divide-x divide-gray-100 dark:divide-white/[0.05] border-t border-gray-100 dark:border-white/[0.05]">
                       <div class="px-4 py-3">
@@ -1759,7 +1852,7 @@
                     </span>
                     <div class="flex-1 h-px bg-gray-100 dark:bg-white/[0.06]"></div>
                   </div>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 [&>*]:min-w-0">
                     {{ additional_sections_html }}
                   </div>
                 </div>
@@ -1806,13 +1899,13 @@
                     <!-- Inline fields -->
                     <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
                       <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                        Status: <span class="font-semibold text-blue-500">Pending</span>
+                        Status: <span id="ev-police-status-val" class="font-semibold text-blue-500">Pending</span>
                       </span>
                       <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                        Case Ref: <span class="font-mono font-semibold text-gray-500 dark:text-gray-400">—</span>
+                        Case Ref: <span id="ev-police-caseref-val" class="font-mono font-semibold text-gray-500 dark:text-gray-400">—</span>
                       </span>
                       <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                        Station: <span class="font-semibold text-gray-500 dark:text-gray-400">—</span>
+                        Station: <span id="ev-police-station-val" class="font-semibold text-gray-500 dark:text-gray-400">—</span>
                       </span>
                     </div>
                     <div id="police-status-detail" class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">{{ police_html }}</div>
@@ -2792,6 +2885,22 @@ var EVC = (function() {
       badge.className = 'inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300';
       badge.innerHTML = '🛡 Reported to Police';
       if (sidebarPolice) { sidebarPolice.textContent = 'Reported'; sidebarPolice.className = 'font-semibold text-blue-600 dark:text-blue-400'; }
+      // Update inline fields if not already set
+      var statusVal = document.getElementById('ev-police-status-val');
+      if (statusVal && statusVal.textContent === 'Pending') {
+        statusVal.textContent = 'Filed';
+        statusVal.className = 'font-semibold text-green-500';
+        var caseId = document.getElementById('police-case-id');
+        var station = document.getElementById('police-station');
+        if (caseId && caseId.value) {
+          var caseRefVal = document.getElementById('ev-police-caseref-val');
+          if (caseRefVal) { caseRefVal.textContent = caseId.value; caseRefVal.className = 'font-mono font-semibold text-blue-500'; }
+        }
+        if (station && station.value) {
+          var stationVal = document.getElementById('ev-police-station-val');
+          if (stationVal) { stationVal.textContent = station.value; stationVal.className = 'font-semibold text-gray-700 dark:text-gray-300'; }
+        }
+      }
     }
   }
 
@@ -2855,6 +2964,31 @@ var EVC = (function() {
       policeEl.textContent = isPolice ? 'Reported' : 'Not Reported';
       policeEl.className = 'font-semibold ' + (isPolice ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500');
     }
+
+    // ── Populate police strip inline fields from old injected HTML ──
+    (function() {
+      var detail = document.getElementById('police-status-detail');
+      if (!detail) return;
+      var isReported = '{{ is_police }}' === 'true';
+      if (isReported) {
+        // Extract Case ID and Station text from the injected card HTML
+        var caseIdEl = detail.querySelector('.font-medium:first-of-type, div.font-medium');
+        var allFontMedium = detail.querySelectorAll('.font-medium');
+        var caseId  = allFontMedium[0] ? allFontMedium[0].textContent.trim() : '';
+        var station = allFontMedium[1] ? allFontMedium[1].textContent.trim() : '';
+
+        // Update the new clean inline fields
+        var statusVal  = document.getElementById('ev-police-status-val');
+        var caseRefVal = document.getElementById('ev-police-caseref-val');
+        var stationVal = document.getElementById('ev-police-station-val');
+        if (statusVal)  { statusVal.textContent = 'Filed'; statusVal.className = 'font-semibold text-green-500'; }
+        if (caseRefVal && caseId)  { caseRefVal.textContent = caseId;  caseRefVal.className = 'font-mono font-semibold text-blue-500'; }
+        if (stationVal && station) { stationVal.textContent = station; stationVal.className = 'font-semibold text-gray-700 dark:text-gray-300'; }
+
+        // Update the badge
+        updatePoliceBadge(true);
+      }
+    })();
     var chainEl = document.getElementById('sidebar-chain');
     if (chainEl) {
       var isSigned = '{{ is_signed }}' === 'true';

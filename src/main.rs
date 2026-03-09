@@ -21,6 +21,7 @@ mod settings_routes;   // ✅ Settings + POI + danger zone
 mod target_routes;     // ✅ Target flag actions (pin / poi / watchlist / flag / takedown / notes / link-case)
 mod intelligence_routes; // ✅ Intelligence subjects + cross-case intel flags (subjects table + intel_flags table)
 mod face_client;    
+mod python_api;
 
 use crate::evidence_service::EvidenceService;
 use crate::database::Database;
@@ -302,6 +303,8 @@ async fn main() -> std::io::Result<()> {
 
             // Settings, POI management, and danger zone
             .configure(settings_routes::config)
+            // Python Connector To Flug 
+            .configure(python_api::config)
 
             // Admin routes
             .configure(|cfg| {
