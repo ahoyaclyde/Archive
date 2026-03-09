@@ -78,6 +78,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::web::Bytes;
 use futures_util::stream::unfold;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -85,6 +86,7 @@ use std::time::Duration;
 use chrono::Utc;
 use uuid::Uuid;
 use actix_web::rt::time::interval;
+use rusqlite::OptionalExtension;
 
 use crate::database::Database;
 use crate::evidence_service::EvidenceService;
@@ -252,8 +254,8 @@ pub async fn api_v1_list_evidence(
         incident_type:      qs.incident_type.clone(),
         county:             county_filter,
         sort_by:            Some(qs.sort_by.clone().unwrap_or_else(|| "newest".to_string())),
-        page,
-        limit,
+        page:               page as u32,
+        limit:              limit as u32,
         reported_to_police: None,
         needs_attention:    None,
         signed_only:        None,
@@ -286,7 +288,7 @@ pub async fn api_v1_get_evidence(
 ) -> HttpResponse {
     require_api_key!(&req);
     let id = path.into_inner();
-    match evidence_service.get_evidence_detail(&id).await {
+    match evidence_service.get_evidence(&id, false).await {
         Ok(Some(d)) => HttpResponse::Ok().json(json!({ "success": true, "data": d })),
         Ok(None)    => HttpResponse::NotFound().json(json!({ "success": false, "error": "Not found" })),
         Err(e)      => HttpResponse::InternalServerError().json(json!({ "success": false, "error": e.to_string() })),
@@ -337,8 +339,8 @@ pub async fn api_v1_evidence_by_location(
         incident_type:      qs.incident_type.clone(),
         county:             county_filter,
         sort_by:            Some("newest".to_string()),
-        page,
-        limit,
+        page:               page as u32,
+        limit:              limit as u32,
         reported_to_police: None,
         needs_attention:    None,
         signed_only:        None,
@@ -836,7 +838,7 @@ pub async fn api_v1_target_encoding(
     let evidence_id: Option<String> = conn.query_row(
         "SELECT evidence_id FROM targets WHERE id = ?1",
         rusqlite::params![target_id],
-        |row| row.get(0),
+        |row| row.get::<_, String>(0),
     ).optional().unwrap_or(None);
 
     let evidence_id = match evidence_id {
@@ -859,13 +861,13 @@ pub async fn api_v1_target_encoding(
     let blob: Option<Vec<u8>> = conn.query_row(
         "SELECT descriptor FROM face_encodings WHERE target_id = ?1 ORDER BY face_index ASC LIMIT 1",
         rusqlite::params![target_id],
-        |row| row.get(0),
+        |row| row.get::<_, Vec<u8>>(0),
     ).optional().unwrap_or(None);
 
     match blob {
         None => HttpResponse::NotFound().json(json!({ "success": false, "error": "No encoding for this target" })),
-        Some(bytes) => {
-            let npy = make_npy_buffer(&bytes);
+        Some(raw_bytes) => {
+            let npy = make_npy_buffer(&raw_bytes);
             let fname = format!("{}_0.npy", &target_id[..target_id.len().min(16)]);
             HttpResponse::Ok()
                 .content_type("application/octet-stream")
@@ -893,9 +895,12 @@ pub struct FlagTargetBody {
 
 /// POST /api/v1/targets/{target_id}/flag
 ///
-/// Writes to target_flags (same table as target_routes.rs).
-/// For poi/wanted: also upserts a persons_of_interest row.
-/// Always fires a notification to the evidence uploader.
+/// Upserts into target_flags using the real schema:
+///   (id, target_id, user_id, is_pinned, is_poi, is_watchlist,
+///    is_flagged, is_takedown, notes, linked_case_refs, updated_at)
+/// UNIQUE constraint is (target_id, user_id) — one row per target per user.
+/// flag_type sets the corresponding boolean column to 1.
+/// Also upserts a persons_of_interest row for poi/watchlist flags.
 pub async fn api_v1_flag_target(
     req:      HttpRequest,
     path:     web::Path<String>,
@@ -905,81 +910,97 @@ pub async fn api_v1_flag_target(
     require_api_key!(&req);
     let target_id = path.into_inner();
 
-    let valid = ["poi","watchlist","wanted","pin","takedown","flagged"];
-    if !valid.contains(&body.flag_type.as_str()) {
-        return HttpResponse::BadRequest().json(json!({
+    // Map flag_type → the boolean column name it controls
+    let col = match body.flag_type.as_str() {
+        "poi"       => "is_poi",
+        "watchlist" => "is_watchlist",
+        "pinned"    => "is_pinned",
+        "takedown"  => "is_takedown",
+        "flagged"   => "is_flagged",
+        other => return HttpResponse::BadRequest().json(json!({
             "success": false,
-            "error":   format!("flag_type must be one of: {}", valid.join(", "))
-        }));
-    }
+            "error":   format!("flag_type '{}' invalid. Must be: poi | watchlist | pinned | takedown | flagged", other)
+        })),
+    };
 
     let conn = match database.pool.get() {
         Ok(c)  => c,
-        Err(e) => return HttpResponse::InternalServerError().json(json!({ "success": false, "error": e.to_string() })),
+        Err(e) => return HttpResponse::InternalServerError()
+            .json(json!({ "success": false, "error": e.to_string() })),
     };
 
-    // Fetch target + uploader info
+    // Fetch target + uploader info (no evidence_id in target_flags — join through targets)
     let info: Option<(String, String, String, String)> = conn.query_row(
         r#"SELECT t.evidence_id, t.hash, e.uploader_id, e.uploader_email
            FROM targets t JOIN evidence e ON t.evidence_id = e.id WHERE t.id = ?1"#,
         rusqlite::params![target_id],
-        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+        |row| Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+        )),
     ).optional().unwrap_or(None);
 
     let (evidence_id, target_hash, uploader_id, uploader_email) = match info {
         Some(t) => t,
-        None    => return HttpResponse::NotFound().json(json!({ "success": false, "error": "Target not found" })),
+        None    => return HttpResponse::NotFound()
+            .json(json!({ "success": false, "error": "Target not found" })),
     };
 
     let now_ts        = Utc::now().timestamp();
-    let flag_id       = format!("flag_{}", Uuid::new_v4());
+    let row_id        = format!("flag_{}", Uuid::new_v4());
     let attributed_to = body.user_id.as_deref().unwrap_or("python_api");
+    let notes_val     = body.notes.as_deref().unwrap_or("");
 
-    // Upsert into target_flags
-    let _ = conn.execute(
-        r#"INSERT INTO target_flags (id, target_id, evidence_id, flag_type, flagged_by, reason, created_at)
-           VALUES (?1,?2,?3,?4,?5,?6,?7)
-           ON CONFLICT(target_id, flag_type) DO UPDATE SET
-               reason=excluded.reason, flagged_by=excluded.flagged_by, created_at=excluded.created_at"#,
-        rusqlite::params![flag_id, target_id, evidence_id, body.flag_type, attributed_to, body.reason, now_ts],
+    // Upsert row: insert with this flag=1; on conflict update the specific column + notes
+    let sql = format!(
+        r#"INSERT INTO target_flags (id, target_id, user_id, {col}, notes, updated_at)
+           VALUES (?1, ?2, ?3, 1, ?4, ?5)
+           ON CONFLICT(target_id, user_id) DO UPDATE SET
+               {col}      = 1,
+               notes      = CASE WHEN excluded.notes != '' THEN excluded.notes ELSE notes END,
+               updated_at = excluded.updated_at"#,
+        col = col
     );
+    let _ = conn.execute(&sql, rusqlite::params![row_id, target_id, attributed_to, notes_val, now_ts]);
 
-    // For poi/wanted: upsert persons_of_interest
-    let poi_id = if body.flag_type == "poi" || body.flag_type == "wanted" {
-        let status  = if body.flag_type == "wanted" { "active" } else { "watching" };
+    // For poi/watchlist: also upsert a persons_of_interest record
+    let poi_id = if body.flag_type == "poi" || body.flag_type == "watchlist" {
+        let status  = if body.flag_type == "poi" { "watching" } else { "watching" };
         let name    = body.display_name.clone()
             .unwrap_or_else(|| format!("Target {}", &target_id[..8.min(target_id.len())]));
         let poi_uid = format!("poi_{}", Uuid::new_v4());
         let poi_num = format!("POI-{}", &Uuid::new_v4().to_string()[..8].to_uppercase());
         let ev_json = serde_json::to_string(&vec![&evidence_id]).unwrap_or_default();
-
         let _ = conn.execute(
             r#"INSERT INTO persons_of_interest
-                   (id,poi_number,display_name,category,status,linked_cases,
-                    linked_evidence,notes,pinned_by,created_at,last_seen_at)
+                   (id, poi_number, display_name, category, status, linked_cases,
+                    linked_evidence, notes, pinned_by, created_at, last_seen_at)
                VALUES (?1,?2,?3,'person',?4,1,?5,?6,?7,?8,?8)
                ON CONFLICT DO NOTHING"#,
-            rusqlite::params![poi_uid, poi_num, name, status, ev_json, body.notes, attributed_to, now_ts],
+            rusqlite::params![poi_uid, poi_num, name, status, ev_json,
+                              body.notes, attributed_to, now_ts],
         );
         Some(poi_uid)
     } else { None };
 
     // Audit
-    write_audit(&conn, "python_api", &format!("target_{}", body.flag_type),
+    write_audit(&conn, attributed_to, &format!("target_{}", body.flag_type),
                 "target", &target_id,
-                &format!(r#"{{"flag_type":"{}","reason":{:?},"by":"{}"}}"#,
-                          body.flag_type, body.reason, attributed_to));
+                &format!(r#"{{"col":"{}","notes":{:?},"by":"{}"}}"#,
+                         col, body.notes, attributed_to));
 
     // Notify uploader
     let title = match body.flag_type.as_str() {
         "poi"       => "Target Flagged as Person of Interest",
-        "wanted"    => "Target Marked as Wanted",
         "watchlist" => "Target Added to Watchlist",
+        "pinned"    => "Target Pinned",
         "takedown"  => "Target Flagged for Takedown",
         _           => "Target Flagged",
     };
     let msg = format!(
-        "A target from your case was marked as '{}' by the intelligence system.",
+        "A target from your evidence was marked as '{}' by the intelligence pipeline.",
         body.flag_type
     );
     let _ = database.create_notification(
@@ -989,10 +1010,10 @@ pub async fn api_v1_flag_target(
 
     HttpResponse::Ok().json(json!({
         "success":     true,
-        "flag_id":     flag_id,
         "target_id":   target_id,
         "evidence_id": evidence_id,
         "flag_type":   body.flag_type,
+        "column_set":  col,
         "poi_id":      poi_id,
         "uploader_notified": { "user_id": uploader_id, "email": uploader_email },
     }))
@@ -1208,7 +1229,11 @@ pub async fn api_v1_face_match_feedback(
     let matched: Option<(String, String, String)> = conn.query_row(
         "SELECT t.hash, e.uploader_id, e.uploader_email FROM targets t JOIN evidence e ON t.evidence_id = e.id WHERE t.id = ?1",
         rusqlite::params![body.matched_target_id],
-        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        |row| Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+        )),
     ).optional().unwrap_or(None);
 
     let (target_hash, uploader_id, uploader_email) = match matched {
@@ -1312,7 +1337,10 @@ pub async fn api_v1_events(
 
             let conn = match pool.get() {
                 Ok(c)  => c,
-                Err(_) => return Some((": error\n\n".to_string(), last_seen)),
+                Err(_) => return Some((
+                    Ok::<Bytes, actix_web::Error>(Bytes::from_static(b": error\n\n")),
+                    last_seen,
+                )),
             };
 
             let rows: Vec<AuditRow> = conn.prepare(
@@ -1332,7 +1360,10 @@ pub async fn api_v1_events(
             ).unwrap_or_default();
 
             if rows.is_empty() {
-                return Some((": ping\n\n".to_string(), last_seen));
+                return Some((
+                    Ok::<Bytes, actix_web::Error>(Bytes::from_static(b": ping\n\n")),
+                    last_seen,
+                ));
             }
 
             let new_last = rows.last().map(|r| r.created_at).unwrap_or(last_seen);
@@ -1340,7 +1371,10 @@ pub async fn api_v1_events(
                 .map(|r| format!("event: audit_log\ndata: {}\n\n", serde_json::to_string(r).unwrap_or_default()))
                 .collect::<String>();
 
-            Some((payload, new_last))
+            Some((
+                Ok::<Bytes, actix_web::Error>(Bytes::from(payload)),
+                new_last,
+            ))
         }
     });
 
@@ -1522,6 +1556,206 @@ fn make_npy_buffer(raw_f32_bytes: &[u8]) -> Vec<u8> {
     buf
 }
 
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FLAGGED TARGETS — READ
+//
+// target_flags uses boolean columns (is_poi, is_watchlist, is_pinned,
+// is_takedown, is_flagged), NOT a single flag_type text column.
+// One row per target; multiple flags are stored as separate boolean fields.
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[derive(Debug, Deserialize)]
+pub struct FlaggedTargetsQuery {
+    /// Filter to only targets with this flag set.
+    /// One of: poi | watchlist | pinned | takedown | flagged
+    /// Omit to return all flagged targets.
+    pub flag_type: Option<String>,
+    pub page:      Option<i64>,
+    pub limit:     Option<i64>,
+}
+
+/// GET /api/v1/targets/flagged
+///
+/// Joins target_flags → targets → evidence.
+/// target_flags stores flags as boolean columns:
+///   is_poi, is_watchlist, is_pinned, is_takedown, is_flagged
+/// so each target has one row with multiple flags set.
+pub async fn api_v1_list_flagged_targets(
+    req:      HttpRequest,
+    qs:       web::Query<FlaggedTargetsQuery>,
+    database: web::Data<Database>,
+) -> HttpResponse {
+    require_api_key!(&req);
+
+    let page   = qs.page.unwrap_or(1).max(1) as i64;
+    let limit  = qs.limit.unwrap_or(100).clamp(1, 500) as i64;
+    let offset = (page - 1) * limit;
+
+    let conn = match database.pool.get() {
+        Ok(c)  => c,
+        Err(e) => return HttpResponse::InternalServerError()
+            .json(json!({ "success": false, "error": e.to_string() })),
+    };
+
+    // Build WHERE clause based on flag_type filter
+    let where_sql = match qs.flag_type.as_deref() {
+        Some("poi")       => "WHERE tf.is_poi      = 1",
+        Some("watchlist") => "WHERE tf.is_watchlist = 1",
+        Some("pinned")    => "WHERE tf.is_pinned    = 1",
+        Some("takedown")  => "WHERE tf.is_takedown  = 1",
+        Some("flagged")   => "WHERE tf.is_flagged   = 1",
+        // No filter — return any target with at least one flag set
+        _ => "WHERE (tf.is_poi=1 OR tf.is_watchlist=1 OR tf.is_pinned=1 OR tf.is_takedown=1 OR tf.is_flagged=1)",
+    };
+
+    let sql = format!(
+        r#"
+        SELECT
+            tf.target_id,
+            tf.is_poi,
+            tf.is_watchlist,
+            tf.is_pinned,
+            tf.is_takedown,
+            tf.is_flagged,
+            tf.notes,
+            tf.updated_at      AS flagged_at,
+            t.id,
+            t.evidence_id,
+            t.target_number,
+            t.filename,
+            t.mime_type,
+            t.file_size,
+            t.description,
+            t.category,
+            t.confidence_score,
+            t.storj_url        AS raw_image_url,
+            t.hash,
+            t.phash,
+            t.auto_generated,
+            e.county,
+            e.constituency,
+            e.ward,
+            e.latitude,
+            e.longitude,
+            e.incident_type,
+            e.emergency_level,
+            e.evidence_number,
+            e.uploader_id,
+            e.uploader_email,
+            e.title,
+            e.incident_time,
+            e.status
+        FROM target_flags tf
+        JOIN targets  t ON t.id          = tf.target_id
+        JOIN evidence e ON e.id          = t.evidence_id
+        {}
+        ORDER BY tf.updated_at DESC
+        LIMIT ?1 OFFSET ?2
+        "#,
+        where_sql,
+    );
+
+    let rows = match conn.prepare(&sql) {
+        Ok(mut stmt) => stmt
+            .query_map(rusqlite::params![limit, offset], |row| {
+                // Derive active flag labels from boolean columns
+                let is_poi:       i64 = row.get(1).unwrap_or(0);
+                let is_watchlist: i64 = row.get(2).unwrap_or(0);
+                let is_pinned:    i64 = row.get(3).unwrap_or(0);
+                let is_takedown:  i64 = row.get(4).unwrap_or(0);
+                let is_flagged:   i64 = row.get(5).unwrap_or(0);
+
+                let mut active_flags: Vec<&str> = Vec::new();
+                if is_poi       != 0 { active_flags.push("poi");       }
+                if is_watchlist != 0 { active_flags.push("watchlist"); }
+                if is_pinned    != 0 { active_flags.push("pinned");    }
+                if is_takedown  != 0 { active_flags.push("takedown");  }
+                if is_flagged   != 0 { active_flags.push("flagged");   }
+
+                Ok(json!({
+                    "target_id":    row.get::<_,String>(0)?,
+                    "flags": {
+                        "is_poi":       is_poi       != 0,
+                        "is_watchlist": is_watchlist != 0,
+                        "is_pinned":    is_pinned    != 0,
+                        "is_takedown":  is_takedown  != 0,
+                        "is_flagged":   is_flagged   != 0,
+                        "active":       active_flags,
+                    },
+                    "notes":        row.get::<_,Option<String>>(6)?,
+                    "flagged_at":   row.get::<_,Option<i64>>(7)?,
+                    "target": {
+                        "id":               row.get::<_,String>(8)?,
+                        "evidence_id":      row.get::<_,String>(9)?,
+                        "target_number":    row.get::<_,i64>(10)?,
+                        "filename":         row.get::<_,String>(11)?,
+                        "mime_type":        row.get::<_,String>(12)?,
+                        "file_size":        row.get::<_,i64>(13)?,
+                        "description":      row.get::<_,Option<String>>(14)?,
+                        "category":         row.get::<_,String>(15)?,
+                        "confidence_score": row.get::<_,i32>(16)?,
+                        "raw_image_url":    row.get::<_,String>(17)?,
+                        "hash":             row.get::<_,String>(18)?,
+                        "phash":            row.get::<_,Option<String>>(19)?,
+                        "auto_generated":   row.get::<_,i32>(20)? != 0,
+                    },
+                    "location": {
+                        "county":       row.get::<_,String>(21)?,
+                        "constituency": row.get::<_,Option<String>>(22)?,
+                        "ward":         row.get::<_,Option<String>>(23)?,
+                        "latitude":     row.get::<_,f64>(24)?,
+                        "longitude":    row.get::<_,f64>(25)?,
+                    },
+                    "evidence": {
+                        "incident_type":   row.get::<_,String>(26)?,
+                        "emergency_level": row.get::<_,String>(27)?,
+                        "evidence_number": row.get::<_,String>(28)?,
+                        "uploader_id":     row.get::<_,String>(29)?,
+                        "uploader_email":  row.get::<_,String>(30)?,
+                        "title":           row.get::<_,String>(31)?,
+                        "incident_time":   row.get::<_,i64>(32)?,
+                        "status":          row.get::<_,String>(33)?,
+                    },
+                }))
+            })
+            .map(|m| m.filter_map(|r| r.ok()).collect::<Vec<_>>())
+            .unwrap_or_default(),
+        Err(e) => return HttpResponse::InternalServerError()
+            .json(json!({ "success": false, "error": e.to_string() })),
+    };
+
+    // Count targets per flag type directly from boolean columns
+    let counts: serde_json::Value = conn.query_row(
+        r#"SELECT
+            SUM(COALESCE(is_poi,      0)) AS poi,
+            SUM(COALESCE(is_watchlist,0)) AS watchlist,
+            SUM(COALESCE(is_pinned,   0)) AS pinned,
+            SUM(COALESCE(is_takedown, 0)) AS takedown,
+            SUM(COALESCE(is_flagged,  0)) AS flagged
+           FROM target_flags"#,
+        [],
+        |row| Ok(json!({
+            "poi":       row.get::<_,i64>(0).unwrap_or(0),
+            "watchlist": row.get::<_,i64>(1).unwrap_or(0),
+            "pinned":    row.get::<_,i64>(2).unwrap_or(0),
+            "takedown":  row.get::<_,i64>(3).unwrap_or(0),
+            "flagged":   row.get::<_,i64>(4).unwrap_or(0),
+        })),
+    ).unwrap_or(json!({}));
+
+    HttpResponse::Ok().json(json!({
+        "success":        true,
+        "count":          rows.len(),
+        "page":           page,
+        "limit":          limit,
+        "filter":         qs.flag_type,
+        "counts_by_type": counts,
+        "data":           rows,
+    }))
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ROUTE CONFIG
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1543,6 +1777,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/api/v1/targets/by-evidence/{evidence_id}", web::get().to(api_v1_targets_by_evidence))
         .route("/api/v1/targets/by-location",               web::get().to(api_v1_targets_by_location))
         .route("/api/v1/targets/by-incident-type/{type}",   web::get().to(api_v1_targets_by_incident_type))
+        .route("/api/v1/targets/flagged",                   web::get().to(api_v1_list_flagged_targets))
         .route("/api/v1/targets/{target_id}/encoding",      web::get().to(api_v1_target_encoding))
         .route("/api/v1/targets/{target_id}",               web::get().to(api_v1_get_target))
         // Target flags — write

@@ -959,17 +959,11 @@ pub async fn evidence_dashboard(
             storage_stats.target
         );
 
-        let wallet_address = session.get::<String>("wallet_address").unwrap_or_default();
-
         context.insert("storage_data_json", storage_data_json);
-   
-        // Replace lines around 549-575 with:
 
-let wallet_address = session.get::<String>("wallet_address").unwrap_or_default();
-
-// FIXED: Convert Option<String> to String
-let wallet_address_str = wallet_address.clone().unwrap_or_default();
-context.insert("wallet_address", wallet_address_str);
+        let wallet_address = session.get::<String>("wallet_address").unwrap_or_default();
+        let wallet_address_str = wallet_address.clone().unwrap_or_default();
+        context.insert("wallet_address", wallet_address_str);
                 
 if wallet_address.is_some() {
     context.insert("wallet_badge", r#"<span class="ml-2 px-2 py-1 bg-green-900 text-xs rounded">Wallet Connected</span>"#.to_string());
@@ -1856,7 +1850,7 @@ pub async fn evidence_upload_page(
                     <span class="text-base font-medium text-gray-700 dark:text-gray-400">
                       Connect Your Blockchain Wallet 
                       </span>
-                    <span class="bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500 inline-flex items-center justify-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-medium"> Connected </span>
+                    <span class="bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500 inline-flex items-center justify-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-medium"> Not Connected </span>
                   </div>
                   <p class="text-sm text-gray-500 sm:pl-3 dark:text-gray-400">
                     Validated crime scene(s) require cryptographic signing for privacy , anonymity and monetization 

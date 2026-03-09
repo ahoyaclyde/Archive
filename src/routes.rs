@@ -150,6 +150,7 @@ fn render_auth_template(template_name: &str, context: HashMap<&str, String>) -> 
     let template_path = format!("static/templates/auth/{}.html", template_name);
     match std::fs::read_to_string(&template_path) {
         Ok(mut template) => {
+            // ── Step 1: Process keys that ARE in the context ──────────────────
             for (key, value) in &context {
                 let placeholder = format!("{{{{{}}}}}", key);
                 template = template.replace(&placeholder, value);
@@ -159,21 +160,54 @@ fn render_auth_template(template_name: &str, context: HashMap<&str, String>) -> 
 
                 if template.contains(&if_start) {
                     if !value.is_empty() && value != "false" && value != "0" {
+                        // Truthy — strip only the tags, keep the content
                         template = template.replace(&if_start, "").replace(if_end, "");
                     } else {
-                        if let Some(start) = template.find(&if_start) {
+                        // Falsy — remove the entire block including its content
+                        while let Some(start) = template.find(&if_start) {
                             if let Some(rel_end) = template[start..].find(if_end) {
-                                let end       = start + rel_end;
-                                let block_end = end + if_end.len();
-                                let before    = template[..start].to_string();
-                                let after     = template[block_end..].to_string();
-                                template      = format!("{}{}", before, after);
+                                let block_end = start + rel_end + if_end.len();
+                                template = format!("{}{}", &template[..start], &template[block_end..]);
+                            } else {
+                                break;
                             }
                         }
                     }
                 }
             }
-            template = template.replace("{{#if", "").replace("{{/if}}", "");
+
+            // ── Step 2: Strip ALL remaining {{#if ...}}...{{/if}} blocks ─────
+            // Any block whose key was not in the context is treated as falsy —
+            // the entire block (tags + inner content) is removed so nothing
+            // leaks onto the page when there is no error / value to show.
+            let if_end = "{{/if}}";
+            while let Some(start) = template.find("{{#if ") {
+                if let Some(rel_end) = template[start..].find(if_end) {
+                    let block_end = start + rel_end + if_end.len();
+                    template = format!("{}{}", &template[..start], &template[block_end..]);
+                } else {
+                    // Malformed opening tag — remove just the tag to avoid an
+                    // infinite loop, then let the next iteration continue.
+                    if let Some(tag_end) = template[start..].find("}}") {
+                        let end = start + tag_end + 2;
+                        template = format!("{}{}", &template[..start], &template[end..]);
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            // ── Step 3: Clean up any remaining {{placeholder}} tags ───────────
+            // Removes leftover {{key}} tokens whose keys were not supplied,
+            // preventing raw template syntax from being sent to the browser.
+            while let Some(start) = template.find("{{") {
+                if let Some(rel_end) = template[start..].find("}}") {
+                    let end = start + rel_end + 2;
+                    template = format!("{}{}", &template[..start], &template[end..]);
+                } else {
+                    break;
+                }
+            }
 
             HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
